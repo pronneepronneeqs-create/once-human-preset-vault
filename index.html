@@ -181,6 +181,7 @@
               </div>
             </div>
 
+            <button id="modalEditBtn" type="button" onclick="openEditModal()" class="hidden w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold">Edit preset</button>
             <div class="flex items-center gap-2 pt-2 border-t border-slate-800">
               <button id="modalVoteBtn" onclick="toggleModalVote()" class="flex-1 flex items-center justify-center gap-2 bg-slate-800 hover:bg-cyan-500/20 hover:text-cyan-400 border border-slate-700 text-slate-300 py-2.5 rounded-xl font-bold text-xs transition"><i data-lucide="arrow-big-up" class="w-4 h-4"></i><span>Upvote (<span id="modalVoteCount">0</span>)</span></button>
               <button id="modalFavBtn" onclick="toggleModalFavorite()" class="px-4 py-2.5 bg-slate-800 hover:bg-amber-500/20 hover:text-amber-400 border border-slate-700 text-slate-300 rounded-xl transition"><i data-lucide="bookmark" class="w-4 h-4"></i></button>
@@ -188,6 +189,20 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Same-browser edit for presets published after edit support was enabled -->
+  <div id="editModal" class="fixed inset-0 z-[80] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-cyan-500/30 rounded-2xl max-w-sm w-full p-6 shadow-2xl relative">
+      <button type="button" onclick="closeEditModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white" aria-label="Close"><i data-lucide="x" class="w-5 h-5"></i></button>
+      <h3 class="text-lg font-black mb-4">Edit preset</h3>
+      <form onsubmit="savePresetEdit(event)" class="space-y-4">
+        <div><label for="editBodyType" class="block text-xs font-semibold text-slate-400 mb-1">Body Type</label>
+        <select id="editBodyType" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white"><option value="female">Female</option><option value="male">Male</option></select></div>
+        <button id="editSaveBtn" type="submit" class="w-full py-2.5 bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 font-bold rounded-xl">Save change</button>
+        <button id="editDeleteBtn" type="button" onclick="deleteOwnPreset()" class="w-full py-2.5 border border-red-500/50 text-red-300 hover:bg-red-500/10 font-bold rounded-xl">Delete preset</button>
+      </form>
     </div>
   </div>
 
@@ -246,11 +261,6 @@
           <label class="block text-xs font-semibold text-slate-400 mb-1">Custom Showcase Image (Optional)</label>
           <input id="pubImageFile" type="file" accept="image/*" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer">
           <span class="text-[10px] text-slate-500 mt-1 block">Required for code-only presets. Otherwise the QR/share screenshot is used as the showcase image.</span>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Legacy Face Code (Optional)</label>
-          <input id="pubFaceCode" type="text" placeholder="Only use this for older presets that have a separate face code." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 font-mono">
         </div>
 
         <div>
@@ -426,6 +436,7 @@
       } else qrContainer.classList.add('hidden');
 
       updateModalButtonStates(p);
+      document.getElementById('modalEditBtn').classList.toggle('hidden', !getEditToken(p.id));
       document.getElementById('detailModal').classList.remove('hidden');
       safeCreateIcons();
     }
@@ -545,6 +556,60 @@
       safeCreateIcons();
     }
     function closeCodeModal(){document.getElementById('codeModal').classList.add('hidden');}
+    function editStorageKey(id){return `ohvault-edit-${id}`;}
+    function getEditToken(id){
+      try{return localStorage.getItem(editStorageKey(id));}catch(_){return null;}
+    }
+    function openEditModal(){
+      const p=presets.find(item=>String(item.id)===String(activePresetId));
+      if(!p || !getEditToken(p.id))return;
+      document.getElementById('editBodyType').value=p.bodyType;
+      document.getElementById('editModal').classList.remove('hidden');
+      safeCreateIcons();
+    }
+    function closeEditModal(){document.getElementById('editModal').classList.add('hidden');}
+    async function deleteOwnPreset(){
+      const id=activePresetId, token=getEditToken(id);
+      const p=presets.find(item=>String(item.id)===String(id));
+      if(!p || !token)return;
+      if(!confirm(`Permanently delete "${p.title}" from the vault? This cannot be undone.`))return;
+      const btn=document.getElementById('editDeleteBtn');
+      btn.disabled=true;btn.innerText='Deleting...';
+      try{
+        const {data,error}=await _supabase.rpc('delete_preset_with_token',{
+          p_id:String(id),p_token:token
+        });
+        if(error)throw error;
+        if(!data)throw new Error('Delete access was not verified for this preset.');
+        localStorage.removeItem(editStorageKey(id));
+        closeEditModal();closeDetailModal();activePresetId=null;
+        presets=presets.filter(item=>String(item.id)!==String(id));
+        renderPresets();showToast('Preset deleted.');
+      }catch(err){alert('Delete failed: '+(err?.message||err));}
+      finally{btn.disabled=false;btn.innerText='Delete preset';}
+    }
+
+    async function savePresetEdit(e){
+      e.preventDefault();
+      const id=activePresetId, token=getEditToken(id);
+      if(!token){alert('Editing is only available in the browser used to publish this preset.');return;}
+      const btn=document.getElementById('editSaveBtn');
+      btn.disabled=true;btn.innerText='Saving...';
+      try{
+        const bodyType=document.getElementById('editBodyType').value;
+        const {data,error}=await _supabase.rpc('edit_preset_body_type',{
+          p_id:String(id),p_token:token,p_body_type:bodyType
+        });
+        if(error)throw error;
+        if(!data)throw new Error('Edit access was not verified for this preset.');
+        const p=presets.find(item=>String(item.id)===String(id));
+        if(p)p.bodyType=bodyType;
+        document.getElementById('modalBodyType').innerText=bodyType;
+        closeEditModal();renderPresets();showToast('Preset updated!');
+      }catch(err){alert('Edit failed: '+(err?.message||err));}
+      finally{btn.disabled=false;btn.innerText='Save change';}
+    }
+
 
     function openPublishModal(){document.getElementById('publishModal').classList.remove('hidden');}
     function closePublishModal(){document.getElementById('publishModal').classList.add('hidden');}
@@ -565,6 +630,12 @@
       btn.innerText='Uploading Images...';btn.disabled=true;
 
       try{
+        if(!window.crypto?.getRandomValues || !window.crypto?.subtle)throw new Error('Publishing needs a secure browser connection.');
+        try{localStorage.setItem('ohvault-storage-check','1');localStorage.removeItem('ohvault-storage-check');}
+        catch(_){throw new Error('Enable browser storage to publish and edit your preset.');}
+        const secret=Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,'0')).join('');
+        const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(secret));
+        const secretHash=Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('');
         const imageFile=document.getElementById('pubImageFile').files[0];
         const qrFile=document.getElementById('pubQRFile').files[0];
         const appearanceCode=normalizeCode(document.getElementById('pubAppearanceCode').value);
@@ -586,12 +657,14 @@
           qr_url:qrUrl,
           // Store only a creator-supplied real code; never generate one.
           preset_code:appearanceCode || null,
+          edit_token_hash:secretHash,
           description:document.getElementById('pubDesc').value.trim(),
           votes_count:1
         };
 
-        const {error}=await _supabase.from('presets').insert([newPreset]);
+        const {data:created,error}=await _supabase.from('presets').insert([newPreset]).select('id').single();
         if(error)throw error;
+        localStorage.setItem(editStorageKey(created.id),secret);
 
         showToast('Preset successfully published!');
         closePublishModal();
@@ -608,7 +681,7 @@
     // Close modals with Escape and clicking the dark backdrop.
     document.addEventListener('keydown',e=>{
       if(e.key==='Escape'){
-        closeCodeModal();closeZoomModal();closeDetailModal();closePublishModal();
+        closeEditModal();closeCodeModal();closeZoomModal();closeDetailModal();closePublishModal();
       }
     });
 
