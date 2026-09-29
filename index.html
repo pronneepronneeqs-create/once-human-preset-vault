@@ -199,6 +199,12 @@
               </div>
               <span id="modalBodyType" class="absolute top-3 left-3 text-[10px] font-bold px-2.5 py-1 rounded bg-slate-950/80 text-cyan-400 border border-cyan-500/30 uppercase tracking-widest backdrop-blur-md"></span>
             </div>
+
+            <!-- Download Button for Game Import -->
+            <button onclick="downloadGameImage()" class="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:brightness-110 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl transition shadow-lg shadow-cyan-500/20">
+              <i data-lucide="download" class="w-4 h-4"></i>
+              <span>Download Image for Game Import</span>
+            </button>
           </div>
 
           <div class="flex flex-col justify-between space-y-4">
@@ -211,6 +217,17 @@
               </div>
 
               <div id="modalTags" class="flex flex-wrap gap-1.5 mt-3"></div>
+            </div>
+
+            <!-- Face Code Container -->
+            <div id="modalFaceCodeContainer" class="p-3 rounded-xl bg-slate-950/90 border border-slate-800 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Face Code</span>
+                <p id="modalFaceCode" class="font-mono text-sm font-bold text-cyan-400"></p>
+              </div>
+              <button onclick="copyModalFaceCode()" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy
+              </button>
             </div>
 
             <div class="p-4 rounded-xl bg-slate-950/90 border border-cyan-500/30 flex items-center gap-4 shadow-inner">
@@ -248,7 +265,7 @@
 
   <!-- Publish Modal -->
   <div id="publishModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-cyan-500/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative">
+    <div class="bg-slate-900 border border-cyan-500/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
       <button onclick="closePublishModal()" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-white">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
@@ -277,13 +294,19 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Character Showcase Image</label>
-          <input id="pubImageFile" type="file" accept="image/*" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer">
+          <label class="block text-xs font-semibold text-slate-400 mb-1">Full In-Game Screenshot (Required)</label>
+          <input id="pubQRFile" type="file" accept="image/*" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer">
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">In-Game QR Code Image</label>
-          <input id="pubQRFile" type="file" accept="image/*" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer">
+          <label class="block text-xs font-semibold text-slate-400 mb-1">Custom Showcase Image (Optional)</label>
+          <input id="pubImageFile" type="file" accept="image/*" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer">
+          <span class="text-[10px] text-slate-500 mt-1 block">If left blank, the full in-game screenshot will be used as the showcase image.</span>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 mb-1">Face Code (Optional)</label>
+          <input id="pubFaceCode" type="text" placeholder="e.g. x6I3..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 font-mono">
         </div>
 
         <div>
@@ -329,9 +352,10 @@
           author: item.author,
           bodyType: item.body_type,
           tags: item.tags || [],
-          image: item.image_url,
+          image: item.image_url || item.qr_url,
           qr: item.qr_url,
           code: item.preset_code || "OH-PRESET",
+          faceCode: item.face_code || "",
           votes: item.votes_count || 1,
           voted: false,
           favorite: false,
@@ -420,6 +444,15 @@
       document.getElementById('modalImage').src = p.image;
       document.getElementById('modalQR').src = p.qr;
       document.getElementById('modalCode').innerText = p.code || "OH-PRESET";
+
+      const faceCodeContainer = document.getElementById('modalFaceCodeContainer');
+      if (p.faceCode) {
+        document.getElementById('modalFaceCode').innerText = p.faceCode;
+        faceCodeContainer.classList.remove('hidden');
+      } else {
+        faceCodeContainer.classList.add('hidden');
+      }
+
       document.getElementById('modalVoteCount').innerText = p.votes;
       document.getElementById('modalTags').innerHTML = p.tags.map(t => `<span class="text-xs px-2.5 py-1 rounded-lg bg-slate-950 text-cyan-400 border border-slate-800 font-medium">#${t}</span>`).join('');
       updateModalButtonStates(p);
@@ -435,6 +468,26 @@
       document.getElementById('zoomModal').classList.remove('hidden');
     }
     function closeZoomModal() { document.getElementById('zoomModal').classList.add('hidden'); }
+
+    async function downloadGameImage() {
+      const p = presets.find(item => item.id === activePresetId);
+      if (!p || !p.qr) return;
+
+      try {
+        const response = await fetch(p.qr);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${p.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_preset.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      } catch (e) {
+        window.open(p.qr, '_blank');
+      }
+    }
 
     function updateModalButtonStates(p) {
       document.getElementById('modalVoteBtn').className = p.voted ? "flex-1 flex items-center justify-center gap-2 bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 py-2.5 rounded-xl font-bold text-xs transition" : "flex-1 flex items-center justify-center gap-2 bg-slate-800 hover:bg-cyan-500/20 hover:text-cyan-400 border border-slate-700 text-slate-300 py-2.5 rounded-xl font-bold text-xs transition";
@@ -502,6 +555,11 @@
       alert('Preset Code Copied!');
     }
 
+    function copyModalFaceCode() {
+      navigator.clipboard.writeText(document.getElementById('modalFaceCode').innerText);
+      alert('Face Code Copied!');
+    }
+
     function openPublishModal() { document.getElementById('publishModal').classList.remove('hidden'); }
     function closePublishModal() { document.getElementById('publishModal').classList.add('hidden'); }
 
@@ -529,11 +587,16 @@
       btn.disabled = true;
 
       try {
-        const imageFile = document.getElementById('pubImageFile').files[0];
-        const qrFile = document.getElementById('pubQRFile').files[0];
+        const imageFileInput = document.getElementById('pubImageFile');
+        const qrFileInput = document.getElementById('pubQRFile');
 
-        const imageUrl = await uploadFileToSupabase(imageFile);
+        const qrFile = qrFileInput.files[0];
         const qrUrl = await uploadFileToSupabase(qrFile);
+
+        let imageUrl = qrUrl;
+        if (imageFileInput.files.length > 0) {
+          imageUrl = await uploadFileToSupabase(imageFileInput.files[0]);
+        }
 
         btn.innerText = "Saving Preset...";
 
@@ -545,6 +608,7 @@
           image_url: imageUrl,
           qr_url: qrUrl,
           preset_code: `OH-${Math.random().toString(36).substring(2, 7).toUpperCase()}`,
+          face_code: document.getElementById('pubFaceCode').value.trim(),
           description: document.getElementById('pubDesc').value,
           votes_count: 1
         };
