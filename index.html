@@ -13,141 +13,179 @@
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   </script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
+    
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
       background-color: #030712;
       color: #f3f4f6;
     }
+
     .glass-panel {
-      background: rgba(15, 23, 42, 0.7);
+      background: rgba(15, 23, 42, 0.75);
       backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
+
+    .glass-card {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.6) 100%);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+    }
+
     .card-hover {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .card-hover:hover {
-      transform: translateY(-4px);
-      border-color: rgba(6, 182, 212, 0.5);
-      box-shadow: 0 12px 30px -10px rgba(6, 182, 212, 0.25);
+      transform: translateY(-6px) scale(1.01);
+      border-color: rgba(6, 182, 212, 0.6);
+      box-shadow: 0 20px 40px -15px rgba(6, 182, 212, 0.35);
     }
+
     .custom-scrollbar::-webkit-scrollbar { width: 6px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 0.8); border-radius: 3px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(6, 182, 212, 0.5); border-radius: 3px; }
     
-    @keyframes pulse-glow {
-      0%, 100% { opacity: 0.4; }
-      50% { opacity: 0.8; }
+    @keyframes pulse-slow {
+      0%, 100% { opacity: 0.35; transform: scale(1); }
+      50% { opacity: 0.75; transform: scale(1.08); }
     }
-    .animate-pulse-slow { animation: pulse-glow 6s infinite ease-in-out; }
+    .animate-pulse-slow { animation: pulse-slow 8s infinite ease-in-out; }
+
+    .cyan-glow-border {
+      box-shadow: 0 0 25px rgba(6, 182, 212, 0.15);
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 relative overflow-x-hidden">
 
-  <!-- Animated Background Mesh -->
+  <!-- Background Decorative Light Orbs -->
   <div class="fixed inset-0 pointer-events-none z-0">
-    <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-cyan-600/15 rounded-full blur-[120px] animate-pulse-slow"></div>
-    <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-amber-500/10 rounded-full blur-[140px] animate-pulse-slow" style="animation-delay: 3s;"></div>
+    <div class="absolute top-[-10%] left-[-10%] w-[45%] h-[45%] bg-cyan-500/15 rounded-full blur-[140px] animate-pulse-slow"></div>
+    <div class="absolute top-[30%] right-[-10%] w-[40%] h-[50%] bg-blue-600/15 rounded-full blur-[150px] animate-pulse-slow" style="animation-delay: 2s;"></div>
+    <div class="absolute bottom-[-10%] left-[20%] w-[50%] h-[40%] bg-amber-500/10 rounded-full blur-[160px] animate-pulse-slow" style="animation-delay: 4s;"></div>
+    
+    <!-- Cyber Grid Overlay -->
+    <div class="absolute inset-0 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
   </div>
 
+  <!-- Left & Right Ambient Border Accent Stripes -->
+  <div class="fixed left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-500 via-blue-600 to-transparent z-30 opacity-70"></div>
+  <div class="fixed right-0 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-500 via-blue-600 to-transparent z-30 opacity-70"></div>
+
   <!-- Header -->
-  <header class="sticky top-0 z-40 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl relative">
+  <header class="sticky top-0 z-40 border-b border-cyan-500/20 bg-slate-950/85 backdrop-blur-xl relative shadow-2xl">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3 cursor-pointer" onclick="resetFilters()">
         <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-400 via-cyan-500 to-blue-600 flex items-center justify-center font-black text-xl text-slate-950 shadow-lg shadow-cyan-500/30">
           OH
         </div>
         <div>
-          <h1 class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">PRESET VAULT</h1>
-          <p class="text-[10px] text-cyan-400 font-semibold tracking-widest uppercase">Once Human Character Vault</p>
+          <h1 class="font-black text-lg tracking-wider bg-gradient-to-r from-white via-cyan-100 to-cyan-400 bg-clip-text text-transparent">PRESET VAULT</h1>
+          <p class="text-[10px] text-cyan-400 font-bold tracking-widest uppercase">Once Human Character Vault</p>
         </div>
       </div>
 
-      <button onclick="openPublishModal()" class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 via-cyan-400 to-blue-600 hover:brightness-110 text-slate-950 font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-cyan-500/25 transition-all transform hover:-translate-y-0.5">
+      <button onclick="openPublishModal()" class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 hover:brightness-110 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-cyan-500/30 transition-all transform hover:-translate-y-0.5">
         <i data-lucide="plus-circle" class="w-4 h-4"></i>
         <span>Publish Preset</span>
       </button>
     </div>
   </header>
 
-  <!-- Hero Section -->
-  <div class="relative z-10 border-b border-slate-800/50 bg-slate-900/20 backdrop-blur-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div class="max-w-2xl">
-          <span class="text-[11px] font-bold text-cyan-400 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 mb-3 inline-flex items-center gap-1.5 uppercase tracking-wider">
-            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
-            Community Presets & QR Library
-          </span>
-          <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-2">
-            Discover & Share Meta-Human Looks
-          </h2>
-          <p class="text-slate-400 text-sm leading-relaxed">
-            Browse community-created presets, import QR codes directly into Once Human, and showcase your finest character creations.
-          </p>
-        </div>
+  <!-- Main Responsive Layout (Sidebars + Center Grid) -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-        <!-- Tag Filters -->
-        <div class="flex flex-wrap gap-1.5 max-w-md">
-          <button onclick="filterByTag('Cyberpunk')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-cyan-400 border border-slate-800 text-xs transition">#Cyberpunk</button>
-          <button onclick="filterByTag('Anime')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-cyan-400 border border-slate-800 text-xs transition">#Anime</button>
-          <button onclick="filterByTag('Gothic')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-cyan-400 border border-slate-800 text-xs transition">#Gothic</button>
-          <button onclick="filterByTag('Realistic')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-cyan-400 border border-slate-800 text-xs transition">#Realistic</button>
-          <button onclick="filterByTag('Cute')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-cyan-400 border border-slate-800 text-xs transition">#Cute</button>
-          <button onclick="filterByTag('Fantasy')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-cyan-400 border border-slate-800 text-xs transition">#Fantasy</button>
+    <!-- LEFT SIDEBAR: Info & Quick Filters -->
+    <aside class="lg:col-span-3 space-y-6">
+      
+      <!-- Vault Info Panel -->
+      <div class="glass-panel p-5 rounded-2xl border border-cyan-500/20 cyan-glow-border relative overflow-hidden">
+        <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
+        <span class="text-[10px] font-bold text-cyan-400 px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 mb-3 inline-flex items-center gap-1.5 uppercase tracking-wider">
+          <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
+          Stardust Database
+        </span>
+        <h2 class="text-xl font-black text-white leading-snug mb-2">Meta-Human Archive</h2>
+        <p class="text-xs text-slate-400 leading-relaxed mb-4">
+          Browse player-created character designs, copy QR codes directly into Once Human, or upload your own creations.
+        </p>
+
+        <div class="pt-3 border-t border-slate-800/80 flex justify-between items-center text-xs">
+          <span class="text-slate-400 font-medium">Total Presets:</span>
+          <span id="presetCounter" class="font-black text-cyan-400 bg-cyan-950/60 px-2.5 py-0.5 rounded-md border border-cyan-500/30">0</span>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Main Grid -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full relative z-10">
-    
-    <!-- Filter Controls -->
-    <div class="glass-panel p-4 rounded-2xl mb-8 flex flex-col md:flex-row gap-4 items-center justify-between shadow-2xl">
-      <div class="relative w-full md:w-96">
-        <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-        <input id="searchInput" type="text" placeholder="Search by title, author, or tag..." oninput="renderPresets()" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition">
+      <!-- Quick Tag Filter Box -->
+      <div class="glass-panel p-5 rounded-2xl border border-slate-800">
+        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+          <i data-lucide="tag" class="w-3.5 h-3.5 text-cyan-400"></i> Popular Tags
+        </h3>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="filterByTag('Cyberpunk')" class="px-2.5 py-1 rounded-lg bg-slate-900/90 hover:bg-cyan-500/20 text-slate-400 hover:text-cyan-400 border border-slate-800 hover:border-cyan-500/40 text-xs transition">#Cyberpunk</button>
+          <button onclick="filterByTag('Anime')" class="px-2.5 py-1 rounded-lg bg-slate-900/90 hover:bg-cyan-500/20 text-slate-400 hover:text-cyan-400 border border-slate-800 hover:border-cyan-500/40 text-xs transition">#Anime</button>
+          <button onclick="filterByTag('Gothic')" class="px-2.5 py-1 rounded-lg bg-slate-900/90 hover:bg-cyan-500/20 text-slate-400 hover:text-cyan-400 border border-slate-800 hover:border-cyan-500/40 text-xs transition">#Gothic</button>
+          <button onclick="filterByTag('Realistic')" class="px-2.5 py-1 rounded-lg bg-slate-900/90 hover:bg-cyan-500/20 text-slate-400 hover:text-cyan-400 border border-slate-800 hover:border-cyan-500/40 text-xs transition">#Realistic</button>
+          <button onclick="filterByTag('Cute')" class="px-2.5 py-1 rounded-lg bg-slate-900/90 hover:bg-cyan-500/20 text-slate-400 hover:text-cyan-400 border border-slate-800 hover:border-cyan-500/40 text-xs transition">#Cute</button>
+          <button onclick="filterByTag('Fantasy')" class="px-2.5 py-1 rounded-lg bg-slate-900/90 hover:bg-cyan-500/20 text-slate-400 hover:text-cyan-400 border border-slate-800 hover:border-cyan-500/40 text-xs transition">#Fantasy</button>
+        </div>
       </div>
 
-      <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-between md:justify-end">
-        <select id="genderFilter" onchange="renderPresets()" class="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-slate-300 focus:outline-none focus:border-cyan-500 transition">
-          <option value="all">All Body Types</option>
-          <option value="female">Female</option>
-          <option value="male">Male</option>
-        </select>
+    </aside>
 
-        <select id="sortBy" onchange="renderPresets()" class="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-slate-300 focus:outline-none focus:border-cyan-500 transition">
-          <option value="newest">Newest First</option>
-          <option value="top">Most Upvoted</option>
-        </select>
+    <!-- CENTER CONTENT: Search Bar + Grid -->
+    <main class="lg:col-span-9 space-y-6">
+      
+      <!-- Filter Controls Bar -->
+      <div class="glass-panel p-4 rounded-2xl flex flex-col md:flex-row gap-4 items-center justify-between border border-slate-800 shadow-xl">
+        <div class="relative w-full md:w-80">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-cyan-400"></i>
+          <input id="searchInput" type="text" placeholder="Search title, author, tag..." oninput="renderPresets()" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition">
+        </div>
 
-        <button id="favToggleBtn" onclick="toggleFavoritesOnly()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-950/80 border border-slate-800 text-xs font-semibold text-slate-400 hover:text-amber-400 transition">
-          <i data-lucide="bookmark" class="w-3.5 h-3.5"></i>
-          <span>Saved</span>
+        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+          <select id="genderFilter" onchange="renderPresets()" class="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-slate-300 focus:outline-none focus:border-cyan-500 transition">
+            <option value="all">All Body Types</option>
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+          </select>
+
+          <select id="sortBy" onchange="renderPresets()" class="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-slate-300 focus:outline-none focus:border-cyan-500 transition">
+            <option value="newest">Newest First</option>
+            <option value="top">Most Upvoted</option>
+          </select>
+
+          <button id="favToggleBtn" onclick="toggleFavoritesOnly()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-950/80 border border-slate-800 text-xs font-semibold text-slate-400 hover:text-amber-400 transition">
+            <i data-lucide="bookmark" class="w-3.5 h-3.5"></i>
+            <span>Saved</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Presets Cards Grid -->
+      <div id="presetGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
+
+      <!-- Empty State View -->
+      <div id="emptyState" class="hidden text-center py-20 glass-panel rounded-2xl border border-slate-800">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/30 text-cyan-400 shadow-inner">
+          <i data-lucide="sparkles" class="w-8 h-8"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-200 mb-1">No Presets Found</h3>
+        <p class="text-xs text-slate-500 max-w-sm mx-auto mb-6">Be the first player to publish a custom preset design!</p>
+        <button onclick="openPublishModal()" class="px-5 py-2.5 bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 text-xs font-extrabold uppercase tracking-wider rounded-xl transition shadow-lg shadow-cyan-500/20">
+          Publish First Preset
         </button>
       </div>
-    </div>
 
-    <div id="presetGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+    </main>
 
-    <div id="emptyState" class="hidden text-center py-20 glass-panel rounded-2xl border border-slate-800">
-      <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-900/90 flex items-center justify-center border border-slate-800 text-cyan-400 shadow-inner">
-        <i data-lucide="sparkles" class="w-8 h-8"></i>
-      </div>
-      <h3 class="text-lg font-bold text-slate-200 mb-1">No Presets Found</h3>
-      <p class="text-xs text-slate-500 max-w-sm mx-auto mb-6">Be the first player to publish a custom preset design!</p>
-      <button onclick="openPublishModal()" class="px-5 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-extrabold uppercase tracking-wider rounded-xl transition shadow-lg shadow-cyan-500/20">
-        Publish First Preset
-      </button>
-    </div>
-  </main>
+  </div>
 
   <!-- Detail Modal -->
-  <div id="detailModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl relative">
-      <button onclick="closeDetailModal()" class="absolute top-4 right-4 z-10 p-2 rounded-full bg-slate-950/70 text-slate-400 hover:text-white border border-slate-800 transition">
+  <div id="detailModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-cyan-500/30 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl relative">
+      <button onclick="closeDetailModal()" class="absolute top-4 right-4 z-10 p-2 rounded-full bg-slate-950/80 text-slate-400 hover:text-white border border-slate-800 transition">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
@@ -168,7 +206,7 @@
               <h2 id="modalTitle" class="text-2xl font-black text-white leading-tight"></h2>
               <p id="modalAuthor" class="text-xs text-cyan-400 font-semibold mt-1"></p>
               
-              <div class="mt-4 p-3 rounded-xl bg-slate-950/70 border border-slate-800/80">
+              <div class="mt-4 p-3 rounded-xl bg-slate-950/70 border border-slate-800">
                 <p id="modalDescription" class="text-xs text-slate-400 leading-relaxed"></p>
               </div>
 
@@ -205,17 +243,17 @@
 
   <!-- Zoom Modal -->
   <div id="zoomModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-lg flex items-center justify-center p-4 hidden cursor-pointer" onclick="closeZoomModal()">
-    <img id="zoomedImg" class="max-w-full max-h-[90vh] rounded-2xl border border-slate-800 shadow-2xl" alt="Zoomed View">
+    <img id="zoomedImg" class="max-w-full max-h-[90vh] rounded-2xl border border-cyan-500/40 shadow-2xl" alt="Zoomed View">
   </div>
 
-  <!-- Publish Modal (Local File Upload Enabled) -->
+  <!-- Publish Modal -->
   <div id="publishModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative">
+    <div class="bg-slate-900 border border-cyan-500/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative">
       <button onclick="closePublishModal()" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-white">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
-      <h3 class="text-xl font-extrabold text-white mb-1">Publish Preset</h3>
+      <h3 class="text-xl font-black text-white mb-1">Publish Preset</h3>
       <p class="text-xs text-slate-400 mb-6">Share your character design and QR code directly from your PC.</p>
 
       <form id="publishForm" onsubmit="handlePublish(event)" class="space-y-4">
@@ -240,12 +278,12 @@
 
         <div>
           <label class="block text-xs font-semibold text-slate-400 mb-1">Character Showcase Image</label>
-          <input id="pubImageFile" type="file" accept="image/*" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30">
+          <input id="pubImageFile" type="file" accept="image/*" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer">
         </div>
 
         <div>
           <label class="block text-xs font-semibold text-slate-400 mb-1">In-Game QR Code Image</label>
-          <input id="pubQRFile" type="file" accept="image/*" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30">
+          <input id="pubQRFile" type="file" accept="image/*" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer">
         </div>
 
         <div>
@@ -258,7 +296,7 @@
           <textarea id="pubDesc" rows="2" placeholder="Details about sliders, skin tone, makeup..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"></textarea>
         </div>
 
-        <button type="submit" id="submitBtn" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-extrabold text-xs uppercase tracking-wider rounded-xl hover:brightness-110 transition shadow-lg shadow-cyan-500/20">
+        <button type="submit" id="submitBtn" class="w-full py-3 bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 font-extrabold text-xs uppercase tracking-wider rounded-xl hover:brightness-110 transition shadow-lg shadow-cyan-500/20">
           Publish Design
         </button>
       </form>
@@ -270,42 +308,49 @@
     let activePresetId = null;
     let showFavoritesOnly = false;
 
-    async function fetchPresetsFromDatabase() {
-      const { data, error } = await _supabase
-        .from('presets')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error("Error fetching presets:", error);
-        return;
+    function safeCreateIcons() {
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
       }
+    }
 
-      presets = data.map(item => ({
-        id: item.id,
-        title: item.title,
-        author: item.author,
-        bodyType: item.body_type,
-        tags: item.tags || [],
-        image: item.image_url,
-        qr: item.qr_url,
-        code: item.preset_code || "OH-PRESET",
-        votes: item.votes_count || 1,
-        voted: false,
-        favorite: false,
-        date: item.created_at,
-        description: item.description
-      }));
+    async function fetchPresetsFromDatabase() {
+      try {
+        const { data, error } = await _supabase
+          .from('presets')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-      renderPresets();
+        if (error) throw error;
+
+        presets = (data || []).map(item => ({
+          id: item.id,
+          title: item.title,
+          author: item.author,
+          bodyType: item.body_type,
+          tags: item.tags || [],
+          image: item.image_url,
+          qr: item.qr_url,
+          code: item.preset_code || "OH-PRESET",
+          votes: item.votes_count || 1,
+          voted: false,
+          favorite: false,
+          date: item.created_at,
+          description: item.description
+        }));
+      } catch (err) {
+        console.error("Error loading presets:", err);
+      } finally {
+        renderPresets();
+      }
     }
 
     function renderPresets() {
       const grid = document.getElementById('presetGrid');
       const emptyState = document.getElementById('emptyState');
-      const searchQuery = document.getElementById('searchInput').value.toLowerCase();
-      const gender = document.getElementById('genderFilter').value;
-      const sortBy = document.getElementById('sortBy').value;
+      const searchQuery = (document.getElementById('searchInput')?.value || '').toLowerCase();
+      const gender = document.getElementById('genderFilter')?.value || 'all';
+      const sortBy = document.getElementById('sortBy')?.value || 'newest';
 
       let filtered = presets.filter(p => {
         const matchesSearch = p.title.toLowerCase().includes(searchQuery) ||
@@ -319,6 +364,8 @@
       if (sortBy === 'top') filtered.sort((a, b) => b.votes - a.votes);
       else filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
 
+      document.getElementById('presetCounter').innerText = presets.length;
+
       grid.innerHTML = '';
       if (filtered.length === 0) {
         emptyState.classList.remove('hidden');
@@ -326,12 +373,12 @@
         emptyState.classList.add('hidden');
         filtered.forEach(preset => grid.appendChild(createPresetCard(preset)));
       }
-      lucide.createIcons();
+      safeCreateIcons();
     }
 
     function createPresetCard(p) {
       const card = document.createElement('div');
-      card.className = "glass-panel rounded-2xl overflow-hidden card-hover flex flex-col group cursor-pointer border border-slate-800/80";
+      card.className = "glass-card rounded-2xl overflow-hidden card-hover flex flex-col group cursor-pointer shadow-xl";
       card.innerHTML = `
         <div class="relative aspect-[4/5] bg-slate-900 overflow-hidden" onclick="openDetailModal('${p.id}')">
           <img src="${p.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="${p.title}">
@@ -377,7 +424,7 @@
       document.getElementById('modalTags').innerHTML = p.tags.map(t => `<span class="text-xs px-2.5 py-1 rounded-lg bg-slate-950 text-cyan-400 border border-slate-800 font-medium">#${t}</span>`).join('');
       updateModalButtonStates(p);
       document.getElementById('detailModal').classList.remove('hidden');
-      lucide.createIcons();
+      safeCreateIcons();
     }
 
     function closeDetailModal() { document.getElementById('detailModal').classList.add('hidden'); }
@@ -458,7 +505,6 @@
     function openPublishModal() { document.getElementById('publishModal').classList.remove('hidden'); }
     function closePublishModal() { document.getElementById('publishModal').classList.add('hidden'); }
 
-    // Upload Helper
     async function uploadFileToSupabase(file) {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
@@ -486,7 +532,6 @@
         const imageFile = document.getElementById('pubImageFile').files[0];
         const qrFile = document.getElementById('pubQRFile').files[0];
 
-        // Upload local files to Supabase Storage
         const imageUrl = await uploadFileToSupabase(imageFile);
         const qrUrl = await uploadFileToSupabase(qrFile);
 
@@ -520,7 +565,10 @@
       }
     }
 
-    document.addEventListener('DOMContentLoaded', fetchPresetsFromDatabase);
+    document.addEventListener('DOMContentLoaded', () => {
+      safeCreateIcons();
+      fetchPresetsFromDatabase();
+    });
   </script>
 </body>
 </html>
