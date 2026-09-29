@@ -144,6 +144,7 @@
             <div>
               <h2 id="modalTitle" class="text-2xl font-black text-white leading-tight"></h2>
               <p id="modalAuthor" class="text-xs text-cyan-400 font-semibold mt-1"></p>
+              <button type="button" onclick="shareActivePreset()" class="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 text-xs font-semibold hover:bg-cyan-500/20"><i data-lucide="link" class="w-3.5 h-3.5"></i>Copy preset link</button>
               <div class="mt-4 p-3 rounded-xl bg-slate-950/70 border border-slate-800"><p id="modalDescription" class="text-xs text-slate-400 leading-relaxed"></p></div>
               <div id="modalTags" class="flex flex-wrap gap-1.5 mt-3"></div>
             </div>
@@ -181,6 +182,7 @@
               </div>
             </div>
 
+            <div id="modalImportGuide" class="p-4 rounded-xl bg-slate-950/90 border border-slate-800 text-xs text-slate-300"></div>
             <button id="modalEditBtn" type="button" onclick="openEditModal()" class="hidden w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold">Edit preset</button>
             <div class="flex items-center gap-2 pt-2 border-t border-slate-800">
               <button id="modalVoteBtn" onclick="toggleModalVote()" class="flex-1 flex items-center justify-center gap-2 bg-slate-800 hover:bg-cyan-500/20 hover:text-cyan-400 border border-slate-700 text-slate-300 py-2.5 rounded-xl font-bold text-xs transition"><i data-lucide="arrow-big-up" class="w-4 h-4"></i><span>Upvote (<span id="modalVoteCount">0</span>)</span></button>
@@ -331,6 +333,7 @@
         console.error('Error loading presets:', err);
       } finally {
         renderPresets();
+        syncPresetFromUrl();
       }
     }
 
@@ -399,10 +402,17 @@
       return card;
     }
 
-    function openDetailModal(id) {
-      activePresetId=id;
+    function openDetailModal(id, updateUrl=true) {
       const p=presets.find(item=>String(item.id)===String(id));
       if(!p)return;
+      activePresetId=id;
+      if(updateUrl){
+        const url=new URL(location.href);
+        if(url.searchParams.get('preset')!==String(id)){
+          url.searchParams.set('preset',String(id));
+          history.pushState({preset:String(id)},'',url);
+        }
+      }
 
       document.getElementById('modalTitle').innerText=p.title;
       document.getElementById('modalAuthor').innerText=`By @${p.author}`;
@@ -435,13 +445,44 @@
         qrContainer.classList.remove('hidden');
       } else qrContainer.classList.add('hidden');
 
+      renderImportGuide(p);
       updateModalButtonStates(p);
       document.getElementById('modalEditBtn').classList.toggle('hidden', !getEditToken(p.id));
       document.getElementById('detailModal').classList.remove('hidden');
       safeCreateIcons();
     }
 
-    function closeDetailModal(){document.getElementById('detailModal').classList.add('hidden');}
+    function closeDetailModal(updateUrl=true){
+      document.getElementById('detailModal').classList.add('hidden');
+      activePresetId=null;
+      if(updateUrl && new URL(location.href).searchParams.has('preset')){
+        const url=new URL(location.href);
+        url.searchParams.delete('preset');
+        history.replaceState({},'',url);
+      }
+    }
+    function syncPresetFromUrl(){
+      const id=new URL(location.href).searchParams.get('preset');
+      if(id){
+        if(presets.some(p=>String(p.id)===id))openDetailModal(id,false);
+        else closeDetailModal(false);
+      } else closeDetailModal(false);
+    }
+    function shareActivePreset(){
+      if(!activePresetId)return;
+      const url=new URL(location.href);
+      url.searchParams.set('preset',String(activePresetId));
+      copyText(url.toString(),'Preset link copied!');
+    }
+    function renderImportGuide(p){
+      const guide=document.getElementById('modalImportGuide');
+      const steps=[];
+      if(p.appearanceCode)steps.push('<li>Copy the Appearance Code above. In Once Human’s appearance sharing/import screen, choose text cipher import and paste it.</li>');
+      if(p.qr)steps.push('<li>Download the QR/share image. In Once Human’s appearance sharing/import screen, choose the QR/image import method and use that image.</li>');
+      guide.innerHTML='<h3 class="font-bold text-cyan-400 mb-2">How to import this preset</h3><ol class="list-decimal pl-4 space-y-2">'+steps.join('')+'</ol>';
+      guide.classList.toggle('hidden',steps.length===0);
+    }
+    window.addEventListener('popstate',syncPresetFromUrl);
     function openZoomModal(){
       const p=presets.find(item=>String(item.id)===String(activePresetId));
       if(!p)return;
@@ -582,7 +623,7 @@
         if(error)throw error;
         if(!data)throw new Error('Delete access was not verified for this preset.');
         localStorage.removeItem(editStorageKey(id));
-        closeEditModal();closeDetailModal();activePresetId=null;
+        closeEditModal();closeDetailModal();
         presets=presets.filter(item=>String(item.id)!==String(id));
         renderPresets();showToast('Preset deleted.');
       }catch(err){alert('Delete failed: '+(err?.message||err));}
