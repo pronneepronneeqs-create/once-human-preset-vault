@@ -9,201 +9,134 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const SUPABASE_URL = "https://bwdsqiwaoqrnnxwmruar.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3ZHNxaXdhb3Fybm54d21ydWFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2Nzk5MDIsImV4cCI6MjEwNjI1NTkwMn0.OBlLRVr8dLxNU7F-ND0Hmu5oNTc494qnfx8mDBkqq5Q";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3ZHNxaXdhb3Fybm54d21ydWFyIiwiaWF0IjoxNzkwNjc3OTAyLCJleHAiOjIxMDYyNTU5MDJ9.OBlLRVr8dLxNU7F-ND0Hmu5oNTc494qnfx8mDBkqq5Q";
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   </script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
-    
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: #030712;
-      color: #f3f4f6;
-    }
-
-    .glass-panel {
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .glass-card {
-      background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.6) 100%);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(6, 182, 212, 0.15);
-    }
-
-    .card-hover {
-      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .card-hover:hover {
-      transform: translateY(-6px) scale(1.01);
-      border-color: rgba(6, 182, 212, 0.6);
-      box-shadow: 0 20px 40px -15px rgba(6, 182, 212, 0.35);
-    }
-
-    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(6, 182, 212, 0.5); border-radius: 3px; }
-    
-    @keyframes pulse-slow {
-      0%, 100% { opacity: 0.35; transform: scale(1); }
-      50% { opacity: 0.75; transform: scale(1.08); }
-    }
-    .animate-pulse-slow { animation: pulse-slow 8s infinite ease-in-out; }
-
-    .cyan-glow-border {
-      box-shadow: 0 0 25px rgba(6, 182, 212, 0.15);
-    }
+    body { font-family:'Plus Jakarta Sans',sans-serif; background-color:#030712; color:#f3f4f6; }
+    .glass-panel { background:rgba(15,23,42,.75); backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,.08); }
+    .glass-card { background:linear-gradient(135deg,rgba(15,23,42,.9) 0%,rgba(30,41,59,.6) 100%); backdrop-filter:blur(12px); border:1px solid rgba(6,182,212,.15); }
+    .card-hover { transition:all .35s cubic-bezier(.4,0,.2,1); }
+    .card-hover:hover { transform:translateY(-6px) scale(1.01); border-color:rgba(6,182,212,.6); box-shadow:0 20px 40px -15px rgba(6,182,212,.35); }
+    .custom-scrollbar::-webkit-scrollbar { width:6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background:rgba(15,23,42,.5); }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background:rgba(6,182,212,.5); border-radius:3px; }
+    @keyframes pulse-slow { 0%,100%{opacity:.35;transform:scale(1)} 50%{opacity:.75;transform:scale(1.08)} }
+    .animate-pulse-slow { animation:pulse-slow 8s infinite ease-in-out; }
+    .cyan-glow-border { box-shadow:0 0 25px rgba(6,182,212,.15); }
+    .code-display { word-break:break-all; overflow-wrap:anywhere; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 relative overflow-x-hidden">
 
-  <!-- Background Decorative Light Orbs -->
   <div class="fixed inset-0 pointer-events-none z-0">
     <div class="absolute top-[-10%] left-[-10%] w-[45%] h-[45%] bg-cyan-500/15 rounded-full blur-[140px] animate-pulse-slow"></div>
-    <div class="absolute top-[30%] right-[-10%] w-[40%] h-[50%] bg-blue-600/15 rounded-full blur-[150px] animate-pulse-slow" style="animation-delay: 2s;"></div>
-    <div class="absolute bottom-[-10%] left-[20%] w-[50%] h-[40%] bg-amber-500/10 rounded-full blur-[160px] animate-pulse-slow" style="animation-delay: 4s;"></div>
-    
-    <!-- Cyber Grid Overlay -->
+    <div class="absolute top-[30%] right-[-10%] w-[40%] h-[50%] bg-blue-600/15 rounded-full blur-[150px] animate-pulse-slow" style="animation-delay:2s"></div>
+    <div class="absolute bottom-[-10%] left-[20%] w-[50%] h-[40%] bg-amber-500/10 rounded-full blur-[160px] animate-pulse-slow" style="animation-delay:4s"></div>
     <div class="absolute inset-0 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
   </div>
 
-  <!-- Left & Right Ambient Border Accent Stripes -->
   <div class="fixed left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-500 via-blue-600 to-transparent z-30 opacity-70"></div>
   <div class="fixed right-0 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-500 via-blue-600 to-transparent z-30 opacity-70"></div>
 
-  <!-- Header -->
   <header class="sticky top-0 z-40 border-b border-cyan-500/20 bg-slate-950/85 backdrop-blur-xl relative shadow-2xl">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3 cursor-pointer" onclick="resetFilters()">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-400 via-cyan-500 to-blue-600 flex items-center justify-center font-black text-xl text-slate-950 shadow-lg shadow-cyan-500/30">
-          OH
-        </div>
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-400 via-cyan-500 to-blue-600 flex items-center justify-center font-black text-xl text-slate-950 shadow-lg shadow-cyan-500/30">OH</div>
         <div>
           <h1 class="font-black text-lg tracking-wider bg-gradient-to-r from-white via-cyan-100 to-cyan-400 bg-clip-text text-transparent">PRESET VAULT</h1>
           <p class="text-[10px] text-cyan-400 font-bold tracking-widest uppercase">Once Human Character Vault</p>
         </div>
       </div>
-
       <button onclick="openPublishModal()" class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 hover:brightness-110 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-cyan-500/30 transition-all transform hover:-translate-y-0.5">
-        <i data-lucide="plus-circle" class="w-4 h-4"></i>
-        <span>Publish Preset</span>
+        <i data-lucide="plus-circle" class="w-4 h-4"></i><span>Publish Preset</span>
       </button>
     </div>
   </header>
 
-  <!-- Main Responsive Layout (Sidebars + Center Grid) -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
-
-    <!-- LEFT SIDEBAR: Info & Quick Filters -->
     <aside class="lg:col-span-3 space-y-6">
-      
-      <!-- Vault Info Panel -->
       <div class="glass-panel p-5 rounded-2xl border border-cyan-500/20 cyan-glow-border relative overflow-hidden">
         <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
         <span class="text-[10px] font-bold text-cyan-400 px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 mb-3 inline-flex items-center gap-1.5 uppercase tracking-wider">
-          <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
-          Stardust Database
+          <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>Stardust Database
         </span>
         <h2 class="text-xl font-black text-white leading-snug mb-2">Meta-Human Archive</h2>
         <p class="text-xs text-slate-400 leading-relaxed mb-4">
-          Browse player-created character designs, copy QR codes directly into Once Human, or upload your own creations.
+          Browse player-created character designs. Use the <b class="text-cyan-400">Appearance Code</b> on PC, mobile, or console, or use the QR image where supported.
         </p>
-
         <div class="pt-3 border-t border-slate-800/80 flex justify-between items-center text-xs">
           <span class="text-slate-400 font-medium">Total Presets:</span>
           <span id="presetCounter" class="font-black text-cyan-400 bg-cyan-950/60 px-2.5 py-0.5 rounded-md border border-cyan-500/30">0</span>
         </div>
       </div>
 
-      <!-- Quick Tag Filter Box -->
       <div class="glass-panel p-5 rounded-2xl border border-slate-800">
-        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
-          <i data-lucide="tag" class="w-3.5 h-3.5 text-cyan-400"></i> Popular Tags
-        </h3>
+        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2"><i data-lucide="tag" class="w-3.5 h-3.5 text-cyan-400"></i>Popular Tags</h3>
         <div class="flex flex-wrap gap-2">
-          <button onclick="filterByTag('Cyberpunk')" class="px-2.5 py-1 rounded-lg bg-slate-900/90 hover:bg-cyan-500/20 text-slate-400 hover:text-cyan-400 border border-slate-800 hover:border-cyan-500/40 text-xs transition">#Cyberpunk</button>
-          <button onclick="filterByTag('Anime')" class="px-2.5 py-1 rounded-lg bg-slate-900/90 hover:bg-cyan-500/20 text-slate-400 hover:text-cyan-400 border border-slate-800 hover:border-cyan-500/40 text-xs transition">#Anime</button>
-          <button onclick="filterByTag('Gothic')" class="px-2.5 py-1 rounded-lg bg-slate-900/90 hover:bg-cyan-500/20 text-slate-400 hover:text-cyan-400 border border-slate-800 hover:border-cyan-500/40 text-xs transition">#Gothic</button>
-          <button onclick="filterByTag('Realistic')" class="px-2.5 py-1 rounded-lg bg-slate-900/90 hover:bg-cyan-500/20 text-slate-400 hover:text-cyan-400 border border-slate-800 hover:border-cyan-500/40 text-xs transition">#Realistic</button>
-          <button onclick="filterByTag('Cute')" class="px-2.5 py-1 rounded-lg bg-slate-900/90 hover:bg-cyan-500/20 text-slate-400 hover:text-cyan-400 border border-slate-800 hover:border-cyan-500/40 text-xs transition">#Cute</button>
-          <button onclick="filterByTag('Fantasy')" class="px-2.5 py-1 rounded-lg bg-slate-900/90 hover:bg-cyan-500/20 text-slate-400 hover:text-cyan-400 border border-slate-800 hover:border-cyan-500/40 text-xs transition">#Fantasy</button>
+          <button onclick="filterByTag('Cyberpunk')" class="tag-btn">#Cyberpunk</button>
+          <button onclick="filterByTag('Anime')" class="tag-btn">#Anime</button>
+          <button onclick="filterByTag('Gothic')" class="tag-btn">#Gothic</button>
+          <button onclick="filterByTag('Realistic')" class="tag-btn">#Realistic</button>
+          <button onclick="filterByTag('Cute')" class="tag-btn">#Cute</button>
+          <button onclick="filterByTag('Fantasy')" class="tag-btn">#Fantasy</button>
         </div>
       </div>
 
+      <div class="glass-panel p-5 rounded-2xl border border-slate-800">
+        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2"><i data-lucide="monitor-smartphone" class="w-3.5 h-3.5 text-cyan-400"></i>Cross-Platform</h3>
+        <div class="space-y-2 text-[11px] text-slate-400 leading-relaxed">
+          <div class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-cyan-400"></i><span><b class="text-slate-300">Appearance Code</b> — main sharing method</span></div>
+          <div class="flex items-center gap-2"><i data-lucide="qr-code" class="w-3.5 h-3.5 text-cyan-400"></i><span><b class="text-slate-300">QR Code</b> — alternate sharing method</span></div>
+        </div>
+      </div>
     </aside>
 
-    <!-- CENTER CONTENT: Search Bar + Grid -->
     <main class="lg:col-span-9 space-y-6">
-      
-      <!-- Filter Controls Bar -->
       <div class="glass-panel p-4 rounded-2xl flex flex-col md:flex-row gap-4 items-center justify-between border border-slate-800 shadow-xl">
         <div class="relative w-full md:w-80">
           <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-cyan-400"></i>
           <input id="searchInput" type="text" placeholder="Search title, author, tag..." oninput="renderPresets()" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition">
         </div>
-
         <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-between md:justify-end">
           <select id="genderFilter" onchange="renderPresets()" class="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-slate-300 focus:outline-none focus:border-cyan-500 transition">
-            <option value="all">All Body Types</option>
-            <option value="female">Female</option>
-            <option value="male">Male</option>
+            <option value="all">All Body Types</option><option value="female">Female</option><option value="male">Male</option>
           </select>
-
           <select id="sortBy" onchange="renderPresets()" class="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-slate-300 focus:outline-none focus:border-cyan-500 transition">
-            <option value="newest">Newest First</option>
-            <option value="top">Most Upvoted</option>
+            <option value="newest">Newest First</option><option value="top">Most Upvoted</option>
           </select>
-
           <button id="favToggleBtn" onclick="toggleFavoritesOnly()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-950/80 border border-slate-800 text-xs font-semibold text-slate-400 hover:text-amber-400 transition">
-            <i data-lucide="bookmark" class="w-3.5 h-3.5"></i>
-            <span>Saved</span>
+            <i data-lucide="bookmark" class="w-3.5 h-3.5"></i><span>Saved</span>
           </button>
         </div>
       </div>
 
-      <!-- Presets Cards Grid -->
       <div id="presetGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
 
-      <!-- Empty State View -->
       <div id="emptyState" class="hidden text-center py-20 glass-panel rounded-2xl border border-slate-800">
-        <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/30 text-cyan-400 shadow-inner">
-          <i data-lucide="sparkles" class="w-8 h-8"></i>
-        </div>
+        <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/30 text-cyan-400 shadow-inner"><i data-lucide="sparkles" class="w-8 h-8"></i></div>
         <h3 class="text-lg font-bold text-slate-200 mb-1">No Presets Found</h3>
         <p class="text-xs text-slate-500 max-w-sm mx-auto mb-6">Be the first player to publish a custom preset design!</p>
-        <button onclick="openPublishModal()" class="px-5 py-2.5 bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 text-xs font-extrabold uppercase tracking-wider rounded-xl transition shadow-lg shadow-cyan-500/20">
-          Publish First Preset
-        </button>
+        <button onclick="openPublishModal()" class="px-5 py-2.5 bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 text-xs font-extrabold uppercase tracking-wider rounded-xl transition shadow-lg shadow-cyan-500/20">Publish First Preset</button>
       </div>
-
     </main>
-
   </div>
 
   <!-- Detail Modal -->
   <div id="detailModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-cyan-500/30 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl relative">
-      <button onclick="closeDetailModal()" class="absolute top-4 right-4 z-10 p-2 rounded-full bg-slate-950/80 text-slate-400 hover:text-white border border-slate-800 transition">
-        <i data-lucide="x" class="w-5 h-5"></i>
-      </button>
-
+      <button onclick="closeDetailModal()" class="absolute top-4 right-4 z-10 p-2 rounded-full bg-slate-950/80 text-slate-400 hover:text-white border border-slate-800 transition"><i data-lucide="x" class="w-5 h-5"></i></button>
       <div class="overflow-y-auto custom-scrollbar p-6 space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="space-y-3">
             <div class="aspect-[4/5] rounded-xl overflow-hidden bg-slate-950 border border-slate-800 relative group cursor-pointer" onclick="openZoomModal()">
               <img id="modalImage" class="w-full h-full object-cover transition duration-500 group-hover:scale-105" alt="Preset">
-              <div class="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-semibold gap-1.5 transition">
-                <i data-lucide="maximize-2" class="w-4 h-4"></i> Click to Zoom
-              </div>
+              <div class="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-semibold gap-1.5 transition"><i data-lucide="maximize-2" class="w-4 h-4"></i>Click to Zoom</div>
               <span id="modalBodyType" class="absolute top-3 left-3 text-[10px] font-bold px-2.5 py-1 rounded bg-slate-950/80 text-cyan-400 border border-cyan-500/30 uppercase tracking-widest backdrop-blur-md"></span>
             </div>
-
-            <!-- Download Button for Game Import -->
             <button onclick="downloadGameImage()" class="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:brightness-110 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl transition shadow-lg shadow-cyan-500/20">
-              <i data-lucide="download" class="w-4 h-4"></i>
-              <span>Download Image for Game Import</span>
+              <i data-lucide="download" class="w-4 h-4"></i><span>Download QR Image</span>
             </button>
           </div>
 
@@ -211,46 +144,46 @@
             <div>
               <h2 id="modalTitle" class="text-2xl font-black text-white leading-tight"></h2>
               <p id="modalAuthor" class="text-xs text-cyan-400 font-semibold mt-1"></p>
-              
-              <div class="mt-4 p-3 rounded-xl bg-slate-950/70 border border-slate-800">
-                <p id="modalDescription" class="text-xs text-slate-400 leading-relaxed"></p>
-              </div>
-
+              <div class="mt-4 p-3 rounded-xl bg-slate-950/70 border border-slate-800"><p id="modalDescription" class="text-xs text-slate-400 leading-relaxed"></p></div>
               <div id="modalTags" class="flex flex-wrap gap-1.5 mt-3"></div>
             </div>
 
-            <!-- Face Code Container -->
-            <div id="modalFaceCodeContainer" class="p-3 rounded-xl bg-slate-950/90 border border-slate-800 flex items-center justify-between">
-              <div>
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Face Code</span>
-                <p id="modalFaceCode" class="font-mono text-sm font-bold text-cyan-400"></p>
+            <!-- New: real appearance/text cipher -->
+            <div id="modalAppearanceCodeContainer" class="p-4 rounded-xl bg-cyan-950/20 border border-cyan-500/40 shadow-inner">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <span class="text-[10px] font-bold text-cyan-400 uppercase tracking-widest block">Appearance Code</span>
+                  <p class="text-[10px] text-slate-500 mt-1">Text cipher for appearance sharing/import.</p>
+                </div>
+                <button onclick="copyModalAppearanceCode()" class="shrink-0 px-3 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+                  <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy
+                </button>
               </div>
-              <button onclick="copyModalFaceCode()" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
-                <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy
-              </button>
+              <div id="modalAppearanceCode" class="code-display mt-3 font-mono text-sm font-bold text-white bg-slate-950 px-3 py-2.5 rounded-lg border border-slate-800 select-all"></div>
+              <button onclick="openCodeModal()" class="mt-2 text-[11px] text-slate-400 hover:text-cyan-400 font-semibold transition flex items-center gap-1"><i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>Show full code</button>
             </div>
 
-            <div class="p-4 rounded-xl bg-slate-950/90 border border-cyan-500/30 flex items-center gap-4 shadow-inner">
-              <div class="w-24 h-24 bg-white p-1.5 rounded-lg shrink-0 border border-slate-700">
-                <img id="modalQR" class="w-full h-full object-contain" alt="QR Code">
+            <!-- Legacy face code retained for existing records -->
+            <div id="modalFaceCodeContainer" class="p-3 rounded-xl bg-slate-950/90 border border-slate-800 flex items-center justify-between hidden">
+              <div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Legacy Face Code</span>
+                <p id="modalFaceCode" class="font-mono text-sm font-bold text-slate-300 code-display"></p>
               </div>
+              <button onclick="copyModalFaceCode()" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"><i data-lucide="copy" class="w-3.5 h-3.5"></i>Copy</button>
+            </div>
+
+            <div id="modalQRContainer" class="p-4 rounded-xl bg-slate-950/90 border border-cyan-500/30 flex items-center gap-4 shadow-inner">
+              <div class="w-24 h-24 bg-white p-1.5 rounded-lg shrink-0 border border-slate-700"><img id="modalQR" class="w-full h-full object-contain" alt="QR Code"></div>
               <div class="space-y-1.5 min-w-0">
-                <span class="text-[10px] font-bold text-cyan-400 uppercase tracking-widest block">In-Game Scan Code</span>
-                <p id="modalCode" class="font-mono text-sm font-bold text-slate-100 truncate bg-slate-900 px-2 py-1 rounded border border-slate-800"></p>
-                <button onclick="copyModalCode()" class="text-xs text-slate-400 hover:text-cyan-400 flex items-center gap-1 font-semibold transition">
-                  <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy Code
-                </button>
+                <span class="text-[10px] font-bold text-cyan-400 uppercase tracking-widest block">QR Appearance Share</span>
+                <p class="text-[10px] text-slate-500">Use the QR image where the game supports QR appearance sharing.</p>
+                <button onclick="downloadGameImage()" class="text-xs text-slate-400 hover:text-cyan-400 flex items-center gap-1 font-semibold transition"><i data-lucide="download" class="w-3.5 h-3.5"></i>Download QR</button>
               </div>
             </div>
 
             <div class="flex items-center gap-2 pt-2 border-t border-slate-800">
-              <button id="modalVoteBtn" onclick="toggleModalVote()" class="flex-1 flex items-center justify-center gap-2 bg-slate-800 hover:bg-cyan-500/20 hover:text-cyan-400 border border-slate-700 text-slate-300 py-2.5 rounded-xl font-bold text-xs transition">
-                <i data-lucide="arrow-big-up" class="w-4 h-4"></i>
-                <span>Upvote (<span id="modalVoteCount">0</span>)</span>
-              </button>
-              <button id="modalFavBtn" onclick="toggleModalFavorite()" class="px-4 py-2.5 bg-slate-800 hover:bg-amber-500/20 hover:text-amber-400 border border-slate-700 text-slate-300 rounded-xl transition">
-                <i data-lucide="bookmark" class="w-4 h-4"></i>
-              </button>
+              <button id="modalVoteBtn" onclick="toggleModalVote()" class="flex-1 flex items-center justify-center gap-2 bg-slate-800 hover:bg-cyan-500/20 hover:text-cyan-400 border border-slate-700 text-slate-300 py-2.5 rounded-xl font-bold text-xs transition"><i data-lucide="arrow-big-up" class="w-4 h-4"></i><span>Upvote (<span id="modalVoteCount">0</span>)</span></button>
+              <button id="modalFavBtn" onclick="toggleModalFavorite()" class="px-4 py-2.5 bg-slate-800 hover:bg-amber-500/20 hover:text-amber-400 border border-slate-700 text-slate-300 rounded-xl transition"><i data-lucide="bookmark" class="w-4 h-4"></i></button>
             </div>
           </div>
         </div>
@@ -258,70 +191,79 @@
     </div>
   </div>
 
-  <!-- Zoom Modal -->
-  <div id="zoomModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-lg flex items-center justify-center p-4 hidden cursor-pointer" onclick="closeZoomModal()">
+  <!-- Full Code Modal -->
+  <div id="codeModal" class="fixed inset-0 z-[60] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-cyan-500/30 rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative">
+      <button onclick="closeCodeModal()" class="absolute top-4 right-4 p-2 rounded-full bg-slate-950/80 text-slate-400 hover:text-white border border-slate-800"><i data-lucide="x" class="w-5 h-5"></i></button>
+      <h3 class="text-lg font-black text-white pr-10">Appearance Code</h3>
+      <p class="text-xs text-slate-500 mt-1 mb-4">Copy or manually enter this text cipher in Once Human's appearance sharing/import interface.</p>
+      <div id="fullCodeText" class="max-h-[45vh] overflow-y-auto custom-scrollbar p-4 rounded-xl bg-slate-950 border border-slate-800 text-sm font-mono text-cyan-300 whitespace-pre-wrap break-all select-all"></div>
+      <button onclick="copyModalAppearanceCode()" class="mt-4 w-full py-2.5 bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl"><i data-lucide="copy" class="w-4 h-4 inline-block mr-1"></i>Copy Appearance Code</button>
+    </div>
+  </div>
+
+  <div id="zoomModal" class="fixed inset-0 z-[70] bg-slate-950/90 backdrop-blur-lg flex items-center justify-center p-4 hidden cursor-pointer" onclick="closeZoomModal()">
     <img id="zoomedImg" class="max-w-full max-h-[90vh] rounded-2xl border border-cyan-500/40 shadow-2xl" alt="Zoomed View">
   </div>
 
   <!-- Publish Modal -->
   <div id="publishModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-cyan-500/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
-      <button onclick="closePublishModal()" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-white">
-        <i data-lucide="x" class="w-5 h-5"></i>
-      </button>
-
+      <button onclick="closePublishModal()" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       <h3 class="text-xl font-black text-white mb-1">Publish Preset</h3>
-      <p class="text-xs text-slate-400 mb-6">Share your character design and QR code directly from your PC.</p>
+      <p class="text-xs text-slate-400 mb-6">Upload your showcase image, QR image, and the <b class="text-cyan-400">actual Appearance Code</b> generated by Once Human.</p>
 
       <form id="publishForm" onsubmit="handlePublish(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-slate-400 mb-1">Preset Title</label>
-          <input id="pubTitle" type="text" required placeholder="e.g. Stardust Operative" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+          <input id="pubTitle" type="text" required maxlength="80" placeholder="e.g. Stardust Operative" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-400 mb-1">Creator Name / @Handle</label>
-            <input id="pubAuthor" type="text" required placeholder="e.g. MetaHunter" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+            <input id="pubAuthor" type="text" required maxlength="40" placeholder="e.g. MetaHunter" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-400 mb-1">Body Type</label>
-            <select id="pubBodyType" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
-              <option value="female">Female</option>
-              <option value="male">Male</option>
-            </select>
+            <select id="pubBodyType" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"><option value="female">Female</option><option value="male">Male</option></select>
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Full In-Game Screenshot (Required)</label>
+          <label class="block text-xs font-semibold text-slate-400 mb-1">Appearance Code <span class="text-cyan-400">*</span></label>
+          <textarea id="pubAppearanceCode" required rows="3" placeholder="Paste the text cipher generated by Once Human here..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-cyan-300 focus:outline-none focus:border-cyan-500 font-mono resize-y"></textarea>
+          <span class="text-[10px] text-slate-500 mt-1 block">This is the important cross-platform code. Do not replace it with a random OH-XXXXX code.</span>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 mb-1">QR Appearance Image <span class="text-cyan-400">*</span></label>
           <input id="pubQRFile" type="file" accept="image/*" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer">
+          <span class="text-[10px] text-slate-500 mt-1 block">Upload the in-game QR/share image. This is kept as the alternate QR method.</span>
         </div>
 
         <div>
           <label class="block text-xs font-semibold text-slate-400 mb-1">Custom Showcase Image (Optional)</label>
           <input id="pubImageFile" type="file" accept="image/*" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer">
-          <span class="text-[10px] text-slate-500 mt-1 block">If left blank, the full in-game screenshot will be used as the showcase image.</span>
+          <span class="text-[10px] text-slate-500 mt-1 block">If blank, the QR/share image is used as the showcase image.</span>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Face Code (Optional)</label>
-          <input id="pubFaceCode" type="text" placeholder="e.g. x6I3..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 font-mono">
+          <label class="block text-xs font-semibold text-slate-400 mb-1">Legacy Face Code (Optional)</label>
+          <input id="pubFaceCode" type="text" placeholder="Only use this for older presets that have a separate face code." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 font-mono">
         </div>
 
         <div>
           <label class="block text-xs font-semibold text-slate-400 mb-1">Tags (Comma separated)</label>
-          <input id="pubTags" type="text" placeholder="Cyberpunk, Anime, Gothic" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+          <input id="pubTags" type="text" maxlength="250" placeholder="Cyberpunk, Anime, Gothic" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
         </div>
 
         <div>
           <label class="block text-xs font-semibold text-slate-400 mb-1">Description (Optional)</label>
-          <textarea id="pubDesc" rows="2" placeholder="Details about sliders, skin tone, makeup..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"></textarea>
+          <textarea id="pubDesc" rows="2" maxlength="500" placeholder="Details about sliders, skin tone, makeup..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"></textarea>
         </div>
 
-        <button type="submit" id="submitBtn" class="w-full py-3 bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 font-extrabold text-xs uppercase tracking-wider rounded-xl hover:brightness-110 transition shadow-lg shadow-cyan-500/20">
-          Publish Design
-        </button>
+        <button type="submit" id="submitBtn" class="w-full py-3 bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 font-extrabold text-xs uppercase tracking-wider rounded-xl hover:brightness-110 transition shadow-lg shadow-cyan-500/20">Publish Design</button>
       </form>
     </div>
   </div>
@@ -332,307 +274,355 @@
     let showFavoritesOnly = false;
 
     function safeCreateIcons() {
-      if (window.lucide && typeof lucide.createIcons === 'function') {
-        lucide.createIcons();
-      }
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, ch => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+      }[ch]));
+    }
+
+    function normalizeCode(value) {
+      // Preserve the actual cipher, but remove accidental leading/trailing whitespace.
+      return String(value ?? '').trim();
     }
 
     async function fetchPresetsFromDatabase() {
       try {
-        const { data, error } = await _supabase
-          .from('presets')
-          .select('*')
-          .order('created_at', { ascending: false });
-
+        const { data, error } = await _supabase.from('presets').select('*').order('created_at', { ascending:false });
         if (error) throw error;
 
         presets = (data || []).map(item => ({
-          id: item.id,
-          title: item.title,
-          author: item.author,
-          bodyType: item.body_type,
-          tags: item.tags || [],
-          image: item.image_url || item.qr_url,
-          qr: item.qr_url,
-          code: item.preset_code || "OH-PRESET",
-          faceCode: item.face_code || "",
-          votes: item.votes_count || 1,
-          voted: false,
-          favorite: false,
-          date: item.created_at,
-          description: item.description
+          id:item.id,
+          title:item.title || 'Untitled Preset',
+          author:item.author || 'Unknown',
+          bodyType:item.body_type || 'female',
+          tags:Array.isArray(item.tags) ? item.tags : [],
+          image:item.image_url || item.qr_url || '',
+          qr:item.qr_url || '',
+          // IMPORTANT: use the existing preset_code DB column for the REAL Once Human appearance cipher.
+          // This avoids requiring a database migration.
+          appearanceCode:normalizeCode(item.appearance_code || item.preset_code || ''),
+          code:normalizeCode(item.appearance_code || item.preset_code || ''),
+          faceCode:normalizeCode(item.face_code || ''),
+          votes:Number(item.votes_count || 1),
+          voted:false,
+          favorite:false,
+          date:item.created_at,
+          description:item.description || ''
         }));
       } catch (err) {
-        console.error("Error loading presets:", err);
+        console.error('Error loading presets:', err);
       } finally {
         renderPresets();
       }
     }
 
     function renderPresets() {
-      const grid = document.getElementById('presetGrid');
-      const emptyState = document.getElementById('emptyState');
-      const searchQuery = (document.getElementById('searchInput')?.value || '').toLowerCase();
-      const gender = document.getElementById('genderFilter')?.value || 'all';
-      const sortBy = document.getElementById('sortBy')?.value || 'newest';
+      const grid=document.getElementById('presetGrid');
+      const emptyState=document.getElementById('emptyState');
+      const searchQuery=(document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+      const gender=document.getElementById('genderFilter')?.value || 'all';
+      const sortBy=document.getElementById('sortBy')?.value || 'newest';
 
-      let filtered = presets.filter(p => {
-        const matchesSearch = p.title.toLowerCase().includes(searchQuery) ||
-                              p.author.toLowerCase().includes(searchQuery) ||
-                              p.tags.some(t => t.toLowerCase().includes(searchQuery));
-        const matchesGender = gender === 'all' || p.bodyType === gender;
-        const matchesFav = !showFavoritesOnly || p.favorite;
-        return matchesSearch && matchesGender && matchesFav;
+      let filtered=presets.filter(p => {
+        const haystack=[p.title,p.author,...p.tags].join(' ').toLowerCase();
+        return haystack.includes(searchQuery) &&
+               (gender==='all' || p.bodyType===gender) &&
+               (!showFavoritesOnly || p.favorite);
       });
 
-      if (sortBy === 'top') filtered.sort((a, b) => b.votes - a.votes);
-      else filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+      if(sortBy==='top') filtered.sort((a,b)=>b.votes-a.votes);
+      else filtered.sort((a,b)=>new Date(b.date)-new Date(a.date));
 
-      document.getElementById('presetCounter').innerText = presets.length;
+      document.getElementById('presetCounter').innerText=presets.length;
+      grid.innerHTML='';
 
-      grid.innerHTML = '';
-      if (filtered.length === 0) {
-        emptyState.classList.remove('hidden');
-      } else {
+      if(filtered.length===0) emptyState.classList.remove('hidden');
+      else {
         emptyState.classList.add('hidden');
-        filtered.forEach(preset => grid.appendChild(createPresetCard(preset)));
+        filtered.forEach(p=>grid.appendChild(createPresetCard(p)));
       }
       safeCreateIcons();
     }
 
     function createPresetCard(p) {
-      const card = document.createElement('div');
-      card.className = "glass-card rounded-2xl overflow-hidden card-hover flex flex-col group cursor-pointer shadow-xl";
-      card.innerHTML = `
-        <div class="relative aspect-[4/5] bg-slate-900 overflow-hidden" onclick="openDetailModal('${p.id}')">
-          <img src="${p.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="${p.title}">
+      const card=document.createElement('div');
+      card.className='glass-card rounded-2xl overflow-hidden card-hover flex flex-col group cursor-pointer shadow-xl';
+      const safeId=escapeHtml(p.id);
+      const safeTitle=escapeHtml(p.title);
+      const safeAuthor=escapeHtml(p.author);
+      const safeBody=escapeHtml(p.bodyType);
+      const safeImage=escapeHtml(p.image);
+
+      card.innerHTML=`
+        <div class="relative aspect-[4/5] bg-slate-900 overflow-hidden" onclick="openDetailModal('${safeId}')">
+          <img src="${safeImage}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="${safeTitle}" onerror="this.style.display='none'">
           <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-90"></div>
           <div class="absolute top-3 left-3 flex gap-2">
-            <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-lg bg-slate-950/80 text-cyan-400 border border-cyan-500/30 uppercase tracking-widest backdrop-blur-md shadow-lg">${p.bodyType}</span>
+            <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-lg bg-slate-950/80 text-cyan-400 border border-cyan-500/30 uppercase tracking-widest backdrop-blur-md shadow-lg">${safeBody}</span>
           </div>
-          <button onclick="event.stopPropagation(); toggleFavorite('${p.id}')" class="absolute top-3 right-3 p-2 rounded-xl bg-slate-950/80 text-slate-400 hover:text-amber-400 border border-slate-800 transition backdrop-blur-md ${p.favorite ? 'text-amber-400 fill-amber-400' : ''}">
+          <button onclick="event.stopPropagation();toggleFavorite('${safeId}')" class="absolute top-3 right-3 p-2 rounded-xl bg-slate-950/80 text-slate-400 hover:text-amber-400 border border-slate-800 transition backdrop-blur-md ${p.favorite?'text-amber-400':''}">
             <i data-lucide="bookmark" class="w-4 h-4"></i>
           </button>
           <div class="absolute bottom-3 left-3 right-3 flex items-end justify-between">
             <div>
-              <h3 class="text-base font-extrabold text-white group-hover:text-cyan-400 transition-colors leading-snug">${p.title}</h3>
-              <p class="text-xs text-slate-400 font-medium">By @${p.author}</p>
+              <h3 class="text-base font-extrabold text-white group-hover:text-cyan-400 transition-colors leading-snug">${safeTitle}</h3>
+              <p class="text-xs text-slate-400 font-medium">By @${safeAuthor}</p>
             </div>
           </div>
         </div>
         <div class="p-3.5 bg-slate-950/80 flex items-center justify-between border-t border-slate-800/80 mt-auto">
           <div class="flex gap-1 flex-wrap">
-            ${p.tags.slice(0, 2).map(t => `<span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-900 text-slate-400 border border-slate-800 font-medium">#${t}</span>`).join('')}
+            ${p.tags.slice(0,2).map(t=>`<span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-900 text-slate-400 border border-slate-800 font-medium">#${escapeHtml(t)}</span>`).join('')}
           </div>
-          <button onclick="event.stopPropagation(); toggleVote('${p.id}')" class="flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs font-bold transition ${p.voted ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/50' : 'bg-slate-900 text-slate-300 border-slate-800 hover:border-slate-700'}">
-            <i data-lucide="arrow-big-up" class="w-3.5 h-3.5"></i>
-            <span>${p.votes}</span>
+          <button onclick="event.stopPropagation();toggleVote('${safeId}')" class="flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs font-bold transition ${p.voted?'bg-cyan-500/20 text-cyan-400 border-cyan-500/50':'bg-slate-900 text-slate-300 border-slate-800 hover:border-slate-700'}">
+            <i data-lucide="arrow-big-up" class="w-3.5 h-3.5"></i><span>${p.votes}</span>
           </button>
-        </div>
-      `;
+        </div>`;
       return card;
     }
 
     function openDetailModal(id) {
-      activePresetId = id;
-      const p = presets.find(item => item.id === id);
-      if (!p) return;
-      document.getElementById('modalTitle').innerText = p.title;
-      document.getElementById('modalAuthor').innerText = `By @${p.author}`;
-      document.getElementById('modalBodyType').innerText = p.bodyType;
-      document.getElementById('modalDescription').innerText = p.description || "No description provided.";
-      document.getElementById('modalImage').src = p.image;
-      document.getElementById('modalQR').src = p.qr;
-      document.getElementById('modalCode').innerText = p.code || "OH-PRESET";
+      activePresetId=id;
+      const p=presets.find(item=>String(item.id)===String(id));
+      if(!p)return;
 
-      const faceCodeContainer = document.getElementById('modalFaceCodeContainer');
-      if (p.faceCode) {
-        document.getElementById('modalFaceCode').innerText = p.faceCode;
-        faceCodeContainer.classList.remove('hidden');
+      document.getElementById('modalTitle').innerText=p.title;
+      document.getElementById('modalAuthor').innerText=`By @${p.author}`;
+      document.getElementById('modalBodyType').innerText=p.bodyType;
+      document.getElementById('modalDescription').innerText=p.description || 'No description provided.';
+      document.getElementById('modalImage').src=p.image || p.qr;
+      document.getElementById('modalQR').src=p.qr || '';
+      document.getElementById('modalVoteCount').innerText=p.votes;
+      document.getElementById('modalTags').innerHTML=p.tags.map(t=>`<span class="text-xs px-2.5 py-1 rounded-lg bg-slate-950 text-cyan-400 border border-slate-800 font-medium">#${escapeHtml(t)}</span>`).join('');
+
+      const code=normalizeCode(p.appearanceCode || p.code);
+      const codeContainer=document.getElementById('modalAppearanceCodeContainer');
+      if(code){
+        document.getElementById('modalAppearanceCode').innerText=code;
+        codeContainer.classList.remove('hidden');
+        document.getElementById('modalCodeContainer')?.classList.remove('hidden');
       } else {
-        faceCodeContainer.classList.add('hidden');
+        document.getElementById('modalAppearanceCode').innerText='No appearance code supplied.';
+        codeContainer.classList.remove('hidden');
       }
 
-      document.getElementById('modalVoteCount').innerText = p.votes;
-      document.getElementById('modalTags').innerHTML = p.tags.map(t => `<span class="text-xs px-2.5 py-1 rounded-lg bg-slate-950 text-cyan-400 border border-slate-800 font-medium">#${t}</span>`).join('');
+      const faceCodeContainer=document.getElementById('modalFaceCodeContainer');
+      if(p.faceCode){
+        document.getElementById('modalFaceCode').innerText=p.faceCode;
+        faceCodeContainer.classList.remove('hidden');
+      } else faceCodeContainer.classList.add('hidden');
+
+      const qrContainer=document.getElementById('modalQRContainer');
+      if(p.qr){
+        document.getElementById('modalQR').src=p.qr;
+        qrContainer.classList.remove('hidden');
+      } else qrContainer.classList.add('hidden');
+
       updateModalButtonStates(p);
       document.getElementById('detailModal').classList.remove('hidden');
       safeCreateIcons();
     }
 
-    function closeDetailModal() { document.getElementById('detailModal').classList.add('hidden'); }
-    function openZoomModal() {
-      const p = presets.find(item => item.id === activePresetId);
-      if (!p) return;
-      document.getElementById('zoomedImg').src = p.image;
+    function closeDetailModal(){document.getElementById('detailModal').classList.add('hidden');}
+    function openZoomModal(){
+      const p=presets.find(item=>String(item.id)===String(activePresetId));
+      if(!p)return;
+      document.getElementById('zoomedImg').src=p.image || p.qr;
       document.getElementById('zoomModal').classList.remove('hidden');
     }
-    function closeZoomModal() { document.getElementById('zoomModal').classList.add('hidden'); }
+    function closeZoomModal(){document.getElementById('zoomModal').classList.add('hidden');}
 
-    async function downloadGameImage() {
-      const p = presets.find(item => item.id === activePresetId);
-      if (!p || !p.qr) return;
+    async function downloadGameImage(){
+      const p=presets.find(item=>String(item.id)===String(activePresetId));
+      if(!p?.qr)return;
+      try{
+        const response=await fetch(p.qr);
+        if(!response.ok)throw new Error('QR image could not be downloaded.');
+        const blob=await response.blob();
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');
+        a.href=url;
+        a.download=`${(p.title||'once-human-preset').replace(/[^a-z0-9]/gi,'_').toLowerCase()}_qr.png`;
+        document.body.appendChild(a);a.click();a.remove();
+        URL.revokeObjectURL(url);
+      }catch(e){window.open(p.qr,'_blank','noopener,noreferrer');}
+    }
 
-      try {
-        const response = await fetch(p.qr);
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${p.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_preset.png`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-      } catch (e) {
-        window.open(p.qr, '_blank');
+    function updateModalButtonStates(p){
+      document.getElementById('modalVoteBtn').className=p.voted
+        ?'flex-1 flex items-center justify-center gap-2 bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 py-2.5 rounded-xl font-bold text-xs transition'
+        :'flex-1 flex items-center justify-center gap-2 bg-slate-800 hover:bg-cyan-500/20 hover:text-cyan-400 border border-slate-700 text-slate-300 py-2.5 rounded-xl font-bold text-xs transition';
+      document.getElementById('modalFavBtn').className=p.favorite
+        ?'px-4 py-2.5 bg-amber-500/20 text-amber-400 border border-amber-500/50 rounded-xl transition'
+        :'px-4 py-2.5 bg-slate-800 hover:bg-amber-500/20 hover:text-amber-400 border border-slate-700 text-slate-300 rounded-xl transition';
+    }
+
+    function filterByTag(tag){document.getElementById('searchInput').value=tag;renderPresets();}
+
+    async function toggleVote(id){
+      const p=presets.find(item=>String(item.id)===String(id));
+      if(!p)return;
+      const newVotes=p.voted?p.votes-1:p.votes+1;
+      p.voted=!p.voted;p.votes=newVotes;renderPresets();
+      const {error}=await _supabase.from('presets').update({votes_count:newVotes}).eq('id',id);
+      if(error)console.error('Vote update failed:',error);
+      if(activePresetId && String(activePresetId)===String(id)){
+        document.getElementById('modalVoteCount').innerText=p.votes;
+        updateModalButtonStates(p);
       }
     }
 
-    function updateModalButtonStates(p) {
-      document.getElementById('modalVoteBtn').className = p.voted ? "flex-1 flex items-center justify-center gap-2 bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 py-2.5 rounded-xl font-bold text-xs transition" : "flex-1 flex items-center justify-center gap-2 bg-slate-800 hover:bg-cyan-500/20 hover:text-cyan-400 border border-slate-700 text-slate-300 py-2.5 rounded-xl font-bold text-xs transition";
-      document.getElementById('modalFavBtn').className = p.favorite ? "px-4 py-2.5 bg-amber-500/20 text-amber-400 border border-amber-500/50 rounded-xl transition" : "px-4 py-2.5 bg-slate-800 hover:bg-amber-500/20 hover:text-amber-400 border border-slate-700 text-slate-300 rounded-xl transition";
+    function toggleModalVote(){if(activePresetId)toggleVote(activePresetId);}
+    function toggleFavorite(id){
+      const p=presets.find(item=>String(item.id)===String(id));
+      if(!p)return;p.favorite=!p.favorite;renderPresets();
     }
-
-    function filterByTag(tag) {
-      document.getElementById('searchInput').value = tag;
-      renderPresets();
-    }
-
-    async function toggleVote(id) {
-      const p = presets.find(item => item.id === id);
-      if (!p) return;
-      
-      const newVotes = p.voted ? p.votes - 1 : p.votes + 1;
-      p.voted = !p.voted;
-      p.votes = newVotes;
-      renderPresets();
-
-      await _supabase
-        .from('presets')
-        .update({ votes_count: newVotes })
-        .eq('id', id);
-    }
-
-    function toggleModalVote() {
-      if (!activePresetId) return;
-      toggleVote(activePresetId);
-      const p = presets.find(item => item.id === activePresetId);
-      document.getElementById('modalVoteCount').innerText = p.votes;
-      updateModalButtonStates(p);
-    }
-
-    function toggleFavorite(id) {
-      const p = presets.find(item => item.id === id);
-      if (!p) return;
-      p.favorite = !p.favorite;
-      renderPresets();
-    }
-
-    function toggleModalFavorite() {
-      if (!activePresetId) return;
+    function toggleModalFavorite(){
+      if(!activePresetId)return;
       toggleFavorite(activePresetId);
-      updateModalButtonStates(presets.find(item => item.id === activePresetId));
+      updateModalButtonStates(presets.find(item=>String(item.id)===String(activePresetId)));
     }
-
-    function toggleFavoritesOnly() {
-      showFavoritesOnly = !showFavoritesOnly;
-      document.getElementById('favToggleBtn').classList.toggle('bg-amber-500/20');
-      document.getElementById('favToggleBtn').classList.toggle('text-amber-400');
+    function toggleFavoritesOnly(){
+      showFavoritesOnly=!showFavoritesOnly;
+      document.getElementById('favToggleBtn').classList.toggle('bg-amber-500/20',showFavoritesOnly);
+      document.getElementById('favToggleBtn').classList.toggle('text-amber-400',showFavoritesOnly);
+      renderPresets();
+    }
+    function resetFilters(){
+      document.getElementById('searchInput').value='';
+      document.getElementById('genderFilter').value='all';
+      document.getElementById('sortBy').value='newest';
+      showFavoritesOnly=false;
+      document.getElementById('favToggleBtn').classList.remove('bg-amber-500/20','text-amber-400');
       renderPresets();
     }
 
-    function resetFilters() {
-      document.getElementById('searchInput').value = '';
-      document.getElementById('genderFilter').value = 'all';
-      document.getElementById('sortBy').value = 'newest';
-      showFavoritesOnly = false;
-      renderPresets();
+    async function copyText(text, successMessage='Copied!'){
+      const value=String(text||'');
+      if(!value)return;
+      try{
+        await navigator.clipboard.writeText(value);
+      }catch(e){
+        const ta=document.createElement('textarea');
+        ta.value=value;ta.style.position='fixed';ta.style.opacity='0';
+        document.body.appendChild(ta);ta.focus();ta.select();
+        try{document.execCommand('copy');}catch(_){}
+        ta.remove();
+      }
+      showToast(successMessage);
     }
 
-    function copyModalCode() {
-      navigator.clipboard.writeText(document.getElementById('modalCode').innerText);
-      alert('Preset Code Copied!');
+    function showToast(message){
+      const old=document.getElementById('siteToast');if(old)old.remove();
+      const toast=document.createElement('div');
+      toast.id='siteToast';
+      toast.className='fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] px-4 py-2.5 rounded-xl bg-slate-900 border border-cyan-500/40 text-cyan-300 text-xs font-bold shadow-2xl';
+      toast.innerText=message;
+      document.body.appendChild(toast);
+      setTimeout(()=>toast.remove(),1800);
     }
 
-    function copyModalFaceCode() {
-      navigator.clipboard.writeText(document.getElementById('modalFaceCode').innerText);
-      alert('Face Code Copied!');
+    function copyModalAppearanceCode(){
+      const p=presets.find(item=>String(item.id)===String(activePresetId));
+      if(!p)return;
+      copyText(p.appearanceCode || p.code,'Appearance Code copied!');
+    }
+    function copyModalFaceCode(){copyText(document.getElementById('modalFaceCode').innerText,'Legacy Face Code copied!');}
+
+    function openCodeModal(){
+      const p=presets.find(item=>String(item.id)===String(activePresetId));
+      if(!p)return;
+      const code=p.appearanceCode || p.code || '';
+      document.getElementById('fullCodeText').innerText=code || 'No appearance code supplied for this preset.';
+      document.getElementById('codeModal').classList.remove('hidden');
+      safeCreateIcons();
+    }
+    function closeCodeModal(){document.getElementById('codeModal').classList.add('hidden');}
+
+    function openPublishModal(){document.getElementById('publishModal').classList.remove('hidden');}
+    function closePublishModal(){document.getElementById('publishModal').classList.add('hidden');}
+
+    async function uploadFileToSupabase(file){
+      if(!file)throw new Error('No file selected.');
+      const fileExt=(file.name.split('.').pop()||'png').toLowerCase();
+      const fileName=`${Date.now()}_${Math.random().toString(36).substring(2,8)}.${fileExt}`;
+      const {error}=await _supabase.storage.from('presets').upload(fileName,file,{upsert:false});
+      if(error)throw error;
+      const {data}=_supabase.storage.from('presets').getPublicUrl(fileName);
+      return data.publicUrl;
     }
 
-    function openPublishModal() { document.getElementById('publishModal').classList.remove('hidden'); }
-    function closePublishModal() { document.getElementById('publishModal').classList.add('hidden'); }
-
-    async function uploadFileToSupabase(file) {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
-
-      const { data, error } = await _supabase.storage
-        .from('presets')
-        .upload(fileName, file);
-
-      if (error) throw error;
-
-      const { data: publicUrlData } = _supabase.storage
-        .from('presets')
-        .getPublicUrl(fileName);
-
-      return publicUrlData.publicUrl;
-    }
-
-    async function handlePublish(e) {
+    async function handlePublish(e){
       e.preventDefault();
-      const btn = document.getElementById('submitBtn');
-      btn.innerText = "Uploading Images...";
-      btn.disabled = true;
+      const btn=document.getElementById('submitBtn');
+      btn.innerText='Uploading Images...';btn.disabled=true;
 
-      try {
-        const imageFileInput = document.getElementById('pubImageFile');
-        const qrFileInput = document.getElementById('pubQRFile');
+      try{
+        const imageFile=document.getElementById('pubImageFile').files[0];
+        const qrFile=document.getElementById('pubQRFile').files[0];
+        const appearanceCode=normalizeCode(document.getElementById('pubAppearanceCode').value);
 
-        const qrFile = qrFileInput.files[0];
-        const qrUrl = await uploadFileToSupabase(qrFile);
+        if(!appearanceCode)throw new Error('Please enter the actual Once Human Appearance Code.');
+        if(!qrFile)throw new Error('Please upload the QR appearance image.');
 
-        let imageUrl = qrUrl;
-        if (imageFileInput.files.length > 0) {
-          imageUrl = await uploadFileToSupabase(imageFileInput.files[0]);
-        }
+        const qrUrl=await uploadFileToSupabase(qrFile);
+        let imageUrl=qrUrl;
+        if(imageFile)imageUrl=await uploadFileToSupabase(imageFile);
 
-        btn.innerText = "Saving Preset...";
+        btn.innerText='Saving Preset...';
 
-        const newPreset = {
-          title: document.getElementById('pubTitle').value,
-          author: document.getElementById('pubAuthor').value,
-          body_type: document.getElementById('pubBodyType').value,
-          tags: document.getElementById('pubTags').value.split(',').map(t => t.trim()).filter(Boolean),
-          image_url: imageUrl,
-          qr_url: qrUrl,
-          preset_code: `OH-${Math.random().toString(36).substring(2, 7).toUpperCase()}`,
-          face_code: document.getElementById('pubFaceCode').value.trim(),
-          description: document.getElementById('pubDesc').value,
-          votes_count: 1
+        const newPreset={
+          title:document.getElementById('pubTitle').value.trim(),
+          author:document.getElementById('pubAuthor').value.trim().replace(/^@/,''),
+          body_type:document.getElementById('pubBodyType').value,
+          tags:document.getElementById('pubTags').value.split(',').map(t=>t.trim()).filter(Boolean),
+          image_url:imageUrl,
+          qr_url:qrUrl,
+          // Existing DB column reused intentionally so no migration is required.
+          // This must contain the REAL Once Human appearance text cipher.
+          preset_code:appearanceCode,
+          face_code:document.getElementById('pubFaceCode').value.trim(),
+          description:document.getElementById('pubDesc').value.trim(),
+          votes_count:1
         };
 
-        const { error } = await _supabase.from('presets').insert([newPreset]);
+        const {error}=await _supabase.from('presets').insert([newPreset]);
+        if(error)throw error;
 
-        if (error) throw error;
-
-        alert("Preset successfully published!");
+        showToast('Preset successfully published!');
         closePublishModal();
         document.getElementById('publishForm').reset();
-        fetchPresetsFromDatabase();
-      } catch (err) {
-        alert("Upload failed: " + err.message);
-      } finally {
-        btn.innerText = "Publish Design";
-        btn.disabled = false;
+        await fetchPresetsFromDatabase();
+      }catch(err){
+        console.error(err);
+        alert('Upload failed: '+(err?.message||err));
+      }finally{
+        btn.innerText='Publish Design';btn.disabled=false;
       }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    // Close modals with Escape and clicking the dark backdrop.
+    document.addEventListener('keydown',e=>{
+      if(e.key==='Escape'){
+        closeCodeModal();closeZoomModal();closeDetailModal();closePublishModal();
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded',()=>{
       safeCreateIcons();
       fetchPresetsFromDatabase();
     });
   </script>
+
+  <style>
+    .tag-btn{
+      padding:.25rem .625rem;border-radius:.5rem;background:rgba(15,23,42,.9);
+      color:#94a3b8;border:1px solid #1e293b;font-size:.75rem;transition:.2s;
+    }
+    .tag-btn:hover{background:rgba(6,182,212,.2);color:#22d3ee;border-color:rgba(6,182,212,.4);}
+  </style>
 </body>
 </html>
