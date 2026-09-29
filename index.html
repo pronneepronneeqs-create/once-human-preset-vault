@@ -14,90 +14,115 @@
       color: #f3f4f6;
     }
     .glass-panel {
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(12px);
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 6px;
+    .card-hover {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: rgba(15, 23, 42, 0.5);
+    .card-hover:hover {
+      transform: translateY(-4px);
+      border-color: rgba(6, 182, 212, 0.5);
+      box-shadow: 0 12px 30px -10px rgba(6, 182, 212, 0.25);
     }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: rgba(51, 65, 85, 0.8);
-      border-radius: 3px;
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 0.8); border-radius: 3px; }
+    
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.8; }
     }
+    .animate-pulse-slow { animation: pulse-glow 6s infinite ease-in-out; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black text-slate-100">
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 relative overflow-x-hidden">
+
+  <!-- Animated Mesh Background -->
+  <div class="fixed inset-0 pointer-events-none z-0">
+    <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-cyan-600/15 rounded-full blur-[120px] animate-pulse-slow"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-amber-500/10 rounded-full blur-[140px] animate-pulse-slow" style="animation-delay: 3s;"></div>
+  </div>
 
   <!-- Header -->
-  <header class="sticky top-0 z-40 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-lg">
+  <header class="sticky top-0 z-40 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl relative">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3 cursor-pointer" onclick="resetFilters()">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center font-black text-xl text-black shadow-lg shadow-cyan-500/20">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-400 via-cyan-500 to-blue-600 flex items-center justify-center font-black text-xl text-slate-950 shadow-lg shadow-cyan-500/30">
           OH
         </div>
         <div>
           <h1 class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">PRESET VAULT</h1>
-          <p class="text-[10px] text-cyan-400 font-semibold tracking-widest uppercase">Once Human Character Library</p>
+          <p class="text-[10px] text-cyan-400 font-semibold tracking-widest uppercase">Once Human Character Vault</p>
         </div>
       </div>
 
-      <button onclick="openPublishModal()" class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-sm rounded-xl shadow-lg shadow-cyan-500/20 transition-all transform hover:-translate-y-0.5">
+      <button onclick="openPublishModal()" class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 via-cyan-400 to-blue-600 hover:brightness-110 text-slate-950 font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-cyan-500/25 transition-all transform hover:-translate-y-0.5">
         <i data-lucide="plus-circle" class="w-4 h-4"></i>
         <span>Publish Preset</span>
       </button>
     </div>
   </header>
 
-  <!-- Hero Banner -->
-  <div class="relative overflow-hidden border-b border-slate-800/50 bg-slate-900/30">
-    <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,_rgba(6,182,212,0.1),_transparent_40%)]"></div>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
-      <div class="max-w-2xl">
-        <span class="text-xs font-bold text-cyan-400 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 mb-3 inline-block">
-          ⚡ Community Presets & QR Sharing
-        </span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-2">
-          Discover & Share Custom Meta-Human Looks
-        </h2>
-        <p class="text-slate-400 text-sm leading-relaxed">
-          Browse community-created presets, extract QR codes directly into Once Human, and showcase your finest character designs.
-        </p>
+  <!-- Hero Section -->
+  <div class="relative z-10 border-b border-slate-800/50 bg-slate-900/20 backdrop-blur-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div class="max-w-2xl">
+          <span class="text-[11px] font-bold text-cyan-400 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 mb-3 inline-flex items-center gap-1.5 uppercase tracking-wider">
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
+            Community Presets & QR Library
+          </span>
+          <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-2">
+            Discover & Share Meta-Human Looks
+          </h2>
+          <p class="text-slate-400 text-sm leading-relaxed">
+            Browse community-created presets, import QR codes directly into Once Human, and showcase your finest character creations.
+          </p>
+        </div>
+
+        <!-- Quick Tag Filter Pills -->
+        <div class="flex flex-wrap gap-1.5 max-w-md">
+          <button onclick="filterByTag('Cyberpunk')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-cyan-400 border border-slate-800 text-xs transition">#Cyberpunk</button>
+          <button onclick="filterByTag('Anime')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-cyan-400 border border-slate-800 text-xs transition">#Anime</button>
+          <button onclick="filterByTag('Gothic')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-cyan-400 border border-slate-800 text-xs transition">#Gothic</button>
+          <button onclick="filterByTag('Realistic')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-cyan-400 border border-slate-800 text-xs transition">#Realistic</button>
+          <button onclick="filterByTag('Cute')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-cyan-400 border border-slate-800 text-xs transition">#Cute</button>
+          <button onclick="filterByTag('Fantasy')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-cyan-400 border border-slate-800 text-xs transition">#Fantasy</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Main Content -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+  <!-- Main Grid -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full relative z-10">
     
-    <!-- Controls Bar -->
-    <div class="glass-panel p-4 rounded-2xl mb-8 flex flex-col md:flex-row gap-4 items-center justify-between shadow-xl">
-      <!-- Search Input -->
+    <!-- Filter Controls Bar -->
+    <div class="glass-panel p-4 rounded-2xl mb-8 flex flex-col md:flex-row gap-4 items-center justify-between shadow-2xl">
+      <!-- Search -->
       <div class="relative w-full md:w-96">
         <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-        <input id="searchInput" type="text" placeholder="Search by name, tags, or author..." oninput="renderPresets()" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition">
+        <input id="searchInput" type="text" placeholder="Search by title, author, or tag..." oninput="renderPresets()" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition">
       </div>
 
       <!-- Filters -->
       <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-between md:justify-end">
-        <select id="genderFilter" onchange="renderPresets()" class="bg-slate-900/80 border border-slate-700/80 rounded-xl px-3 py-2 text-xs font-medium text-slate-300 focus:outline-none focus:border-cyan-500 transition">
+        <select id="genderFilter" onchange="renderPresets()" class="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-slate-300 focus:outline-none focus:border-cyan-500 transition">
           <option value="all">All Body Types</option>
           <option value="female">Female</option>
           <option value="male">Male</option>
         </select>
 
-        <select id="sortBy" onchange="renderPresets()" class="bg-slate-900/80 border border-slate-700/80 rounded-xl px-3 py-2 text-xs font-medium text-slate-300 focus:outline-none focus:border-cyan-500 transition">
+        <select id="sortBy" onchange="renderPresets()" class="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-slate-300 focus:outline-none focus:border-cyan-500 transition">
           <option value="newest">Newest First</option>
-          <option value="top">Most Popular</option>
+          <option value="top">Most Upvoted</option>
           <option value="trending">Trending</option>
         </select>
 
-        <button id="favToggleBtn" onclick="toggleFavoritesOnly()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900/80 border border-slate-700/80 text-xs font-medium text-slate-400 hover:text-amber-400 transition">
+        <button id="favToggleBtn" onclick="toggleFavoritesOnly()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-950/80 border border-slate-800 text-xs font-semibold text-slate-400 hover:text-amber-400 transition">
           <i data-lucide="bookmark" class="w-3.5 h-3.5"></i>
-          <span>Favorites</span>
+          <span>Saved</span>
         </button>
       </div>
     </div>
@@ -106,31 +131,34 @@
     <div id="presetGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
 
     <!-- Empty State -->
-    <div id="emptyState" class="hidden text-center py-20 glass-panel rounded-2xl">
-      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-900 flex items-center justify-center border border-slate-800 text-slate-500">
-        <i data-lucide="folder-open" class="w-8 h-8"></i>
+    <div id="emptyState" class="hidden text-center py-20 glass-panel rounded-2xl border border-slate-800">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-900/90 flex items-center justify-center border border-slate-800 text-cyan-400 shadow-inner">
+        <i data-lucide="sparkles" class="w-8 h-8"></i>
       </div>
-      <h3 class="text-lg font-bold text-slate-300 mb-1">No Presets Found</h3>
-      <p class="text-sm text-slate-500 max-w-sm mx-auto mb-6">Be the first to publish a custom preset design for Once Human!</p>
-      <button onclick="openPublishModal()" class="px-4 py-2 bg-cyan-500 text-slate-950 text-xs font-bold rounded-lg hover:bg-cyan-400 transition">
+      <h3 class="text-lg font-bold text-slate-200 mb-1">No Presets Found</h3>
+      <p class="text-xs text-slate-500 max-w-sm mx-auto mb-6">Be the first player to publish a custom preset design!</p>
+      <button onclick="openPublishModal()" class="px-5 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-extrabold uppercase tracking-wider rounded-xl transition shadow-lg shadow-cyan-500/20">
         Publish First Preset
       </button>
     </div>
   </main>
 
   <!-- Detail Modal -->
-  <div id="detailModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+  <div id="detailModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl relative">
-      <button onclick="closeDetailModal()" class="absolute top-4 right-4 z-10 p-2 rounded-full bg-slate-950/60 text-slate-400 hover:text-white border border-slate-800">
+      <button onclick="closeDetailModal()" class="absolute top-4 right-4 z-10 p-2 rounded-full bg-slate-950/70 text-slate-400 hover:text-white border border-slate-800 transition">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
       <div class="overflow-y-auto custom-scrollbar p-6 space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="space-y-3">
-            <div class="aspect-[4/5] rounded-xl overflow-hidden bg-slate-950 border border-slate-800 relative">
-              <img id="modalImage" class="w-full h-full object-cover" alt="Preset">
-              <span id="modalBodyType" class="absolute top-3 left-3 text-[10px] font-bold px-2.5 py-1 rounded bg-slate-900/90 text-cyan-400 border border-cyan-500/30 uppercase tracking-widest backdrop-blur-md"></span>
+            <div class="aspect-[4/5] rounded-xl overflow-hidden bg-slate-950 border border-slate-800 relative group cursor-pointer" onclick="openZoomModal()">
+              <img id="modalImage" class="w-full h-full object-cover transition duration-500 group-hover:scale-105" alt="Preset">
+              <div class="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-semibold gap-1.5 transition">
+                <i data-lucide="maximize-2" class="w-4 h-4"></i> Click to Zoom
+              </div>
+              <span id="modalBodyType" class="absolute top-3 left-3 text-[10px] font-bold px-2.5 py-1 rounded bg-slate-950/80 text-cyan-400 border border-cyan-500/30 uppercase tracking-widest backdrop-blur-md"></span>
             </div>
           </div>
 
@@ -139,33 +167,33 @@
               <h2 id="modalTitle" class="text-2xl font-black text-white leading-tight"></h2>
               <p id="modalAuthor" class="text-xs text-cyan-400 font-semibold mt-1"></p>
               
-              <div class="mt-4 p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+              <div class="mt-4 p-3 rounded-xl bg-slate-950/70 border border-slate-800/80">
                 <p id="modalDescription" class="text-xs text-slate-400 leading-relaxed"></p>
               </div>
 
               <div id="modalTags" class="flex flex-wrap gap-1.5 mt-3"></div>
             </div>
 
-            <!-- QR Code Section -->
-            <div class="p-4 rounded-xl bg-slate-950/80 border border-cyan-500/20 flex items-center gap-4">
-              <div class="w-24 h-24 bg-white p-1 rounded-lg shrink-0">
+            <!-- In-Game QR / Import Code Box -->
+            <div class="p-4 rounded-xl bg-slate-950/90 border border-cyan-500/30 flex items-center gap-4 shadow-inner">
+              <div class="w-24 h-24 bg-white p-1.5 rounded-lg shrink-0 border border-slate-700">
                 <img id="modalQR" class="w-full h-full object-contain" alt="QR Code">
               </div>
-              <div class="space-y-1 min-w-0">
+              <div class="space-y-1.5 min-w-0">
                 <span class="text-[10px] font-bold text-cyan-400 uppercase tracking-widest block">In-Game Scan Code</span>
-                <p id="modalCode" class="font-mono text-sm font-bold text-slate-200 truncate"></p>
-                <button onclick="copyModalCode()" class="text-xs text-slate-400 hover:text-cyan-400 flex items-center gap-1 font-medium transition">
-                  <i data-lucide="copy" class="w-3 h-3"></i> Copy Code
+                <p id="modalCode" class="font-mono text-sm font-bold text-slate-100 truncate bg-slate-900 px-2 py-1 rounded border border-slate-800"></p>
+                <button onclick="copyModalCode()" class="text-xs text-slate-400 hover:text-cyan-400 flex items-center gap-1 font-semibold transition">
+                  <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy Code
                 </button>
               </div>
             </div>
 
             <div class="flex items-center gap-2 pt-2 border-t border-slate-800">
-              <button id="modalVoteBtn" onclick="toggleModalVote()" class="flex-1 flex items-center justify-center gap-2 bg-slate-800 hover:bg-cyan-500/20 hover:text-cyan-400 border border-slate-700 text-slate-300 py-2.5 rounded-lg font-medium text-xs transition">
+              <button id="modalVoteBtn" onclick="toggleModalVote()" class="flex-1 flex items-center justify-center gap-2 bg-slate-800 hover:bg-cyan-500/20 hover:text-cyan-400 border border-slate-700 text-slate-300 py-2.5 rounded-xl font-bold text-xs transition">
                 <i data-lucide="arrow-big-up" class="w-4 h-4"></i>
                 <span>Upvote (<span id="modalVoteCount">0</span>)</span>
               </button>
-              <button id="modalFavBtn" onclick="toggleModalFavorite()" class="px-4 py-2.5 bg-slate-800 hover:bg-amber-500/20 hover:text-amber-400 border border-slate-700 text-slate-300 rounded-lg transition">
+              <button id="modalFavBtn" onclick="toggleModalFavorite()" class="px-4 py-2.5 bg-slate-800 hover:bg-amber-500/20 hover:text-amber-400 border border-slate-700 text-slate-300 rounded-xl transition">
                 <i data-lucide="bookmark" class="w-4 h-4"></i>
               </button>
             </div>
@@ -174,11 +202,11 @@
 
         <!-- Comments -->
         <div class="border-t border-slate-800 pt-4">
-          <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Community Comments</h4>
+          <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Comments</h4>
           <div id="commentsList" class="space-y-2 max-h-36 overflow-y-auto custom-scrollbar mb-3"></div>
           <div class="flex gap-2">
-            <input id="commentInput" type="text" placeholder="Add a comment..." class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-cyan-500">
-            <button onclick="addComment()" class="px-4 py-2 bg-slate-800 hover:bg-cyan-500 hover:text-slate-950 text-slate-300 font-semibold text-xs rounded-lg transition">
+            <input id="commentInput" type="text" placeholder="Write a comment..." class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-cyan-500">
+            <button onclick="addComment()" class="px-4 py-2 bg-slate-800 hover:bg-cyan-500 hover:text-slate-950 text-slate-200 font-bold text-xs rounded-xl transition">
               Post
             </button>
           </div>
@@ -187,30 +215,35 @@
     </div>
   </div>
 
+  <!-- Zoom Image Modal -->
+  <div id="zoomModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-lg flex items-center justify-center p-4 hidden cursor-pointer" onclick="closeZoomModal()">
+    <img id="zoomedImg" class="max-w-full max-h-[90vh] rounded-2xl border border-slate-800 shadow-2xl" alt="Zoomed View">
+  </div>
+
   <!-- Publish Modal -->
-  <div id="publishModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+  <div id="publishModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative">
       <button onclick="closePublishModal()" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-white">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
-      <h3 class="text-xl font-bold text-white mb-1">Publish New Preset</h3>
-      <p class="text-xs text-slate-400 mb-6">Share your Once Human character design with the community.</p>
+      <h3 class="text-xl font-extrabold text-white mb-1">Publish Preset</h3>
+      <p class="text-xs text-slate-400 mb-6">Share your character design and QR code with players worldwide.</p>
 
       <form id="publishForm" onsubmit="handlePublish(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-slate-400 mb-1">Preset Title</label>
-          <input id="pubTitle" type="text" required placeholder="e.g. Cyberpunk Assassin" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+          <input id="pubTitle" type="text" required placeholder="e.g. Stardust Operative" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Author / Handle</label>
-            <input id="pubAuthor" type="text" required placeholder="e.g. StardustKing" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Creator Name / @Handle</label>
+            <input id="pubAuthor" type="text" required placeholder="e.g. MetaHunter" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-400 mb-1">Body Type</label>
-            <select id="pubBodyType" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+            <select id="pubBodyType" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
               <option value="female">Female</option>
               <option value="male">Male</option>
             </select>
@@ -218,26 +251,26 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Character Image Direct URL</label>
-          <input id="pubImageUrl" type="url" required placeholder="https://..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+          <label class="block text-xs font-semibold text-slate-400 mb-1">Character Showcase Image URL</label>
+          <input id="pubImageUrl" type="url" required placeholder="https://..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">QR Code Image Direct URL</label>
-          <input id="pubQRUrl" type="url" required placeholder="https://..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+          <label class="block text-xs font-semibold text-slate-400 mb-1">In-Game QR Code Image URL</label>
+          <input id="pubQRUrl" type="url" required placeholder="https://..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
         </div>
 
         <div>
           <label class="block text-xs font-semibold text-slate-400 mb-1">Tags (Comma separated)</label>
-          <input id="pubTags" type="text" placeholder="Anime, Gothic, Futuristic" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+          <input id="pubTags" type="text" placeholder="Cyberpunk, Anime, Gothic" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
         </div>
 
         <div>
           <label class="block text-xs font-semibold text-slate-400 mb-1">Description (Optional)</label>
-          <textarea id="pubDesc" rows="2" placeholder="Brief details about the sliders or aesthetic..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"></textarea>
+          <textarea id="pubDesc" rows="2" placeholder="Details about sliders, skin tone, makeup..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"></textarea>
         </div>
 
-        <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold text-xs rounded-lg hover:from-cyan-400 hover:to-blue-500 transition shadow-lg shadow-cyan-500/20">
+        <button type="submit" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-extrabold text-xs uppercase tracking-wider rounded-xl hover:brightness-110 transition shadow-lg shadow-cyan-500/20">
           Publish Design
         </button>
       </form>
@@ -245,9 +278,7 @@
   </div>
 
   <script>
-    // Clean start - No demo presets
     const INITIAL_PRESETS = [];
-
     let presets = [...INITIAL_PRESETS];
     let activePresetId = null;
     let showFavoritesOnly = false;
@@ -283,30 +314,30 @@
 
     function createPresetCard(p) {
       const card = document.createElement('div');
-      card.className = "glass-panel rounded-xl overflow-hidden hover:border-slate-600 transition-all duration-300 flex flex-col group cursor-pointer";
+      card.className = "glass-panel rounded-2xl overflow-hidden card-hover flex flex-col group cursor-pointer border border-slate-800/80";
       card.innerHTML = `
         <div class="relative aspect-[4/5] bg-slate-900 overflow-hidden" onclick="openDetailModal('${p.id}')">
           <img src="${p.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="${p.title}">
-          <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-80"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-90"></div>
           <div class="absolute top-3 left-3 flex gap-2">
-            <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-900/80 text-cyan-400 border border-cyan-500/30 uppercase tracking-wider backdrop-blur-md">${p.bodyType}</span>
+            <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-lg bg-slate-950/80 text-cyan-400 border border-cyan-500/30 uppercase tracking-widest backdrop-blur-md shadow-lg">${p.bodyType}</span>
           </div>
-          <button onclick="event.stopPropagation(); toggleFavorite('${p.id}')" class="absolute top-3 right-3 p-2 rounded-full bg-slate-900/80 text-slate-400 hover:text-amber-400 border border-slate-700/80 transition backdrop-blur-md ${p.favorite ? 'text-amber-400 fill-amber-400' : ''}">
+          <button onclick="event.stopPropagation(); toggleFavorite('${p.id}')" class="absolute top-3 right-3 p-2 rounded-xl bg-slate-950/80 text-slate-400 hover:text-amber-400 border border-slate-800 transition backdrop-blur-md ${p.favorite ? 'text-amber-400 fill-amber-400' : ''}">
             <i data-lucide="bookmark" class="w-4 h-4"></i>
           </button>
           <div class="absolute bottom-3 left-3 right-3 flex items-end justify-between">
             <div>
-              <h3 class="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors leading-tight">${p.title}</h3>
-              <p class="text-xs text-slate-400">By @${p.author}</p>
+              <h3 class="text-base font-extrabold text-white group-hover:text-cyan-400 transition-colors leading-snug">${p.title}</h3>
+              <p class="text-xs text-slate-400 font-medium">By @${p.author}</p>
             </div>
           </div>
         </div>
-        <div class="p-4 bg-slate-950/60 flex items-center justify-between border-t border-slate-800/80 mt-auto">
+        <div class="p-3.5 bg-slate-950/80 flex items-center justify-between border-t border-slate-800/80 mt-auto">
           <div class="flex gap-1 flex-wrap">
-            ${p.tags.slice(0, 2).map(t => `<span class="text-[10px] px-2 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800">#${t}</span>`).join('')}
+            ${p.tags.slice(0, 2).map(t => `<span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-900 text-slate-400 border border-slate-800 font-medium">#${t}</span>`).join('')}
           </div>
-          <button onclick="event.stopPropagation(); toggleVote('${p.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition ${p.voted ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/50' : 'bg-slate-900 text-slate-300 border-slate-800 hover:border-slate-700'}">
-            <i data-lucide="arrow-big-up" class="w-4 h-4"></i>
+          <button onclick="event.stopPropagation(); toggleVote('${p.id}')" class="flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs font-bold transition ${p.voted ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/50' : 'bg-slate-900 text-slate-300 border-slate-800 hover:border-slate-700'}">
+            <i data-lucide="arrow-big-up" class="w-3.5 h-3.5"></i>
             <span>${p.votes}</span>
           </button>
         </div>
@@ -326,7 +357,7 @@
       document.getElementById('modalQR').src = p.qr;
       document.getElementById('modalCode').innerText = p.code || "OH-PRESET";
       document.getElementById('modalVoteCount').innerText = p.votes;
-      document.getElementById('modalTags').innerHTML = p.tags.map(t => `<span class="text-xs px-2.5 py-1 rounded bg-slate-800 text-cyan-400 border border-slate-700">#${t}</span>`).join('');
+      document.getElementById('modalTags').innerHTML = p.tags.map(t => `<span class="text-xs px-2.5 py-1 rounded-lg bg-slate-950 text-cyan-400 border border-slate-800 font-medium">#${t}</span>`).join('');
       updateModalButtonStates(p);
       renderComments(p);
       document.getElementById('detailModal').classList.remove('hidden');
@@ -334,15 +365,23 @@
     }
 
     function closeDetailModal() { document.getElementById('detailModal').classList.add('hidden'); }
+    function openZoomModal() {
+      const p = presets.find(item => item.id === activePresetId);
+      if (!p) return;
+      document.getElementById('zoomedImg').src = p.image;
+      document.getElementById('zoomModal').classList.remove('hidden');
+    }
+    function closeZoomModal() { document.getElementById('zoomModal').classList.add('hidden'); }
+
     function updateModalButtonStates(p) {
-      document.getElementById('modalVoteBtn').className = p.voted ? "flex-1 flex items-center justify-center gap-2 bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 py-2.5 rounded-lg font-medium transition" : "flex-1 flex items-center justify-center gap-2 bg-slate-800 hover:bg-cyan-500/20 hover:text-cyan-400 hover:border-cyan-500/50 border border-slate-700 text-slate-300 py-2.5 rounded-lg font-medium transition";
-      document.getElementById('modalFavBtn').className = p.favorite ? "px-4 py-2.5 bg-amber-500/20 text-amber-400 border border-amber-500/50 rounded-lg transition" : "px-4 py-2.5 bg-slate-800 hover:bg-amber-500/20 hover:text-amber-400 border border-slate-700 text-slate-300 rounded-lg transition";
+      document.getElementById('modalVoteBtn').className = p.voted ? "flex-1 flex items-center justify-center gap-2 bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 py-2.5 rounded-xl font-bold text-xs transition" : "flex-1 flex items-center justify-center gap-2 bg-slate-800 hover:bg-cyan-500/20 hover:text-cyan-400 border border-slate-700 text-slate-300 py-2.5 rounded-xl font-bold text-xs transition";
+      document.getElementById('modalFavBtn').className = p.favorite ? "px-4 py-2.5 bg-amber-500/20 text-amber-400 border border-amber-500/50 rounded-xl transition" : "px-4 py-2.5 bg-slate-800 hover:bg-amber-500/20 hover:text-amber-400 border border-slate-700 text-slate-300 rounded-xl transition";
     }
 
     function renderComments(p) {
       document.getElementById('commentsList').innerHTML = (p.comments || []).map(c => `
-        <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800 text-xs">
-          <span class="font-semibold text-slate-300 block mb-0.5">@${c.author}</span>
+        <div class="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800 text-xs">
+          <span class="font-bold text-slate-300 block mb-0.5">@${c.author}</span>
           <p class="text-slate-400">${c.text}</p>
         </div>
       `).join('');
@@ -357,6 +396,11 @@
       p.comments.push({ author: "You", text });
       input.value = '';
       renderComments(p);
+    }
+
+    function filterByTag(tag) {
+      document.getElementById('searchInput').value = tag;
+      renderPresets();
     }
 
     function toggleVote(id) {
