@@ -6,6 +6,12 @@
   <title>OH Vault | Once Human Character Presets</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://bwdsqiwaoqrnnxwmruar.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3ZHNxaXdhb3Fybm54d21ydWFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2Nzk5MDIsImV4cCI6MjEwNjI1NTkwMn0.OBlLRVr8dLxNU7F-ND0Hmu5oNTc494qnfx8mDBkqq5Q";
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  </script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
     body {
@@ -39,7 +45,7 @@
 </head>
 <body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 relative overflow-x-hidden">
 
-  <!-- Animated Mesh Background -->
+  <!-- Animated Background Mesh -->
   <div class="fixed inset-0 pointer-events-none z-0">
     <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-cyan-600/15 rounded-full blur-[120px] animate-pulse-slow"></div>
     <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-amber-500/10 rounded-full blur-[140px] animate-pulse-slow" style="animation-delay: 3s;"></div>
@@ -100,7 +106,7 @@
     
     <!-- Filter Controls Bar -->
     <div class="glass-panel p-4 rounded-2xl mb-8 flex flex-col md:flex-row gap-4 items-center justify-between shadow-2xl">
-      <!-- Search -->
+      <!-- Search Input -->
       <div class="relative w-full md:w-96">
         <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
         <input id="searchInput" type="text" placeholder="Search by title, author, or tag..." oninput="renderPresets()" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition">
@@ -117,7 +123,6 @@
         <select id="sortBy" onchange="renderPresets()" class="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-slate-300 focus:outline-none focus:border-cyan-500 transition">
           <option value="newest">Newest First</option>
           <option value="top">Most Upvoted</option>
-          <option value="trending">Trending</option>
         </select>
 
         <button id="favToggleBtn" onclick="toggleFavoritesOnly()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-950/80 border border-slate-800 text-xs font-semibold text-slate-400 hover:text-amber-400 transition">
@@ -174,7 +179,7 @@
               <div id="modalTags" class="flex flex-wrap gap-1.5 mt-3"></div>
             </div>
 
-            <!-- In-Game QR / Import Code Box -->
+            <!-- QR / Import Code Box -->
             <div class="p-4 rounded-xl bg-slate-950/90 border border-cyan-500/30 flex items-center gap-4 shadow-inner">
               <div class="w-24 h-24 bg-white p-1.5 rounded-lg shrink-0 border border-slate-700">
                 <img id="modalQR" class="w-full h-full object-contain" alt="QR Code">
@@ -197,18 +202,6 @@
                 <i data-lucide="bookmark" class="w-4 h-4"></i>
               </button>
             </div>
-          </div>
-        </div>
-
-        <!-- Comments -->
-        <div class="border-t border-slate-800 pt-4">
-          <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Comments</h4>
-          <div id="commentsList" class="space-y-2 max-h-36 overflow-y-auto custom-scrollbar mb-3"></div>
-          <div class="flex gap-2">
-            <input id="commentInput" type="text" placeholder="Write a comment..." class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-cyan-500">
-            <button onclick="addComment()" class="px-4 py-2 bg-slate-800 hover:bg-cyan-500 hover:text-slate-950 text-slate-200 font-bold text-xs rounded-xl transition">
-              Post
-            </button>
           </div>
         </div>
       </div>
@@ -270,7 +263,7 @@
           <textarea id="pubDesc" rows="2" placeholder="Details about sliders, skin tone, makeup..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"></textarea>
         </div>
 
-        <button type="submit" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-extrabold text-xs uppercase tracking-wider rounded-xl hover:brightness-110 transition shadow-lg shadow-cyan-500/20">
+        <button type="submit" id="submitBtn" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-extrabold text-xs uppercase tracking-wider rounded-xl hover:brightness-110 transition shadow-lg shadow-cyan-500/20">
           Publish Design
         </button>
       </form>
@@ -278,10 +271,39 @@
   </div>
 
   <script>
-    const INITIAL_PRESETS = [];
-    let presets = [...INITIAL_PRESETS];
+    let presets = [];
     let activePresetId = null;
     let showFavoritesOnly = false;
+
+    async function fetchPresetsFromDatabase() {
+      const { data, error } = await _supabase
+        .from('presets')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Error fetching presets:", error);
+        return;
+      }
+
+      presets = data.map(item => ({
+        id: item.id,
+        title: item.title,
+        author: item.author,
+        bodyType: item.body_type,
+        tags: item.tags || [],
+        image: item.image_url,
+        qr: item.qr_url,
+        code: item.preset_code || "OH-PRESET",
+        votes: item.votes_count || 1,
+        voted: false,
+        favorite: false,
+        date: item.created_at,
+        description: item.description
+      }));
+
+      renderPresets();
+    }
 
     function renderPresets() {
       const grid = document.getElementById('presetGrid');
@@ -300,12 +322,12 @@
       });
 
       if (sortBy === 'top') filtered.sort((a, b) => b.votes - a.votes);
-      else if (sortBy === 'trending') filtered.sort((a, b) => (b.votes * 1.5) - (a.votes * 1.5));
       else filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
 
       grid.innerHTML = '';
-      if (filtered.length === 0) emptyState.classList.remove('hidden');
-      else {
+      if (filtered.length === 0) {
+        emptyState.classList.remove('hidden');
+      } else {
         emptyState.classList.add('hidden');
         filtered.forEach(preset => grid.appendChild(createPresetCard(preset)));
       }
@@ -359,7 +381,6 @@
       document.getElementById('modalVoteCount').innerText = p.votes;
       document.getElementById('modalTags').innerHTML = p.tags.map(t => `<span class="text-xs px-2.5 py-1 rounded-lg bg-slate-950 text-cyan-400 border border-slate-800 font-medium">#${t}</span>`).join('');
       updateModalButtonStates(p);
-      renderComments(p);
       document.getElementById('detailModal').classList.remove('hidden');
       lucide.createIcons();
     }
@@ -378,36 +399,24 @@
       document.getElementById('modalFavBtn').className = p.favorite ? "px-4 py-2.5 bg-amber-500/20 text-amber-400 border border-amber-500/50 rounded-xl transition" : "px-4 py-2.5 bg-slate-800 hover:bg-amber-500/20 hover:text-amber-400 border border-slate-700 text-slate-300 rounded-xl transition";
     }
 
-    function renderComments(p) {
-      document.getElementById('commentsList').innerHTML = (p.comments || []).map(c => `
-        <div class="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800 text-xs">
-          <span class="font-bold text-slate-300 block mb-0.5">@${c.author}</span>
-          <p class="text-slate-400">${c.text}</p>
-        </div>
-      `).join('');
-    }
-
-    function addComment() {
-      const input = document.getElementById('commentInput');
-      const text = input.value.trim();
-      if (!text || !activePresetId) return;
-      const p = presets.find(item => item.id === activePresetId);
-      if (!p.comments) p.comments = [];
-      p.comments.push({ author: "You", text });
-      input.value = '';
-      renderComments(p);
-    }
-
     function filterByTag(tag) {
       document.getElementById('searchInput').value = tag;
       renderPresets();
     }
 
-    function toggleVote(id) {
+    async function toggleVote(id) {
       const p = presets.find(item => item.id === id);
       if (!p) return;
-      p.voted ? (p.votes--, p.voted = false) : (p.votes++, p.voted = true);
+      
+      const newVotes = p.voted ? p.votes - 1 : p.votes + 1;
+      p.voted = !p.voted;
+      p.votes = newVotes;
       renderPresets();
+
+      await _supabase
+        .from('presets')
+        .update({ votes_count: newVotes })
+        .eq('id', id);
     }
 
     function toggleModalVote() {
@@ -448,38 +457,46 @@
 
     function copyModalCode() {
       navigator.clipboard.writeText(document.getElementById('modalCode').innerText);
-      alert('Preset Code Copied to Clipboard!');
+      alert('Preset Code Copied!');
     }
 
     function openPublishModal() { document.getElementById('publishModal').classList.remove('hidden'); }
     function closePublishModal() { document.getElementById('publishModal').classList.add('hidden'); }
 
-    function handlePublish(e) {
+    async function handlePublish(e) {
       e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      btn.innerText = "Publishing...";
+      btn.disabled = true;
+
       const newPreset = {
-        id: Date.now().toString(),
         title: document.getElementById('pubTitle').value,
         author: document.getElementById('pubAuthor').value,
-        bodyType: document.getElementById('pubBodyType').value,
+        body_type: document.getElementById('pubBodyType').value,
         tags: document.getElementById('pubTags').value.split(',').map(t => t.trim()).filter(Boolean),
-        image: document.getElementById('pubImageUrl').value,
-        qr: document.getElementById('pubQRUrl').value,
-        code: `OH-${Math.random().toString(36).substring(2, 7).toUpperCase()}`,
-        votes: 1,
-        voted: true,
-        favorite: false,
-        date: new Date().toISOString().split('T')[0],
+        image_url: document.getElementById('pubImageUrl').value,
+        qr_url: document.getElementById('pubQRUrl').value,
+        preset_code: `OH-${Math.random().toString(36).substring(2, 7).toUpperCase()}`,
         description: document.getElementById('pubDesc').value,
-        comments: []
+        votes_count: 1
       };
 
-      presets.unshift(newPreset);
-      closePublishModal();
-      document.getElementById('publishForm').reset();
-      renderPresets();
+      const { data, error } = await _supabase.from('presets').insert([newPreset]);
+
+      btn.innerText = "Publish Design";
+      btn.disabled = false;
+
+      if (error) {
+        alert("Error publishing: " + error.message);
+      } else {
+        alert("Preset successfully saved to cloud!");
+        closePublishModal();
+        document.getElementById('publishForm').reset();
+        fetchPresetsFromDatabase();
+      }
     }
 
-    document.addEventListener('DOMContentLoaded', renderPresets);
+    document.addEventListener('DOMContentLoaded', fetchPresetsFromDatabase);
   </script>
 </body>
 </html>
