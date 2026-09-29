@@ -144,7 +144,10 @@
 
       <div id="galleryHeading" class="hidden flex items-center justify-between gap-4">
         <div><span class="text-[11px] font-bold text-cyan-400 uppercase tracking-widest">The Archive</span><h2 class="text-xl sm:text-2xl font-black text-white">Explore presets</h2></div>
-        <span id="visibleCount" class="text-sm font-semibold text-slate-300"></span>
+        <div class="flex flex-wrap items-center justify-end gap-3">
+          <span id="visibleCount" class="text-sm font-semibold text-slate-300"></span>
+          <button type="button" onclick="openRandomPreset()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/40 text-cyan-200 text-xs font-extrabold transition"><i data-lucide="shuffle" class="w-3.5 h-3.5"></i>Surprise me</button>
+        </div>
       </div>
       <div id="presetGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
       <div id="loadMoreWrap" class="hidden text-center pt-3">
@@ -327,6 +330,7 @@
     let featuredTimer = null;
     const PRESET_BATCH_SIZE=18;
     let visiblePresetLimit=PRESET_BATCH_SIZE;
+    let lastRandomPresetId=null;
 
     function updateBackgroundScene(){
       // Four shared daily slots: 00:00, 06:00, 12:00, 18:00 Berlin time.
@@ -460,6 +464,22 @@
     }
     function openFeaturedPreset(){if(featuredPresetId)openDetailModal(featuredPresetId);}
 
+    function openRandomPreset(){
+      if(!presets.length){showToast('No presets yet.');return;}
+      const choices=presets.length>1
+        ? presets.filter(p=>String(p.id)!==String(lastRandomPresetId))
+        : presets;
+      const choice=choices[Math.floor(Math.random()*choices.length)];
+      lastRandomPresetId=choice.id;
+      openDetailModal(choice.id);
+    }
+
+    function isNewPreset(p){
+      const uploaded=new Date(p.date).getTime();
+      const age=Date.now()-uploaded;
+      return Number.isFinite(uploaded) && age>=0 && age<7*24*60*60*1000;
+    }
+
     function createPresetCard(p) {
       const card=document.createElement('div');
       card.className='preset-card glass-card rounded-2xl overflow-hidden card-hover flex flex-col group cursor-pointer shadow-xl';
@@ -478,6 +498,7 @@
             ${p.qr?'<span class="text-[10px] font-bold px-2 py-1 rounded-lg bg-slate-950/80 text-slate-100 border border-slate-600/70 backdrop-blur-md">QR</span>':''}
             ${p.appearanceCode?'<span class="text-[10px] font-bold px-2 py-1 rounded-lg bg-slate-950/80 text-slate-100 border border-slate-600/70 backdrop-blur-md">Code</span>':''}
           </div>
+          ${isNewPreset(p)?'<span class="absolute top-14 right-3 px-2 py-1 rounded-lg bg-amber-400/90 text-slate-950 text-[10px] font-black uppercase tracking-wide shadow-lg">New</span>':''}
           <button onclick="event.stopPropagation();toggleFavorite('${safeId}')" class="absolute top-3 right-3 p-2 rounded-xl bg-slate-950/80 text-slate-400 hover:text-amber-400 border border-slate-800 transition backdrop-blur-md ${p.favorite?'text-amber-400':''}">
             <i data-lucide="bookmark" class="w-4 h-4"></i>
           </button>
