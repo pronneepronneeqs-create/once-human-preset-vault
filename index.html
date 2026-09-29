@@ -1,491 +1,192 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Once Human - Preset Vault</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Teko:wght@500;700&family=Inter:wght@300;400;600;700&display=swap');
-    
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #0b0f17;
-      color: #e2e8f0;
-    }
-    
-    .font-heading {
-      font-family: 'Teko', sans-serif;
-      letter-spacing: 0.05em;
-    }
+<script>
+  // Clean start - No default demo presets
+  const INITIAL_PRESETS = [];
 
-    .glass-panel {
-      background: rgba(18, 24, 38, 0.75);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-  </style>
-</head>
-<body class="min-h-screen flex flex-col selection:bg-cyan-500 selection:text-black">
+  let presets = [...INITIAL_PRESETS];
+  let activePresetId = null;
+  let showFavoritesOnly = false;
 
-  <!-- Header -->
-  <header class="sticky top-0 z-40 glass-panel border-b border-slate-800/80">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-      <div class="flex items-center gap-3 cursor-pointer" onclick="resetFilters()">
-        <div class="w-10 h-10 bg-gradient-to-tr from-cyan-500 to-amber-400 rounded-lg flex items-center justify-center font-bold text-black text-xl shadow-lg shadow-cyan-500/20">
-          OH
+  function renderPresets() {
+    const grid = document.getElementById('presetGrid');
+    const emptyState = document.getElementById('emptyState');
+    const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+    const gender = document.getElementById('genderFilter').value;
+    const sortBy = document.getElementById('sortBy').value;
+
+    let filtered = presets.filter(p => {
+      const matchesSearch = p.title.toLowerCase().includes(searchQuery) ||
+                            p.author.toLowerCase().includes(searchQuery) ||
+                            p.tags.some(t => t.toLowerCase().includes(searchQuery));
+      const matchesGender = gender === 'all' || p.bodyType === gender;
+      const matchesFav = !showFavoritesOnly || p.favorite;
+      return matchesSearch && matchesGender && matchesFav;
+    });
+
+    if (sortBy === 'top') filtered.sort((a, b) => b.votes - a.votes);
+    else if (sortBy === 'trending') filtered.sort((a, b) => (b.votes * 1.5) - (a.votes * 1.5));
+    else filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    grid.innerHTML = '';
+    if (filtered.length === 0) emptyState.classList.remove('hidden');
+    else {
+      emptyState.classList.add('hidden');
+      filtered.forEach(preset => grid.appendChild(createPresetCard(preset)));
+    }
+    lucide.createIcons();
+  }
+
+  function createPresetCard(p) {
+    const card = document.createElement('div');
+    card.className = "glass-panel rounded-xl overflow-hidden hover:border-slate-600 transition-all duration-300 flex flex-col group cursor-pointer";
+    card.innerHTML = `
+      <div class="relative aspect-[4/5] bg-slate-900 overflow-hidden" onclick="openDetailModal('${p.id}')">
+        <img src="${p.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="${p.title}">
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-80"></div>
+        <div class="absolute top-3 left-3 flex gap-2">
+          <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-900/80 text-cyan-400 border border-cyan-500/30 uppercase tracking-wider backdrop-blur-md">${p.bodyType}</span>
         </div>
-        <div>
-          <h1 class="font-heading text-3xl font-bold uppercase tracking-wider text-white leading-none">
-            Preset<span class="text-cyan-400">Vault</span>
-          </h1>
-          <p class="text-xs text-slate-400 -mt-1 tracking-widest uppercase">Once Human Character Library</p>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-4">
-        <button onclick="openPublishModal()" class="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-semibold px-4 py-2.5 rounded-lg transition-all shadow-md shadow-cyan-500/20 text-sm">
-          <i data-lucide="plus-circle" class="w-4 h-4"></i>
-          <span>Publish Preset</span>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- Hero & Filters -->
-  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-    
-    <!-- Hero Banner -->
-    <div class="relative rounded-2xl overflow-hidden glass-panel p-8 md:p-10 border border-slate-800">
-      <div class="absolute inset-0 bg-gradient-to-r from-cyan-950/40 via-transparent to-slate-950/80 z-0"></div>
-      <div class="relative z-10 max-w-2xl space-y-3">
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Community Presets & QR Sharing
-        </span>
-        <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight text-white">
-          Discover & Share Custom Meta-Human Looks
-        </h2>
-        <p class="text-slate-400 text-sm md:text-base">
-          Browse community-created presets, extract QR codes directly into Once Human, and showcase your finest character designs.
-        </p>
-      </div>
-    </div>
-
-    <!-- Search & Filter Bar -->
-    <div class="glass-panel rounded-xl p-4 flex flex-col md:flex-row gap-4 justify-between items-center">
-      
-      <!-- Search Input -->
-      <div class="relative w-full md:w-80">
-        <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400"></i>
-        <input 
-          type="text" 
-          id="searchInput"
-          placeholder="Search by name, tags, or author..." 
-          oninput="renderPresets()"
-          class="w-full pl-10 pr-4 py-2 bg-slate-900/90 border border-slate-700/80 rounded-lg text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-colors"
-        >
-      </div>
-
-      <!-- Filters & Sorting -->
-      <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
-        
-        <!-- Body Type -->
-        <select id="genderFilter" onchange="renderPresets()" class="bg-slate-900/90 border border-slate-700/80 text-slate-300 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-cyan-500">
-          <option value="all">All Body Types</option>
-          <option value="Female">Female</option>
-          <option value="Male">Male</option>
-        </select>
-
-        <!-- Sorting -->
-        <select id="sortBy" onchange="renderPresets()" class="bg-slate-900/90 border border-slate-700/80 text-slate-300 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-cyan-500">
-          <option value="newest">Newest First</option>
-          <option value="top">Most Voted</option>
-          <option value="trending">🔥 Trending This Week</option>
-        </select>
-
-        <!-- Favorites Toggle -->
-        <button 
-          id="favToggleBtn"
-          onclick="toggleFavoritesOnly()" 
-          class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border border-slate-700/80 bg-slate-900/90 text-slate-300 hover:text-amber-400 hover:border-amber-500/50 transition-all"
-        >
+        <button onclick="event.stopPropagation(); toggleFavorite('${p.id}')" class="absolute top-3 right-3 p-2 rounded-full bg-slate-900/80 text-slate-400 hover:text-amber-400 border border-slate-700/80 transition backdrop-blur-md ${p.favorite ? 'text-amber-400 fill-amber-400' : ''}">
           <i data-lucide="bookmark" class="w-4 h-4"></i>
-          <span>Favorites</span>
+        </button>
+        <div class="absolute bottom-3 left-3 right-3 flex items-end justify-between">
+          <div>
+            <h3 class="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors leading-tight">${p.title}</h3>
+            <p class="text-xs text-slate-400">By @${p.author}</p>
+          </div>
+        </div>
+      </div>
+      <div class="p-4 bg-slate-950/60 flex items-center justify-between border-t border-slate-800/80 mt-auto">
+        <div class="flex gap-1 flex-wrap">
+          ${p.tags.slice(0, 2).map(t => `<span class="text-[10px] px-2 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800">#${t}</span>`).join('')}
+        </div>
+        <button onclick="event.stopPropagation(); toggleVote('${p.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition ${p.voted ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/50' : 'bg-slate-900 text-slate-300 border-slate-800 hover:border-slate-700'}">
+          <i data-lucide="arrow-big-up" class="w-4 h-4"></i>
+          <span>${p.votes}</span>
         </button>
       </div>
-    </div>
+    `;
+    return card;
+  }
 
-    <!-- Preset Grid -->
-    <div id="presetGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      <!-- Dynamic Presets Inserted Here -->
-    </div>
+  function openDetailModal(id) {
+    activePresetId = id;
+    const p = presets.find(item => item.id === id);
+    if (!p) return;
+    document.getElementById('modalTitle').innerText = p.title;
+    document.getElementById('modalAuthor').innerText = `By @${p.author}`;
+    document.getElementById('modalBodyType').innerText = p.bodyType;
+    document.getElementById('modalDescription').innerText = p.description || "No description provided.";
+    document.getElementById('modalImage').src = p.image;
+    document.getElementById('modalQR').src = p.qr;
+    document.getElementById('modalCode').innerText = p.code || "OH-PRESET";
+    document.getElementById('modalVoteCount').innerText = p.votes;
+    document.getElementById('modalTags').innerHTML = p.tags.map(t => `<span class="text-xs px-2.5 py-1 rounded bg-slate-800 text-cyan-400 border border-slate-700">#${t}</span>`).join('');
+    updateModalButtonStates(p);
+    renderComments(p);
+    document.getElementById('detailModal').classList.remove('hidden');
+    lucide.createIcons();
+  }
 
-    <!-- Empty State -->
-    <div id="emptyState" class="hidden text-center py-16 space-y-3">
-      <i data-lucide="ghost" class="w-12 h-12 text-slate-600 mx-auto"></i>
-      <h3 class="text-lg font-semibold text-slate-300">No Presets Found</h3>
-      <p class="text-sm text-slate-500">Try adjusting your search query or filter tags.</p>
-    </div>
+  function closeDetailModal() { document.getElementById('detailModal').classList.add('hidden'); }
+  function updateModalButtonStates(p) {
+    document.getElementById('modalVoteBtn').className = p.voted ? "flex-1 flex items-center justify-center gap-2 bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 py-2.5 rounded-lg font-medium transition" : "flex-1 flex items-center justify-center gap-2 bg-slate-800 hover:bg-cyan-500/20 hover:text-cyan-400 hover:border-cyan-500/50 border border-slate-700 text-slate-300 py-2.5 rounded-lg font-medium transition";
+    document.getElementById('modalFavBtn').className = p.favorite ? "px-4 py-2.5 bg-amber-500/20 text-amber-400 border border-amber-500/50 rounded-lg transition" : "px-4 py-2.5 bg-slate-800 hover:bg-amber-500/20 hover:text-amber-400 border border-slate-700 text-slate-300 rounded-lg transition";
+  }
 
-  </main>
-
-  <!-- Detail Modal -->
-  <div id="detailModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="glass-panel max-w-4xl w-full max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-700 shadow-2xl flex flex-col md:flex-row relative">
-      <button onclick="closeDetailModal()" class="absolute top-4 right-4 z-20 text-slate-400 hover:text-white bg-black/50 rounded-full p-2">
-        <i data-lucide="x" class="w-5 h-5"></i>
-      </button>
-
-      <div class="w-full md:w-1/2 p-6 flex flex-col gap-4 border-b md:border-b-0 md:border-r border-slate-800 bg-slate-950/40">
-        <div class="relative aspect-[3/4] rounded-xl overflow-hidden bg-slate-900 border border-slate-800">
-          <img id="modalImage" src="" class="w-full h-full object-cover" alt="Preset portrait">
-          <div class="absolute bottom-3 right-3 bg-black/80 p-2 rounded-lg border border-slate-700 text-center">
-            <img id="modalQR" src="" class="w-20 h-20 object-contain rounded" alt="QR Code">
-            <span class="text-[10px] text-cyan-400 font-mono mt-1 block">SCAN IN GAME</span>
-          </div>
-        </div>
-
-        <div class="flex items-center justify-between bg-slate-900/80 p-3 rounded-lg border border-slate-800">
-          <div>
-            <span class="text-xs text-slate-500 uppercase tracking-wider block">Import Code</span>
-            <code id="modalCode" class="text-xs font-mono text-cyan-300">---</code>
-          </div>
-          <button onclick="copyModalCode()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded transition">
-            Copy Code
-          </button>
-        </div>
+  function renderComments(p) {
+    document.getElementById('commentsList').innerHTML = p.comments.map(c => `
+      <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800 text-xs">
+        <span class="font-semibold text-slate-300 block mb-0.5">@${c.author}</span>
+        <p class="text-slate-400">${c.text}</p>
       </div>
+    `).join('');
+  }
 
-      <div class="w-full md:w-1/2 p-6 flex flex-col justify-between space-y-6">
-        <div>
-          <div class="flex items-center justify-between mb-2">
-            <span id="modalBodyType" class="text-xs px-2.5 py-1 rounded bg-slate-800 text-slate-300 font-medium">--</span>
-            <span id="modalAuthor" class="text-xs text-slate-400">By --</span>
-          </div>
+  function addComment() {
+    const input = document.getElementById('commentInput');
+    const text = input.value.trim();
+    if (!text || !activePresetId) return;
+    const p = presets.find(item => item.id === activePresetId);
+    p.comments.push({ author: "You", text });
+    input.value = '';
+    renderComments(p);
+  }
 
-          <h2 id="modalTitle" class="text-2xl font-bold text-white mb-2">--</h2>
-          <p id="modalDescription" class="text-sm text-slate-400 mb-4 leading-relaxed">--</p>
+  function toggleVote(id) {
+    const p = presets.find(item => item.id === id);
+    if (!p) return;
+    p.voted ? (p.votes--, p.voted = false) : (p.votes++, p.voted = true);
+    renderPresets();
+  }
 
-          <div id="modalTags" class="flex flex-wrap gap-1.5 mb-6"></div>
+  function toggleModalVote() {
+    if (!activePresetId) return;
+    toggleVote(activePresetId);
+    const p = presets.find(item => item.id === activePresetId);
+    document.getElementById('modalVoteCount').innerText = p.votes;
+    updateModalButtonStates(p);
+  }
 
-          <div class="flex items-center gap-3 border-t border-b border-slate-800/80 py-4">
-            <button id="modalVoteBtn" onclick="toggleModalVote()" class="flex-1 flex items-center justify-center gap-2 bg-slate-800 hover:bg-cyan-500/20 hover:text-cyan-400 hover:border-cyan-500/50 border border-slate-700 text-slate-300 py-2.5 rounded-lg font-medium transition">
-              <i data-lucide="arrow-big-up" class="w-5 h-5"></i>
-              <span id="modalVoteCount">0</span> Votes
-            </button>
-            <button id="modalFavBtn" onclick="toggleModalFavorite()" class="px-4 py-2.5 bg-slate-800 hover:bg-amber-500/20 hover:text-amber-400 border border-slate-700 text-slate-300 rounded-lg transition">
-              <i data-lucide="bookmark" class="w-5 h-5"></i>
-            </button>
-          </div>
-        </div>
+  function toggleFavorite(id) {
+    const p = presets.find(item => item.id === id);
+    if (!p) return;
+    p.favorite = !p.favorite;
+    renderPresets();
+  }
 
-        <div class="space-y-4">
-          <h3 class="text-sm font-semibold text-slate-300 flex items-center gap-2">
-            <i data-lucide="message-square" class="w-4 h-4 text-cyan-400"></i> Comments
-          </h3>
-          
-          <div id="commentsList" class="space-y-3 max-h-48 overflow-y-auto pr-1"></div>
+  function toggleModalFavorite() {
+    if (!activePresetId) return;
+    toggleFavorite(activePresetId);
+    updateModalButtonStates(presets.find(item => item.id === activePresetId));
+  }
 
-          <div class="flex gap-2">
-            <input 
-              type="text" 
-              id="commentInput" 
-              placeholder="Add a comment..." 
-              class="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"
-              onkeydown="if(event.key === 'Enter') addComment()"
-            >
-            <button onclick="addComment()" class="bg-cyan-500 hover:bg-cyan-400 text-black px-4 py-2 rounded-lg text-xs font-semibold transition">
-              Post
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  function toggleFavoritesOnly() {
+    showFavoritesOnly = !showFavoritesOnly;
+    document.getElementById('favToggleBtn').classList.toggle('bg-amber-500/20');
+    document.getElementById('favToggleBtn').classList.toggle('text-amber-400');
+    renderPresets();
+  }
 
-  <!-- Publish Modal -->
-  <div id="publishModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="glass-panel max-w-lg w-full rounded-2xl border border-slate-700 p-6 space-y-5 relative">
-      <button onclick="closePublishModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
-        <i data-lucide="x" class="w-5 h-5"></i>
-      </button>
+  function resetFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('genderFilter').value = 'all';
+    document.getElementById('sortBy').value = 'newest';
+    showFavoritesOnly = false;
+    renderPresets();
+  }
 
-      <div>
-        <h3 class="text-xl font-bold text-white">Share a Character Preset</h3>
-        <p class="text-xs text-slate-400">Upload your in-game design & QR code for players to import.</p>
-      </div>
+  function copyModalCode() {
+    navigator.clipboard.writeText(document.getElementById('modalCode').innerText);
+    alert('Preset Code Copied to Clipboard!');
+  }
 
-      <form id="publishForm" onsubmit="handlePublish(event)" class="space-y-4">
-        <div>
-          <label class="block text-xs font-medium text-slate-300 mb-1">Preset Title</label>
-          <input type="text" id="pubTitle" required placeholder="e.g., Cyberpunk Specialist" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500">
-        </div>
+  function openPublishModal() { document.getElementById('publishModal').classList.remove('hidden'); }
+  function closePublishModal() { document.getElementById('publishModal').classList.add('hidden'); }
 
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-medium text-slate-300 mb-1">Author Name</label>
-            <input type="text" id="pubAuthor" required placeholder="Your handle" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500">
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-300 mb-1">Body Type</label>
-            <select id="pubBodyType" class="w-full bg-slate-900 border border-slate-800 text-slate-200 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-cyan-500">
-              <option value="Female">Female</option>
-              <option value="Male">Male</option>
-            </select>
-          </div>
-        </div>
+  function handlePublish(e) {
+    e.preventDefault();
+    const newPreset = {
+      id: Date.now().toString(),
+      title: document.getElementById('pubTitle').value,
+      author: document.getElementById('pubAuthor').value,
+      bodyType: document.getElementById('pubBodyType').value,
+      tags: document.getElementById('pubTags').value.split(',').map(t => t.trim()).filter(Boolean),
+      image: document.getElementById('pubImageUrl').value,
+      qr: document.getElementById('pubQRUrl').value,
+      code: `OH-${Math.random().toString(36).substring(2, 7).toUpperCase()}`,
+      votes: 1,
+      voted: true,
+      favorite: false,
+      date: new Date().toISOString().split('T')[0],
+      description: document.getElementById('pubDesc').value,
+      comments: []
+    };
 
-        <div>
-          <label class="block text-xs font-medium text-slate-300 mb-1">Tags (Comma Separated)</label>
-          <input type="text" id="pubTags" placeholder="Anime, Tactical, Dark, Cyber" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500">
-        </div>
+    presets.unshift(newPreset);
+    closePublishModal();
+    document.getElementById('publishForm').reset();
+    renderPresets();
+  }
 
-        <div>
-          <label class="block text-xs font-medium text-slate-300 mb-1">Image URL (Portrait/Screenshot)</label>
-          <input type="url" id="pubImageUrl" required placeholder="https://..." class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500">
-        </div>
-
-        <div>
-          <label class="block text-xs font-medium text-slate-300 mb-1">QR Code Image URL</label>
-          <input type="url" id="pubQRUrl" required placeholder="https://..." class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500">
-        </div>
-
-        <div>
-          <label class="block text-xs font-medium text-slate-300 mb-1">Description</label>
-          <textarea id="pubDesc" rows="2" placeholder="Brief details about hair style, makeup, or slider themes..." class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500"></textarea>
-        </div>
-
-        <button type="submit" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-bold rounded-lg transition shadow-lg shadow-cyan-500/20">
-          Publish Preset
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <script>
-    const INITIAL_PRESETS = [
-      {
-        id: "1",
-        title: "Neon Cyber Operative",
-        author: "Vex_Runner",
-        bodyType: "Female",
-        tags: ["Cyberpunk", "Tactical", "Futuristic"],
-        image: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=600&auto=format&fit=crop&q=80",
-        qr: "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=OnceHumanPreset_CyberOp01",
-        code: "OH-CYBER-8891",
-        votes: 142,
-        voted: false,
-        favorite: false,
-        date: "2026-03-25",
-        description: "Dark high-contrast makeup paired with glowing hair highlights.",
-        comments: [{ author: "MetaSurvivor", text: "Looks sick in-game!" }]
-      },
-      {
-        id: "2",
-        title: "Stardust Inquisitor",
-        author: "Aethelgard",
-        bodyType: "Male",
-        tags: ["Dark Fantasy", "Gothic", "Scarred"],
-        image: "https://images.unsplash.com/photo-1563089145-599997674d42?w=600&auto=format&fit=crop&q=80",
-        qr: "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=OnceHumanPreset_Inquisitor",
-        code: "OH-INQ-4412",
-        votes: 98,
-        voted: false,
-        favorite: false,
-        date: "2026-03-28",
-        description: "Rugged facial scars, intense amber eyes, and clean jawline sliders.",
-        comments: [{ author: "Kael", text: "Best male preset so far." }]
-      }
-    ];
-
-    let presets = [...INITIAL_PRESETS];
-    let activePresetId = null;
-    let showFavoritesOnly = false;
-
-    function renderPresets() {
-      const grid = document.getElementById('presetGrid');
-      const emptyState = document.getElementById('emptyState');
-      const searchQuery = document.getElementById('searchInput').value.toLowerCase();
-      const gender = document.getElementById('genderFilter').value;
-      const sortBy = document.getElementById('sortBy').value;
-
-      let filtered = presets.filter(p => {
-        const matchesSearch = p.title.toLowerCase().includes(searchQuery) ||
-                              p.author.toLowerCase().includes(searchQuery) ||
-                              p.tags.some(t => t.toLowerCase().includes(searchQuery));
-        const matchesGender = gender === 'all' || p.bodyType === gender;
-        const matchesFav = !showFavoritesOnly || p.favorite;
-        return matchesSearch && matchesGender && matchesFav;
-      });
-
-      if (sortBy === 'top') filtered.sort((a, b) => b.votes - a.votes);
-      else if (sortBy === 'trending') filtered.sort((a, b) => (b.votes * 1.5) - (a.votes * 1.5));
-      else filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-      grid.innerHTML = '';
-      if (filtered.length === 0) emptyState.classList.remove('hidden');
-      else {
-        emptyState.classList.add('hidden');
-        filtered.forEach(preset => grid.appendChild(createPresetCard(preset)));
-      }
-      lucide.createIcons();
-    }
-
-    function createPresetCard(p) {
-      const card = document.createElement('div');
-      card.className = "glass-panel rounded-xl overflow-hidden hover:border-slate-600 transition-all duration-300 flex flex-col group cursor-pointer";
-      card.innerHTML = `
-        <div class="relative aspect-[4/5] bg-slate-900 overflow-hidden" onclick="openDetailModal('${p.id}')">
-          <img src="${p.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="${p.title}">
-          <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-80"></div>
-          <div class="absolute top-3 left-3 flex gap-2">
-            <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-900/80 text-cyan-400 border border-cyan-500/30 uppercase tracking-wider backdrop-blur-md">${p.bodyType}</span>
-          </div>
-          <button onclick="event.stopPropagation(); toggleFavorite('${p.id}')" class="absolute top-3 right-3 p-2 rounded-full bg-slate-900/80 text-slate-400 hover:text-amber-400 border border-slate-700/80 transition backdrop-blur-md ${p.favorite ? 'text-amber-400 fill-amber-400' : ''}">
-            <i data-lucide="bookmark" class="w-4 h-4"></i>
-          </button>
-          <div class="absolute bottom-3 left-3 right-3 flex items-end justify-between">
-            <div>
-              <h3 class="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors leading-tight">${p.title}</h3>
-              <p class="text-xs text-slate-400">By @${p.author}</p>
-            </div>
-          </div>
-        </div>
-        <div class="p-4 bg-slate-950/60 flex items-center justify-between border-t border-slate-800/80 mt-auto">
-          <div class="flex gap-1 flex-wrap">
-            ${p.tags.slice(0, 2).map(t => `<span class="text-[10px] px-2 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800">#${t}</span>`).join('')}
-          </div>
-          <button onclick="event.stopPropagation(); toggleVote('${p.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition ${p.voted ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/50' : 'bg-slate-900 text-slate-300 border-slate-800 hover:border-slate-700'}">
-            <i data-lucide="arrow-big-up" class="w-4 h-4"></i>
-            <span>${p.votes}</span>
-          </button>
-        </div>
-      `;
-      return card;
-    }
-
-    function openDetailModal(id) {
-      activePresetId = id;
-      const p = presets.find(item => item.id === id);
-      if (!p) return;
-      document.getElementById('modalTitle').innerText = p.title;
-      document.getElementById('modalAuthor').innerText = `By @${p.author}`;
-      document.getElementById('modalBodyType').innerText = p.bodyType;
-      document.getElementById('modalDescription').innerText = p.description || "No description provided.";
-      document.getElementById('modalImage').src = p.image;
-      document.getElementById('modalQR').src = p.qr;
-      document.getElementById('modalCode').innerText = p.code || "OH-PRESET";
-      document.getElementById('modalVoteCount').innerText = p.votes;
-      document.getElementById('modalTags').innerHTML = p.tags.map(t => `<span class="text-xs px-2.5 py-1 rounded bg-slate-800 text-cyan-400 border border-slate-700">#${t}</span>`).join('');
-      updateModalButtonStates(p);
-      renderComments(p);
-      document.getElementById('detailModal').classList.remove('hidden');
-      lucide.createIcons();
-    }
-
-    function closeDetailModal() { document.getElementById('detailModal').classList.add('hidden'); }
-    function updateModalButtonStates(p) {
-      document.getElementById('modalVoteBtn').className = p.voted ? "flex-1 flex items-center justify-center gap-2 bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 py-2.5 rounded-lg font-medium transition" : "flex-1 flex items-center justify-center gap-2 bg-slate-800 hover:bg-cyan-500/20 hover:text-cyan-400 hover:border-cyan-500/50 border border-slate-700 text-slate-300 py-2.5 rounded-lg font-medium transition";
-      document.getElementById('modalFavBtn').className = p.favorite ? "px-4 py-2.5 bg-amber-500/20 text-amber-400 border border-amber-500/50 rounded-lg transition" : "px-4 py-2.5 bg-slate-800 hover:bg-amber-500/20 hover:text-amber-400 border border-slate-700 text-slate-300 rounded-lg transition";
-    }
-
-    function renderComments(p) {
-      document.getElementById('commentsList').innerHTML = p.comments.map(c => `
-        <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800 text-xs">
-          <span class="font-semibold text-slate-300 block mb-0.5">@${c.author}</span>
-          <p class="text-slate-400">${c.text}</p>
-        </div>
-      `).join('');
-    }
-
-    function addComment() {
-      const input = document.getElementById('commentInput');
-      const text = input.value.trim();
-      if (!text || !activePresetId) return;
-      const p = presets.find(item => item.id === activePresetId);
-      p.comments.push({ author: "You", text });
-      input.value = '';
-      renderComments(p);
-    }
-
-    function toggleVote(id) {
-      const p = presets.find(item => item.id === id);
-      if (!p) return;
-      p.voted ? (p.votes--, p.voted = false) : (p.votes++, p.voted = true);
-      renderPresets();
-    }
-
-    function toggleModalVote() {
-      if (!activePresetId) return;
-      toggleVote(activePresetId);
-      const p = presets.find(item => item.id === activePresetId);
-      document.getElementById('modalVoteCount').innerText = p.votes;
-      updateModalButtonStates(p);
-    }
-
-    function toggleFavorite(id) {
-      const p = presets.find(item => item.id === id);
-      if (!p) return;
-      p.favorite = !p.favorite;
-      renderPresets();
-    }
-
-    function toggleModalFavorite() {
-      if (!activePresetId) return;
-      toggleFavorite(activePresetId);
-      updateModalButtonStates(presets.find(item => item.id === activePresetId));
-    }
-
-    function toggleFavoritesOnly() {
-      showFavoritesOnly = !showFavoritesOnly;
-      document.getElementById('favToggleBtn').classList.toggle('bg-amber-500/20');
-      document.getElementById('favToggleBtn').classList.toggle('text-amber-400');
-      renderPresets();
-    }
-
-    function resetFilters() {
-      document.getElementById('searchInput').value = '';
-      document.getElementById('genderFilter').value = 'all';
-      document.getElementById('sortBy').value = 'newest';
-      showFavoritesOnly = false;
-      renderPresets();
-    }
-
-    function copyModalCode() {
-      navigator.clipboard.writeText(document.getElementById('modalCode').innerText);
-      alert('Preset Code Copied to Clipboard!');
-    }
-
-    function openPublishModal() { document.getElementById('publishModal').classList.remove('hidden'); }
-    function closePublishModal() { document.getElementById('publishModal').classList.add('hidden'); }
-
-    function handlePublish(e) {
-      e.preventDefault();
-      const newPreset = {
-        id: Date.now().toString(),
-        title: document.getElementById('pubTitle').value,
-        author: document.getElementById('pubAuthor').value,
-        bodyType: document.getElementById('pubBodyType').value,
-        tags: document.getElementById('pubTags').value.split(',').map(t => t.trim()).filter(Boolean),
-        image: document.getElementById('pubImageUrl').value,
-        qr: document.getElementById('pubQRUrl').value,
-        code: `OH-${Math.random().toString(36).substring(2, 7).toUpperCase()}`,
-        votes: 1,
-        voted: true,
-        favorite: false,
-        date: new Date().toISOString().split('T')[0],
-        description: document.getElementById('pubDesc').value,
-        comments: []
-      };
-
-      presets.unshift(newPreset);
-      closePublishModal();
-      document.getElementById('publishForm').reset();
-      renderPresets();
-    }
-
-    document.addEventListener('DOMContentLoaded', renderPresets);
-  </script>
-</body>
-</html>
+  document.addEventListener('DOMContentLoaded', renderPresets);
+</script>
