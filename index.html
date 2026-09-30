@@ -326,6 +326,35 @@
     const PRESET_BATCH_SIZE=18;
     let visiblePresetLimit=PRESET_BATCH_SIZE;
     let lastRandomPresetId=null;
+    const VOTE_STORAGE_KEY='ohvault_voter_token_v1';
+    const pendingVotes=new Set();
+
+    function getVoteToken(create=false){
+      const stored=localStorage.getItem(VOTE_STORAGE_KEY);
+      if(stored && /^[0-9a-f]{64}$/.test(stored)){
+        return stored;
+      }
+      if(!create)return null;
+      const bytes=crypto.getRandomValues(new Uint8Array(32));
+      const token=Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');
+      localStorage.setItem(VOTE_STORAGE_KEY,token);
+      if(localStorage.getItem(VOTE_STORAGE_KEY)!==token)throw new Error('Browser storage unavailable.');
+      return token;
+    }
+
+    async function restoreMyVotes(){
+      try{
+        const token=getVoteToken();
+        if(!token)return;
+        const {data,error}=await _supabase.rpc('get_my_preset_votes_v1',{p_token:token});
+        if(error)throw error;
+        const votedIds=new Set((data||[]).map(row=>String(row.preset_id)));
+        presets.forEach(p=>{p.voted=votedIds.has(String(p.id));});
+      }catch(err){
+        console.error('Could not restore voting state:',err);
+        showToast('Your votes could not be loaded. Try refreshing before voting.');
+      }
+    }
 
     function safeCreateIcons() {
       if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
@@ -365,12 +394,13 @@
           // This avoids requiring a database migration.
           appearanceCode:realAppearanceCode(item.appearance_code || item.preset_code),
           faceCode:normalizeCode(item.face_code || ''),
-          votes:Number(item.votes_count || 1),
+          votes:Number(item.votes_count ?? 0),
           voted:false,
           favorite:false,
           date:item.created_at,
           description:item.description || ''
         }));
+        await restoreMyVotes();
       } catch (err) {
         console.error('Error loading presets:', err);
       } finally {
@@ -626,15 +656,40 @@
     function filterByTag(tag){document.getElementById('searchInput').value=tag;renderPresets(true);}
 
     async function toggleVote(id){
-      const p=presets.find(item=>String(item.id)===String(id));
-      if(!p)return;
-      const newVotes=p.voted?p.votes-1:p.votes+1;
-      p.voted=!p.voted;p.votes=newVotes;renderPresets();
-      const {error}=await _supabase.from('presets').update({votes_count:newVotes}).eq('id',id);
-      if(error)console.error('Vote update failed:',error);
-      if(activePresetId && String(activePresetId)===String(id)){
-        document.getElementById('modalVoteCount').innerText=p.votes;
-        updateModalButtonStates(p);
+      const key=String(id);
+      const p=presets.find(item=>String(item.id)===key);
+      if(!p || pendingVotes.has(key))return;
+      pendingVotes.add(key);
+      try{
+        let token;
+        try{token=getVoteToken(true);}
+        catch(err){
+          showToast('Enable browser storage to keep your vote after refreshing.');
+          return;
+        }
+        const {data,error}=await _supabase.rpc('set_preset_vote_v1',{
+          p_id:key,p_token:token,p_upvoted:!p.voted
+        });
+        if(error)throw error;
+        const count=Number(data?.votes_count);
+        if(!data || typeof data.voted!=='boolean' || !Number.isFinite(count) || count<0){
+          throw new Error('Invalid vote response.');
+        }
+        // Use only the server's acknowledged result; a failed request changes no tally.
+        const current=presets.find(item=>String(item.id)===key);
+        if(!current)return;
+        current.voted=data.voted;
+        current.votes=count;
+        renderPresets();
+        if(activePresetId && String(activePresetId)===key){
+          document.getElementById('modalVoteCount').innerText=current.votes;
+          updateModalButtonStates(current);
+        }
+      }catch(err){
+        console.error('Vote update failed:',err);
+        showToast('Your vote could not be saved. Please try again.');
+      }finally{
+        pendingVotes.delete(key);
       }
     }
 
@@ -807,7 +862,7 @@
           preset_code:appearanceCode || null,
           edit_token_hash:secretHash,
           description:document.getElementById('pubDesc').value.trim(),
-          votes_count:1
+          votes_count:0
         };
 
         const {data:created,error}=await _supabase.from('presets').insert([newPreset]).select('id').single();
