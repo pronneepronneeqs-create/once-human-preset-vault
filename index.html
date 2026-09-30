@@ -104,13 +104,16 @@
     </aside>
 
     <main class="lg:col-span-9 space-y-6">
+<div role="tablist" aria-label="Preset galleries" class="flex gap-2"><button id="allTab" role="tab" onclick="switchTab(false)" class="px-5 py-3 rounded-xl font-bold text-sm">All presets</button><button id="compTab" role="tab" onclick="switchTab(true)" class="px-5 py-3 rounded-xl font-bold text-sm">🏆 <span id="competitionTabName">Competition</span></button></div>
+<section id="competitionInfo" class="hidden rounded-2xl border border-cyan-500/30 bg-cyan-500/10 p-5"><div class="flex flex-wrap gap-4 justify-between items-center"><div><p class="text-xs uppercase tracking-widest text-cyan-300 font-bold">Community event</p><h2 class="text-2xl font-black mt-1">Create. Share. Stand out.</h2><p class="text-sm text-slate-300 mt-2">Vote for your favourite designs. Competition scores start fresh.</p></div><div class="rounded-xl bg-slate-950/70 p-4"><p class="text-xs text-cyan-300 font-bold"><span id="competitionStatus">Voting open</span></p><p class="text-sm mt-2"><span id="competitionDeadline">Deadline to be announced</span></p></div></div><p class="text-xs text-slate-400 mt-4">Entries are shuffled for fair discovery · One vote per entry per browser</p></section>
+      
       <section id="featuredBanner" class="hidden relative min-h-[330px] rounded-3xl border border-cyan-500/25 overflow-hidden shadow-2xl shadow-cyan-950/30 bg-slate-900">
         <div class="absolute inset-y-0 right-0 w-full sm:w-1/2">
           <img id="featuredImage" alt="" class="w-full h-full object-cover object-top opacity-70" onerror="this.style.display='none'">
         </div>
         <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/95 sm:via-slate-950/90 to-slate-950/30"></div>
         <div class="relative z-10 max-w-xl p-7 sm:p-10 min-h-[330px] flex flex-col justify-center items-start">
-          <span class="text-[11px] font-extrabold text-cyan-300 uppercase tracking-[.18em] flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4"></i> Featured Preset</span>
+          <span class="text-[11px] font-extrabold text-cyan-300 uppercase tracking-[.18em] flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4"></i> <span id="featureLabel">Featured Preset</span></span>
           <h2 id="featuredTitle" class="mt-4 text-3xl sm:text-5xl font-black text-white leading-tight"></h2>
           <p id="featuredAuthor" class="mt-2 text-sm font-semibold text-cyan-200"></p>
           <p id="featuredPosition" class="mt-2 text-xs font-bold text-slate-300" aria-live="off"></p>
@@ -129,7 +132,7 @@
             <option value="all">All Body Types</option><option value="female">Female</option><option value="male">Male</option>
           </select>
           <select id="sortBy" onchange="renderPresets(true)" class="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-slate-300 focus:outline-none focus:border-cyan-500 transition">
-            <option value="newest">Newest First</option><option value="top">Most Upvoted</option>
+            <option value="newest">Newest First</option><option value="random">Random order</option><option value="top">Most Upvoted</option>
           </select>
           <button id="favToggleBtn" onclick="toggleFavoritesOnly()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-950/80 border border-slate-800 text-xs font-semibold text-slate-400 hover:text-amber-400 transition">
             <i data-lucide="bookmark" class="w-3.5 h-3.5"></i><span>Saved</span>
@@ -236,7 +239,7 @@
       <h3 class="text-lg font-black mb-4">Edit preset</h3>
       <form onsubmit="savePresetEdit(event)" class="space-y-4">
         <div><label for="editBodyType" class="block text-xs font-semibold text-slate-400 mb-1">Body Type</label>
-        <select id="editBodyType" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white"><option value="female">Female</option><option value="male">Male</option></select></div>
+        <label class="flex gap-3 items-start rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-3 text-sm"><input type="checkbox" id="editCompetition" class="mt-1"><span>Enter this preset in the competition<small class="block text-slate-400 mt-1">It will also appear in All presets.</small></span></label><select id="editBodyType" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white"><option value="female">Female</option><option value="male">Male</option></select></div>
         <button id="editSaveBtn" type="submit" class="w-full py-2.5 bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 font-bold rounded-xl">Save change</button>
         <button id="editDeleteBtn" type="button" onclick="deleteOwnPreset()" class="w-full py-2.5 border border-red-500/50 text-red-300 hover:bg-red-500/10 font-bold rounded-xl">Delete preset</button>
       </form>
@@ -310,7 +313,7 @@
           <textarea id="pubDesc" rows="2" maxlength="500" placeholder="Details about sliders, skin tone, makeup..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"></textarea>
         </div>
 
-        <button type="submit" id="submitBtn" class="w-full py-3 bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 font-extrabold text-xs uppercase tracking-wider rounded-xl hover:brightness-110 transition shadow-lg shadow-cyan-500/20">Publish Design</button>
+        <label class="flex gap-3 items-start rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-3 text-sm"><input type="checkbox" id="enterCompetition" class="mt-1"><span>Enter this preset in the competition<small class="block text-slate-400 mt-1">It will also appear in All presets.</small></span></label><button type="submit" id="submitBtn" class="w-full py-3 bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 font-extrabold text-xs uppercase tracking-wider rounded-xl hover:brightness-110 transition shadow-lg shadow-cyan-500/20">Publish Design</button>
       </form>
     </div>
   </div>
@@ -349,7 +352,7 @@
         const {data,error}=await _supabase.rpc('get_my_preset_votes_v1',{p_token:token});
         if(error)throw error;
         const votedIds=new Set((data||[]).map(row=>String(row.preset_id)));
-        presets.forEach(p=>{p.voted=votedIds.has(String(p.id));});
+        presets.forEach(p=>{p.allVoted=votedIds.has(String(p.id));p.voted=competitionMode?!!p.compVoted:p.allVoted;});
       }catch(err){
         console.error('Could not restore voting state:',err);
         showToast('Your votes could not be loaded. Try refreshing before voting.');
@@ -401,6 +404,7 @@
           description:item.description || ''
         }));
         await restoreMyVotes();
+        await loadCompetition();
       } catch (err) {
         console.error('Error loading presets:', err);
       } finally {
@@ -416,6 +420,7 @@
 
     function renderPresets(resetLimit=false) {
       if(resetLimit)visiblePresetLimit=PRESET_BATCH_SIZE;
+      updateCompetitionUI();
       const grid=document.getElementById('presetGrid');
       const emptyState=document.getElementById('emptyState');
       const searchQuery=(document.getElementById('searchInput')?.value || '').toLowerCase().trim();
@@ -424,21 +429,22 @@
 
       let filtered=presets.filter(p => {
         const haystack=[p.title,p.author,...p.tags].join(' ').toLowerCase();
-        return haystack.includes(searchQuery) &&
+        return (!competitionMode || p.entry) && haystack.includes(searchQuery) &&
                (gender==='all' || p.bodyType===gender) &&
                (!showFavoritesOnly || p.favorite);
       });
 
-      if(sortBy==='top') filtered.sort((a,b)=>b.votes-a.votes);
+      if(competitionMode && sortBy==='random') filtered.sort((a,b)=>a.order-b.order);
+      else if(sortBy==='top') filtered.sort((a,b)=>score(b)-score(a));
       else filtered.sort((a,b)=>new Date(b.date)-new Date(a.date));
 
       document.getElementById('presetCounter').innerText=presets.length;
-      const defaultView=!searchQuery && gender==='all' && !showFavoritesOnly && sortBy==='newest';
+      const defaultView=!searchQuery && gender==='all' && !showFavoritesOnly && (sortBy==='newest' || sortBy==='random');
       // The three highest voted presets with images rotate in the banner.
       // Keep every preset in the gallery so cards never jump as it rotates.
       const previousFeaturedId=featuredPresetId;
       featuredPresets=defaultView
-        ? presets.filter(p=>p.image).sort((a,b)=>b.votes-a.votes || new Date(b.date)-new Date(a.date)).slice(0,3)
+        ? competitionMode ? presets.filter(p=>p.entry && p.image).sort((a,b)=>a.order-b.order) : presets.filter(p=>p.image).sort((a,b)=>b.votes-a.votes || new Date(b.date)-new Date(a.date)).slice(0,3)
         : [];
       const previousIndex=featuredPresets.findIndex(p=>String(p.id)===String(previousFeaturedId));
       featuredIndex=previousIndex>=0 ? previousIndex : 0;
@@ -475,7 +481,7 @@
       featuredImage.src=p.image;
       document.getElementById('featuredTitle').textContent=p.title;
       document.getElementById('featuredAuthor').textContent=`By @${p.author}`;
-      document.getElementById('featuredPosition').textContent=`${featuredIndex+1} / ${featuredPresets.length} · ${p.votes} upvote${p.votes===1?'':'s'}`;
+      document.getElementById('featuredPosition').textContent=`${featuredIndex+1} / ${featuredPresets.length} · ${score(p)} upvote${score(p)===1?'':'s'}`;
       const methods=[];
       if(p.qr)methods.push('<span class="px-2.5 py-1 rounded-lg bg-slate-950/80 border border-cyan-500/40 text-xs text-cyan-200 font-bold">QR image</span>');
       if(p.appearanceCode)methods.push('<span class="px-2.5 py-1 rounded-lg bg-slate-950/80 border border-blue-500/40 text-xs text-blue-200 font-bold">Appearance Code</span>');
@@ -485,9 +491,9 @@
 
     function openRandomPreset(){
       if(!presets.length){showToast('No presets yet.');return;}
-      const choices=presets.length>1
-        ? presets.filter(p=>String(p.id)!==String(lastRandomPresetId))
-        : presets;
+      const eligible=presets.filter(p=>!competitionMode || p.entry);
+      if(!eligible.length){showToast('No entries yet.');return;}
+      const choices=eligible.length>1?eligible.filter(p=>String(p.id)!==String(lastRandomPresetId)):eligible;
       const choice=choices[Math.floor(Math.random()*choices.length)];
       lastRandomPresetId=choice.id;
       openDetailModal(choice.id);
@@ -532,11 +538,11 @@
           <div class="flex gap-1 flex-wrap">
             ${p.tags.slice(0,2).map(t=>`<span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-900 text-slate-400 border border-slate-800 font-medium">#${escapeHtml(t)}</span>`).join('')}
           </div>
-          <button onclick="event.stopPropagation();toggleVote('${safeId}')" class="flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs font-bold transition ${p.voted?'bg-cyan-500/20 text-cyan-400 border-cyan-500/50':'bg-slate-900 text-slate-300 border-slate-800 hover:border-slate-700'}">
-            <i data-lucide="arrow-big-up" class="w-3.5 h-3.5"></i><span>${p.votes}</span>
+          <button data-vote-button onclick="event.stopPropagation();toggleVote('${safeId}')" class="flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs font-bold transition ${p.voted?'bg-cyan-500/20 text-cyan-400 border-cyan-500/50':'bg-slate-900 text-slate-300 border-slate-800 hover:border-slate-700'}">
+            <i data-lucide="arrow-big-up" class="w-3.5 h-3.5"></i><span>${score(p)}</span>
           </button>
         </div>`;
-      return card;
+      const voteButton=card.querySelector('[data-vote-button]');if(voteButton)voteButton.disabled=competitionMode && !!competitionClosed();const report=document.createElement('button');report.type='button';report.className='w-full py-2 text-xs text-slate-400 hover:text-cyan-300 border-t border-slate-800';report.textContent='⚑ Report preset';report.onclick=e=>{e.stopPropagation();openReport(p.id);};card.appendChild(report);return card;
     }
 
     function openDetailModal(id, updateUrl=true) {
@@ -557,7 +563,7 @@
       document.getElementById('modalDescription').innerText=p.description || 'No description provided.';
       document.getElementById('modalImage').src=p.image || p.qr;
       document.getElementById('modalQR').src=p.qr || '';
-      document.getElementById('modalVoteCount').innerText=p.votes;
+      document.getElementById('modalVoteCount').innerText=score(p);
       document.getElementById('modalTags').innerHTML=p.tags.map(t=>`<span class="text-xs px-2.5 py-1 rounded-lg bg-slate-950 text-cyan-400 border border-slate-800 font-medium">#${escapeHtml(t)}</span>`).join('');
 
       const code=p.appearanceCode;
@@ -659,6 +665,8 @@
       const key=String(id);
       const p=presets.find(item=>String(item.id)===key);
       if(!p || pendingVotes.has(key))return;
+      if(competitionMode && competitionClosed()){showToast("Competition voting is closed.");return;}
+      const votingCompetition=competitionMode;
       pendingVotes.add(key);
       try{
         let token;
@@ -667,9 +675,9 @@
           showToast('Enable browser storage to keep your vote after refreshing.');
           return;
         }
-        const {data,error}=await _supabase.rpc('set_preset_vote_v1',{
-          p_id:key,p_token:token,p_upvoted:!p.voted
-        });
+        const args={p_id:key,p_token:token,p_upvoted:!(votingCompetition?p.compVoted:p.allVoted)};
+        if(votingCompetition)args.p_competition=competition.id;
+        const {data,error}=await _supabase.rpc(votingCompetition?'vault_set_competition_vote':'set_preset_vote_v1',args);
         if(error)throw error;
         const count=Number(data?.votes_count);
         if(!data || typeof data.voted!=='boolean' || !Number.isFinite(count) || count<0){
@@ -678,16 +686,16 @@
         // Use only the server's acknowledged result; a failed request changes no tally.
         const current=presets.find(item=>String(item.id)===key);
         if(!current)return;
-        current.voted=data.voted;
-        current.votes=count;
+        if(votingCompetition){current.compVoted=data.voted;current.competitionVotes=count;}else{current.allVoted=data.voted;current.votes=count;}
+        current.voted=competitionMode?!!current.compVoted:!!current.allVoted;
         renderPresets();
         if(activePresetId && String(activePresetId)===key){
-          document.getElementById('modalVoteCount').innerText=current.votes;
+          document.getElementById('modalVoteCount').innerText=score(current);
           updateModalButtonStates(current);
         }
       }catch(err){
         console.error('Vote update failed:',err);
-        showToast('Your vote could not be saved. Please try again.');
+        showToast(votingCompetition?(err.message||'Competition vote could not be saved.'):'Your vote could not be saved. Please try again.');
       }finally{
         pendingVotes.delete(key);
       }
@@ -712,7 +720,7 @@
     function resetFilters(){
       document.getElementById('searchInput').value='';
       document.getElementById('genderFilter').value='all';
-      document.getElementById('sortBy').value='newest';
+      document.getElementById('sortBy').value=competitionMode?'random':'newest';
       showFavoritesOnly=false;
       document.getElementById('favToggleBtn').classList.remove('bg-amber-500/20','text-amber-400');
       renderPresets(true);
@@ -767,6 +775,7 @@
       const p=presets.find(item=>String(item.id)===String(activePresetId));
       if(!p || !getEditToken(p.id))return;
       document.getElementById('editBodyType').value=p.bodyType;
+      document.getElementById('editCompetition').checked=!!p.entry;document.getElementById('editCompetition').disabled=!competition || competitionClosed();
       document.getElementById('editModal').classList.remove('hidden');
       safeCreateIcons();
     }
@@ -807,6 +816,12 @@
         if(!data)throw new Error('Edit access was not verified for this preset.');
         const p=presets.find(item=>String(item.id)===String(id));
         if(p)p.bodyType=bodyType;
+        const entering=document.getElementById('editCompetition').checked;
+        if(p && competition && entering!==!!p.entry){
+          const result=await _supabase.rpc('vault_set_competition_entry',{p_competition:competition.id,p_id:String(id),p_token:token,p_enter:entering});
+          if(result.error)throw new Error('Body type saved, but competition change failed: '+result.error.message);
+          p.entry=entering;
+        }
         document.getElementById('modalBodyType').innerText=bodyType;
         closeEditModal();renderPresets();showToast('Preset updated!');
       }catch(err){alert('Edit failed: '+(err?.message||err));}
@@ -814,7 +829,7 @@
     }
 
 
-    function openPublishModal(){document.getElementById('publishModal').classList.remove('hidden');}
+    function openPublishModal(){document.getElementById('enterCompetition').checked=competitionMode && !competitionClosed();document.getElementById('enterCompetition').disabled=!competition || competitionClosed();document.getElementById('publishModal').classList.remove('hidden');}
     function closePublishModal(){document.getElementById('publishModal').classList.add('hidden');}
 
     async function uploadFileToSupabase(file){
@@ -868,6 +883,10 @@
         const {data:created,error}=await _supabase.from('presets').insert([newPreset]).select('id').single();
         if(error)throw error;
         localStorage.setItem(editStorageKey(created.id),secret);
+        if(document.getElementById('enterCompetition').checked && competition){
+          const entry=await _supabase.rpc('vault_set_competition_entry',{p_competition:competition.id,p_id:String(created.id),p_token:secret,p_enter:true});
+          if(entry.error){alert('Your preset was published, but competition entry failed: '+entry.error.message+'. You can retry from Edit preset.');}
+        }
 
         showToast('Preset successfully published!');
         closePublishModal();
@@ -881,16 +900,51 @@
       }
     }
 
+let competitionMode=false, competition=null, reportPresetId=null;
+const COMPETITION_ID='community-1';
+const entryOrder=new Map();
+function score(p){return competitionMode?Number(p.competitionVotes||0):p.votes;}
+function competitionClosed(){return !competition || !competition.enabled || (competition.closes_at && Date.now()>=new Date(competition.closes_at).getTime());}
+async function loadCompetition(){
+ try{
+ const config=await _supabase.from('vault_competitions').select('id,name,enabled,closes_at').eq('id',COMPETITION_ID).single();if(config.error)throw config.error;competition=config.data;
+ let token=null;try{token=getVoteToken();}catch(_){}
+ const snapshot=await _supabase.rpc('vault_competition_snapshot',{p_competition:competition.id,p_token:token});if(snapshot.error)throw snapshot.error;
+ const entries=new Map((snapshot.data||[]).map(e=>[String(e.preset_id),e]));
+ const fresh=presets.filter(p=>!entryOrder.has(String(p.id)));
+ for(let i=fresh.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[fresh[i],fresh[j]]=[fresh[j],fresh[i]];}
+ fresh.forEach(p=>entryOrder.set(String(p.id),entryOrder.size));
+ presets.forEach(p=>{const e=entries.get(String(p.id));p.entry=!!e;p.competitionVotes=Number(e?.votes_count||0);p.compVoted=!!e?.voted;p.order=entryOrder.get(String(p.id));p.voted=competitionMode?p.compVoted:!!p.allVoted;});
+ }catch(err){console.error('Competition unavailable',err);competition=null;showToast('Competition could not be loaded. Try refreshing.');}
+}
+function updateCompetitionUI(){
+ const name=competition?.name||'Competition';document.getElementById('competitionTabName').textContent=name;
+ document.getElementById('competitionInfo').classList.toggle('hidden',!competitionMode);
+ document.getElementById('competitionStatus').textContent=!competition?'Competition unavailable':competitionClosed()?'Voting closed':'Voting open';
+ document.getElementById('competitionDeadline').textContent=competition?.closes_at?'Closes '+new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Berlin',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}).format(new Date(competition.closes_at))+' · Berlin time':'Deadline to be announced';
+ document.getElementById('featureLabel').textContent=competitionMode?'Competition spotlight · Random rotation':'Featured Preset';
+ document.querySelector('#galleryHeading h2').textContent=competitionMode?'Meet the contestants':'Explore presets';
+ document.querySelector('#emptyState h3').textContent=competitionMode?'No competition entries yet':'No Presets Found';
+ document.querySelector('#emptyState p').textContent=competitionMode?'Enter a new preset using the upload checkbox, or enter your existing preset through Edit.':'Be the first player to publish a custom preset design!';
+ const vote=document.getElementById('modalVoteBtn');vote.disabled=competitionMode && !!competitionClosed();
+ document.querySelectorAll('#presetGrid [data-vote-button]').forEach(b=>b.disabled=competitionMode && !!competitionClosed());
+}
+function switchTab(comp){competitionMode=comp;closeDetailModal();for(const [id,on] of [['allTab',!comp],['compTab',comp]]){const b=document.getElementById(id);b.setAttribute('aria-selected',String(on));b.className='px-5 py-3 rounded-xl font-bold text-sm border '+(on?'bg-cyan-400 text-slate-950 border-cyan-300':'bg-slate-900 text-slate-400 border-slate-700');}document.getElementById('sortBy').value=comp?'random':'newest';presets.forEach(p=>p.voted=comp?!!p.compVoted:!!p.allVoted);renderPresets(true);}
+function openReport(id){reportPresetId=String(id);const p=presets.find(p=>String(p.id)===reportPresetId);if(!p)return;document.getElementById('reportName').textContent=p.title;document.getElementById('reportModal').classList.remove('hidden');}
+function closeReport(){document.getElementById('reportModal').classList.add('hidden');}
+async function submitReport(e){e.preventDefault();const id=reportPresetId,b=document.getElementById('reportSubmit');b.disabled=true;b.textContent='Sending...';try{const token=getVoteToken(true);const r=await _supabase.rpc('vault_report_preset',{p_id:id,p_token:token,p_reason:document.getElementById('reportReason').value,p_details:document.getElementById('reportDetails').value.trim()});if(r.error)throw r.error;if(!r.data)throw new Error('Report was not saved');closeReport();e.target.reset();showToast('Report sent. Thank you!');}catch(err){showToast(err.message||'Could not send report. Please try again.');}finally{b.disabled=false;b.textContent='Send report';}}
+
     // Close modals with Escape and clicking the dark backdrop.
     document.addEventListener('keydown',e=>{
       if(e.key==='Escape'){
-        closeEditModal();closeCodeModal();closeZoomModal();closeDetailModal();closePublishModal();
+        closeReport();closeEditModal();closeCodeModal();closeZoomModal();closeDetailModal();closePublishModal();
       }
     });
 
     document.addEventListener('DOMContentLoaded',()=>{
       safeCreateIcons();
-      fetchPresetsFromDatabase();
+      switchTab(false);fetchPresetsFromDatabase();
+      setInterval(updateCompetitionUI,10000);
     });
   </script>
 
@@ -901,5 +955,5 @@
     }
     .tag-btn:hover{background:rgba(6,182,212,.2);color:#22d3ee;border-color:rgba(6,182,212,.4);}
   </style>
-</body>
+<div id="reportModal" class="hidden fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4" onclick="if(event.target===this)closeReport()"><form onsubmit="submitReport(event)" class="w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl p-6"><div class="flex justify-between items-center"><h2 class="text-xl font-bold">Report preset</h2><button type="button" onclick="closeReport()" aria-label="Close report">✕</button></div><p id="reportName" class="text-cyan-300 mt-2 text-sm"></p><label class="block text-sm mt-5">Reason<select id="reportReason" required class="block w-full mt-2 bg-slate-950 border border-slate-700 rounded-xl p-3"><option value="">Choose a reason</option><option value="copied">Stolen or copied preset</option><option value="inappropriate">Inappropriate content</option><option value="rules">Competition rule violation</option><option value="other">Other</option></select></label><label class="block text-sm mt-4">Details (optional)<textarea id="reportDetails" maxlength="500" class="block w-full mt-2 bg-slate-950 border border-slate-700 rounded-xl p-3" rows="3" placeholder="Tell us what should be reviewed"></textarea></label><p class="text-xs text-slate-400 mt-3">Reports go to the site owner for review.</p><button id="reportSubmit" class="w-full bg-cyan-400 text-slate-950 font-bold p-3 rounded-xl mt-5">Send report</button></form></div></body>
 </html>
