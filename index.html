@@ -101,7 +101,8 @@ header button[onclick="openPublishModal()"] i{display:none}
 .vault-total{color:#67e8f9;font-size:12px;white-space:nowrap}
 .vault-toolbar{padding:12px 0 18px;border-bottom:1px solid #203047}
 .vault-help{position:fixed;right:24px;bottom:max(24px,env(safe-area-inset-bottom));z-index:45}
-.vault-help-toggle{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 18px;border:1px solid #0e7490;border-radius:30px;background:#103043;color:#cffafe;box-shadow:0 6px 25px #0005;font-size:13px;font-weight:700;min-height:44px}
+.vault-help-direct{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;max-width:calc(100vw - 32px)}
+.vault-help-toggle{text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 18px;border:1px solid #0e7490;border-radius:30px;background:#103043;color:#cffafe;box-shadow:0 6px 25px #0005;font-size:13px;font-weight:700;min-height:44px}
 .vault-help-toggle svg{width:18px;height:18px}
 .vault-help-menu{position:absolute;bottom:58px;right:0;width:270px;max-width:calc(100vw - 32px);padding:8px;border:1px solid #334155;border-radius:14px;background:#0e1c2d;box-shadow:0 12px 30px #0008}
 .vault-help-menu[hidden]{display:none}
@@ -376,12 +377,9 @@ header button[onclick="openPublishModal()"] i{display:none}
 </div>
 
 
-<div id="vaultHelp" class="vault-help">
- <div id="vaultHelpMenu" class="vault-help-menu" hidden>
-  <button type="button" onclick="openHelpFaq()"><i data-lucide="book-open" aria-hidden="true"></i><span>FAQ &amp; Guide<small>Easy steps for using OH Vault</small></span></button>
-  <a href="mailto:pronneepronneeqs@gmail.com?subject=OH%20Vault%20support"><i data-lucide="mail" aria-hidden="true"></i><span>Contact support<small>pronneepronneeqs@gmail.com</small></span></a>
- </div>
- <button id="vaultHelpToggle" type="button" class="vault-help-toggle" onclick="toggleHelpMenu()" aria-expanded="false" aria-controls="vaultHelpMenu"><i data-lucide="circle-help" aria-hidden="true"></i> Help</button>
+<div id="vaultHelp" class="vault-help vault-help-direct">
+<button type="button" class="vault-help-toggle" onclick="openFaqGuide()"><i data-lucide="book-open" aria-hidden="true"></i> FAQ &amp; Guide</button>
+<a class="vault-help-toggle" href="mailto:pronneepronneeqs@gmail.com?subject=OH%20Vault%20support"><i data-lucide="mail" aria-hidden="true"></i> Contact support</a>
 </div>
 <dialog id="faqDialog" aria-labelledby="faqTitle">
 <div class="faq-shell">
@@ -1389,11 +1387,6 @@ mountSecurity('report');
 function closeReport(){document.getElementById('reportModal').classList.add('hidden');}
 
 
-function closeHelpMenu(){document.getElementById('vaultHelpMenu').hidden=true;document.getElementById('vaultHelpToggle').setAttribute('aria-expanded','false');}
-function toggleHelpMenu(){const menu=document.getElementById('vaultHelpMenu');menu.hidden=!menu.hidden;document.getElementById('vaultHelpToggle').setAttribute('aria-expanded',String(!menu.hidden));}
-function openHelpFaq(){closeHelpMenu();openFaqGuide();}
-document.addEventListener('click',e=>{if(!document.getElementById('vaultHelp').contains(e.target))closeHelpMenu();});
-
 function openFaqGuide(){
 const d=document.getElementById('faqDialog');
 if(!d.open)d.showModal();
@@ -1411,7 +1404,6 @@ if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)clos
 
 document.addEventListener('keydown',e=>{
 if(e.key==='Escape'){
-closeHelpMenu();
 closeFaqGuide();
 closeReport();
 closeEditModal();
