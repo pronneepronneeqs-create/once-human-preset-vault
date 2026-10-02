@@ -852,7 +852,12 @@ async function secureSubmit(action,body){
  const browserToken=getVoteToken(true);
  const headers={apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY,'x-turnstile-token':token,'x-submit-action':action,'x-browser-token':browserToken};
  if(!(body instanceof FormData))headers['Content-Type']='application/json';
- let response;try{response=await fetch(SUPABASE_URL+'/functions/v1/ohvault-submit',{method:'POST',headers,body:body instanceof FormData?body:JSON.stringify(body),signal:AbortSignal.timeout(90000)});}finally{resetSecurity(action);}
+ let response;try{
+  const admission=await fetch('/api/submission-permit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,browser_token:browserToken}),signal:AbortSignal.timeout(15000)});
+  let ticket;try{ticket=await admission.json();}catch{throw new Error('Submission service could not respond. Please retry.');}
+  if(!admission.ok||!ticket.permit)throw new Error(ticket.error||'Could not start submission. Please retry.');
+  headers['x-vault-permit']=ticket.permit;
+  response=await fetch(SUPABASE_URL+'/functions/v1/ohvault-submit',{method:'POST',headers,body:body instanceof FormData?body:JSON.stringify(body),signal:AbortSignal.timeout(90000)});}finally{resetSecurity(action);}
  let result;try{result=await response.json();}catch{throw new Error('Submission service could not respond. Please retry.');}
  if(!response.ok)throw new Error(result.error||result.message||'Submission failed. Please retry.');return result;
 }
