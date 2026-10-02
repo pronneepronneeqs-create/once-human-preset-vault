@@ -94,7 +94,6 @@ header button[onclick="openPublishModal()"] i{display:none}
 .faq-steps{padding:14px}
 .faq-picture strong{font-size:14px}
 }
-
 .vault-intro{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:24px}
 .vault-intro h2{font-size:24px;font-weight:800;color:#f1f5f9;margin:0 0 8px}
 .vault-intro p{font-size:13px;line-height:1.7;color:#94a3b8}
@@ -111,8 +110,13 @@ header button[onclick="openPublishModal()"] i{display:none}
 .vault-help-menu svg{width:18px;height:18px;flex-shrink:0;margin-top:2px;color:#67e8f9}
 .vault-help-menu small{display:block;margin-top:5px;color:#94a3b8;font-size:11px;overflow-wrap:anywhere}
 @media(max-width:540px){.vault-intro{align-items:flex-start;gap:12px}.vault-intro h2{font-size:20px}.vault-intro p{font-size:12px}.vault-total{font-size:11px}.vault-help{right:16px;bottom:max(16px,env(safe-area-inset-bottom))}body{padding-bottom:72px}}
-
-.vault-support-dialog{padding:26px;background:#0f172a;color:#e2e8f0;border:1px solid #155e75;border-radius:20px;width:min(440px,calc(100% - 32px));max-height:85dvh;overflow:auto;box-shadow:0 24px 90px #0009}.vault-support-dialog::backdrop{background:#020617d9;backdrop-filter:blur(5px)}.vault-support-dialog h2{font-size:24px;font-weight:800;margin:0 40px 18px 0}.vault-support-dialog p{font-size:14px;line-height:1.8;color:#cbd5e1;margin:12px 0}.vault-support-dialog .vault-support-hint{color:#94a3b8;font-size:12px}.vault-support-close{position:absolute;right:16px;top:16px;padding:8px 12px;border-radius:10px;background:#1e293b;color:#cbd5e1}.vault-support-email{display:block;text-align:center;margin-top:22px;padding:12px 18px;border-radius:12px;background:#22d3ee;color:#082f49;text-decoration:none;font-size:14px;font-weight:800}
+.vault-support-dialog{padding:26px;background:#0f172a;color:#e2e8f0;border:1px solid #155e75;border-radius:20px;width:min(440px,calc(100% - 32px));max-height:85dvh;overflow:auto;box-shadow:0 24px 90px #0009}
+.vault-support-dialog::backdrop{background:#020617d9;backdrop-filter:blur(5px)}
+.vault-support-dialog h2{font-size:24px;font-weight:800;margin:0 40px 18px 0}
+.vault-support-dialog p{font-size:14px;line-height:1.8;color:#cbd5e1;margin:12px 0}
+.vault-support-dialog .vault-support-hint{color:#94a3b8;font-size:12px}
+.vault-support-close{position:absolute;right:16px;top:16px;padding:8px 12px;border-radius:10px;background:#1e293b;color:#cbd5e1}
+.vault-support-email{display:block;text-align:center;margin-top:22px;padding:12px 18px;border-radius:12px;background:#22d3ee;color:#082f49;text-decoration:none;font-size:14px;font-weight:800}
 </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 relative overflow-x-hidden">
@@ -144,7 +148,10 @@ header button[onclick="openPublishModal()"] i{display:none}
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full relative z-10">
 <main class="space-y-6">
-<div class="vault-intro"><div><h2>Your next character starts here.</h2><p>Discover community presets. Download a QR image or copy a game code.</p></div><span class="vault-total"><span id="presetCounter">0</span> presets</span></div>
+<div class="vault-intro">
+<div><h2>Your next character starts here.</h2><p>Discover community presets. Download a QR image or copy a game code.</p></div>
+<span class="vault-total"><span id="presetCounter">0</span> presets</span>
+</div>
 <div role="tablist" aria-label="Preset galleries" class="flex gap-2">
 <button id="allTab" role="tab" onclick="switchTab(false)" class="px-5 py-3 rounded-xl font-bold text-sm">All presets</button>
 <button id="compTab" role="tab" onclick="switchTab(true)" class="px-5 py-3 rounded-xl font-bold text-sm">🏆 <span id="competitionTabName">Competition</span></button>
@@ -277,16 +284,51 @@ header button[onclick="openPublishModal()"] i{display:none}
 </div>
 
 <div id="editModal" class="fixed inset-0 z-[80] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
-<div class="bg-slate-900 border border-cyan-500/30 rounded-2xl max-w-sm w-full p-6 shadow-2xl relative">
-<button type="button" onclick="closeEditModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white" aria-label="Close"><i data-lucide="x" class="w-5 h-5"></i></button>
+<div class="bg-slate-900 border border-cyan-500/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+<button type="button" onclick="closeEditModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white" aria-label="Close">✕</button>
 <h3 class="text-lg font-black mb-4">Edit preset</h3>
-<form onsubmit="savePresetEdit(event)" class="space-y-4">
+<form id="editForm" onsubmit="savePresetEdit(event)" class="space-y-4">
+<div>
+<label for="editTitle" class="block text-xs font-semibold text-slate-400 mb-1">Preset Title</label>
+<input id="editTitle" type="text" maxlength="80" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white">
+</div>
+<div>
+<label for="editAuthor" class="block text-xs font-semibold text-slate-400 mb-1">Creator Name</label>
+<input id="editAuthor" type="text" maxlength="40" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white">
+</div>
 <div>
 <label for="editBodyType" class="block text-xs font-semibold text-slate-400 mb-1">Body Type</label>
-<label class="flex gap-3 items-start rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-3 text-sm"><input type="checkbox" id="editCompetition" class="mt-1"><span>Enter this preset in the competition<small class="block text-slate-400 mt-1">It will also appear in All presets.</small></span></label>
 <select id="editBodyType" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white"><option value="female">Female</option><option value="male">Male</option></select>
 </div>
-<button id="editSaveBtn" type="submit" class="w-full py-2.5 bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 font-bold rounded-xl">Save change</button>
+<div>
+<label for="editTags" class="block text-xs font-semibold text-slate-400 mb-1">Tags (comma separated)</label>
+<input id="editTags" type="text" maxlength="250" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white">
+</div>
+<div>
+<label for="editDesc" class="block text-xs font-semibold text-slate-400 mb-1">Description</label>
+<textarea id="editDesc" rows="2" maxlength="500" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white"></textarea>
+</div>
+<p id="editMediaLock" class="hidden rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200">This competition entry has votes. Its images and Appearance Code are locked to protect those votes. You can still correct the other details.</p>
+<fieldset id="editMediaFields" class="space-y-4 disabled:opacity-60">
+<div>
+<label for="editAppearanceCode" class="block text-xs font-semibold text-slate-400 mb-1">Appearance Code</label>
+<textarea id="editAppearanceCode" rows="2" maxlength="12000" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white"></textarea>
+</div>
+<div>
+<label for="editImageFile" class="block text-xs font-semibold text-slate-400 mb-1">Replace showcase image (optional)</label>
+<input id="editImageFile" type="file" accept="image/jpeg,image/png,image/webp" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white">
+</div>
+<div>
+<label for="editQRFile" class="block text-xs font-semibold text-slate-400 mb-1">Replace QR/share image (optional)</label>
+<input id="editQRFile" type="file" accept="image/jpeg,image/png,image/webp" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white">
+</div>
+<label class="flex gap-2 items-center text-xs text-slate-400"><input id="editRemoveQR" type="checkbox">Remove the existing QR/share image</label>
+<p class="text-xs text-slate-400">Leave file fields empty to keep your images. Keep at least a QR/share image or an Appearance Code. JPEG, PNG or WebP · Up to 5 MB per image.</p>
+</fieldset>
+<label class="flex gap-3 items-start rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-3 text-sm"><input type="checkbox" id="editCompetition" class="mt-1"><span>Enter this preset in the competition<small class="block text-slate-400 mt-1">Entries with votes cannot be withdrawn.</small></span></label>
+<p class="text-xs text-slate-400">Replacement images are sent to OpenAI for the same safety check used on new uploads. Explicit nudity and sexual content are not allowed.</p>
+<div id="editSecurity" class="min-h-[65px]"></div>
+<button id="editSaveBtn" type="submit" class="w-full py-2.5 bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 font-bold rounded-xl">Save changes</button>
 <button id="editDeleteBtn" type="button" onclick="deleteOwnPreset()" class="w-full py-2.5 border border-red-500/50 text-red-300 hover:bg-red-500/10 font-bold rounded-xl">Delete preset</button>
 </form>
 </div>
@@ -378,7 +420,6 @@ header button[onclick="openPublishModal()"] i{display:none}
 </form>
 </div>
 
-
 <div id="vaultHelp" class="vault-help vault-help-direct">
 <button type="button" class="vault-help-toggle" onclick="openFaqGuide()"><i data-lucide="book-open" aria-hidden="true"></i> FAQ &amp; Guide</button>
 <button type="button" class="vault-help-toggle" onclick="document.getElementById('supportDialog').showModal()"><i data-lucide="mail" aria-hidden="true"></i> Need help?</button>
@@ -391,6 +432,7 @@ header button[onclick="openPublishModal()"] i{display:none}
 <p class="vault-support-hint">Include what went wrong and a screenshot if possible so I can help you more easily.</p>
 <a class="vault-support-email" href="mailto:pronneepronneeqs@gmail.com?subject=OH%20Vault%20help">Send an email</a>
 </dialog>
+
 <dialog id="faqDialog" aria-labelledby="faqTitle">
 <div class="faq-shell">
 <div class="faq-top">
@@ -489,7 +531,7 @@ header button[onclick="openPublishModal()"] i{display:none}
 <summary>Image rules and automatic safety checks<span aria-hidden="true">＋</span></summary>
 <div class="faq-steps">
 <p>Upload screenshots from Once Human. Explicit nudity and sexual content are not allowed.</p>
-<p>Before a new preset is published, both the showcase image and any QR/share image are sent to OpenAI’s Moderation API for an automated sexual-content check. Images that are flagged are rejected before they are stored publicly or published.</p>
+<p>Before a new preset is published, or an image is replaced through Edit preset, the new showcase image and any new QR/share image are sent to OpenAI’s Moderation API for an automated sexual-content check. Images that are flagged are rejected before they are stored publicly or published.</p>
 <p>Revealing game outfits may pass, but the filter cannot reliably distinguish game imagery from real photos. It can occasionally reject a legitimate screenshot or miss inappropriate content. If your image is rejected, try a less suggestive screenshot. Please report inappropriate presets that appear in the gallery.</p>
 <p>If the safety-check service is unavailable, the upload is paused and you will be asked to retry later.</p>
 </div>
@@ -505,8 +547,10 @@ header button[onclick="openPublishModal()"] i{display:none}
 </li>
 <li>
 <div class="faq-step-heading"><span class="faq-number">2</span><h4>Click Edit preset</h4></div>
-<div class="faq-picture"><span class="faq-picture-icon" aria-hidden="true">✎</span><div><strong>Edit preset</strong><small>Correct the body type, or delete your preset</small></div></div>
-<p>You can correct the Male/Female body type. Other preset details cannot currently be edited. The edit controls also let you delete your preset.</p>
+<div class="faq-picture"><span class="faq-picture-icon" aria-hidden="true">✎</span><div><strong>Edit preset</strong><small>Correct your preset details, or delete your preset</small></div></div>
+<p>You can edit the title, creator name, body type, tags, description, Appearance Code and both images. Leave replacement file fields empty to keep your images. Replacement images are sent to OpenAI for safety checking. Complete the security check and click Save changes. Edits share the upload rate limits.</p>
+<p>While a competition entry has votes, its images and Appearance Code are locked and it cannot be withdrawn. You can still correct its title, creator name, body type, tags and description. Ordinary gallery votes do not lock editing.</p>
+<p>The edit controls also let you permanently delete your preset. Changing browsers or clearing browser data removes access to those controls.</p>
 </li>
 <li>
 <div class="faq-step-heading"><span class="faq-number">3</span><h4>Keep your browser data</h4></div>
@@ -1049,10 +1093,22 @@ catch(_){return null;}
 function openEditModal(){
 const p=presets.find(item=>String(item.id)===String(activePresetId));
 if(!p||!getEditToken(p.id))return;
-document.getElementById('editBodyType').value=p.bodyType;
+document.getElementById('editForm').reset();
+for(const [id,value] of Object.entries({
+editTitle:p.title,
+editAuthor:p.author,
+editBodyType:p.bodyType,
+editTags:p.tags.join(', '),
+editDesc:p.description,
+editAppearanceCode:p.appearanceCode
+}))document.getElementById(id).value=value||'';
+const locked=!!p.entry&&Number(p.competitionVotes||0)>0;
+document.getElementById('editMediaFields').disabled=locked;
+document.getElementById('editMediaLock').classList.toggle('hidden',!locked);
 document.getElementById('editCompetition').checked=!!p.entry;
-document.getElementById('editCompetition').disabled=!competition||competitionClosed();
+document.getElementById('editCompetition').disabled=locked||!competition||competitionClosed();
 document.getElementById('editModal').classList.remove('hidden');
+mountSecurity('edit');
 safeCreateIcons();
 }
 
@@ -1086,36 +1142,58 @@ btn.innerText='Delete preset';
 
 async function savePresetEdit(e){
 e.preventDefault();
+const btn=document.getElementById('editSaveBtn');
+if(btn.disabled)return;
 const id=activePresetId,token=getEditToken(id);
 if(!token){
-alert('Editing is only available in the browser used to publish this preset.');
+showToast('Use the browser that published this preset.');
 return;
 }
-const btn=document.getElementById('editSaveBtn');
 btn.disabled=true;
-btn.innerText='Saving...';
+document.getElementById('editDeleteBtn').disabled=true;
+btn.textContent='Saving…';
 try{
-const bodyType=document.getElementById('editBodyType').value;
-const {data,error}=await _supabase.rpc('edit_preset_body_type',{p_id:String(id),p_token:token,p_body_type:bodyType});
-if(error)throw error;
-if(!data)throw new Error('Edit access was not verified for this preset.');
 const p=presets.find(item=>String(item.id)===String(id));
-if(p)p.bodyType=bodyType;
-const entering=document.getElementById('editCompetition').checked;
-if(p&&competition&&entering!==!!p.entry){
-const result=await _supabase.rpc('vault_set_competition_entry',{p_competition:competition.id,p_id:String(id),p_token:token,p_enter:entering});
-if(result.error)throw new Error('Body type saved, but competition change failed: '+result.error.message);
-p.entry=entering;
-}
-document.getElementById('modalBodyType').innerText=bodyType;
+if(!p)throw new Error('Preset no longer exists.');
+const locked=document.getElementById('editMediaFields').disabled;
+const image=locked?null:document.getElementById('editImageFile').files[0];
+const qr=locked?null:document.getElementById('editQRFile').files[0];
+validateClientFile(image);
+validateClientFile(qr);
+const removeQR=!locked&&document.getElementById('editRemoveQR').checked;
+if(qr&&removeQR)throw new Error('Choose a replacement QR image or Remove QR image, not both.');
+const fields={
+operation:'edit',
+preset_id:String(id),
+request_id:crypto.randomUUID(),
+edit_token:token,
+title:document.getElementById('editTitle').value.trim(),
+author:document.getElementById('editAuthor').value.trim().replace(/^@/,''),
+body_type:document.getElementById('editBodyType').value,
+tags:document.getElementById('editTags').value.split(',').map(t=>t.trim()).filter(Boolean),
+description:document.getElementById('editDesc').value.trim(),
+preset_code:locked?p.appearanceCode:normalizeCode(document.getElementById('editAppearanceCode').value),
+remove_qr:removeQR,
+enter_competition:document.getElementById('editCompetition').disabled?null:document.getElementById('editCompetition').checked
+};
+if(fields.tags.length>10||fields.tags.some(t=>t.length>30))throw new Error('Use up to 10 tags, each no longer than 30 characters.');
+if(!qr&&(!p.qr||removeQR)&&!fields.preset_code)throw new Error('Keep a QR/share image or an Appearance Code.');
+const form=new FormData();
+form.set('metadata',JSON.stringify(fields));
+if(image)form.set('image',image);
+if(qr)form.set('qr',qr);
+const saved=await secureSubmit('edit',form);
+if(saved.success!==true)throw new Error('Edit was not confirmed.');
 closeEditModal();
-renderPresets();
+closeDetailModal();
+await fetchPresetsFromDatabase();
 showToast('Preset updated!');
 }catch(err){
-alert('Edit failed: '+(err?.message||err));
+showToast(err?.message||'Edit failed. Please retry.');
 }finally{
 btn.disabled=false;
-btn.innerText='Save change';
+document.getElementById('editDeleteBtn').disabled=false;
+btn.textContent='Save changes';
 }
 }
 
@@ -1129,8 +1207,8 @@ mountSecurity('publish');
 function closePublishModal(){document.getElementById('publishModal').classList.add('hidden');}
 
 const TURNSTILE_SITE_KEY='0x4AAAAAAFL6Eiq7FMIZvKes';
-const securityWidgets={publish:null,report:null};
-const securityTokens={publish:'',report:''};
+const securityWidgets={publish:null,report:null,edit:null};
+const securityTokens={publish:'',report:'',edit:''};
 let publishInFlight=false;
 
 function mountSecurity(action){
@@ -1148,7 +1226,7 @@ container.textContent='';
 securityTokens[action]='';
 securityWidgets[action]=turnstile.render(container,{
 sitekey:TURNSTILE_SITE_KEY,
-action,
+action:action==='edit'?'publish':action,
 theme:'dark',
 size:'flexible',
 callback:token=>{securityTokens[action]=token;},
@@ -1168,9 +1246,11 @@ if(window.turnstile&&securityWidgets[action]!==null)turnstile.reset(securityWidg
 document.addEventListener('vault-turnstile-ready',()=>{
 if(!document.getElementById('publishModal').classList.contains('hidden'))mountSecurity('publish');
 if(!document.getElementById('reportModal').classList.contains('hidden'))mountSecurity('report');
+if(!document.getElementById('editModal').classList.contains('hidden'))mountSecurity('edit');
 });
 
 async function secureSubmit(action,body){
+const submitAction=action==='edit'?'publish':action;
 const token=securityTokens[action];
 if(!token)throw new Error('Please complete the security check before submitting.');
 const browserToken=getVoteToken(true);
@@ -1178,7 +1258,7 @@ const headers={
 apikey:SUPABASE_ANON_KEY,
 Authorization:'Bearer '+SUPABASE_ANON_KEY,
 'x-turnstile-token':token,
-'x-submit-action':action,
+'x-submit-action':submitAction,
 'x-browser-token':browserToken
 };
 if(!(body instanceof FormData))headers['Content-Type']='application/json';
@@ -1187,7 +1267,7 @@ try{
 const admission=await fetch('/api/submission-permit',{
 method:'POST',
 headers:{'Content-Type':'application/json'},
-body:JSON.stringify({action,browser_token:browserToken}),
+body:JSON.stringify({action:submitAction,browser_token:browserToken}),
 signal:AbortSignal.timeout(15000)
 });
 let ticket;
@@ -1406,7 +1486,6 @@ mountSecurity('report');
 
 function closeReport(){document.getElementById('reportModal').classList.add('hidden');}
 
-
 function openFaqGuide(){
 const d=document.getElementById('faqDialog');
 if(!d.open)d.showModal();
@@ -1435,7 +1514,13 @@ closePublishModal();
 }
 });
 
-document.getElementById('supportDialog').addEventListener('click',e=>{const d=e.currentTarget;if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close();}});
+document.getElementById('supportDialog').addEventListener('click',e=>{
+const d=e.currentTarget;
+if(e.target===d){
+const r=d.getBoundingClientRect();
+if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close();
+}
+});
 
 document.addEventListener('DOMContentLoaded',()=>{
 safeCreateIcons();
