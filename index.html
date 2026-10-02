@@ -112,6 +112,7 @@ header button[onclick="openPublishModal()"] i{display:none}
 .vault-help-menu small{display:block;margin-top:5px;color:#94a3b8;font-size:11px;overflow-wrap:anywhere}
 @media(max-width:540px){.vault-intro{align-items:flex-start;gap:12px}.vault-intro h2{font-size:20px}.vault-intro p{font-size:12px}.vault-total{font-size:11px}.vault-help{right:16px;bottom:max(16px,env(safe-area-inset-bottom))}body{padding-bottom:72px}}
 
+.vault-support-dialog{padding:26px;background:#0f172a;color:#e2e8f0;border:1px solid #155e75;border-radius:20px;width:min(440px,calc(100% - 32px));max-height:85dvh;overflow:auto;box-shadow:0 24px 90px #0009}.vault-support-dialog::backdrop{background:#020617d9;backdrop-filter:blur(5px)}.vault-support-dialog h2{font-size:24px;font-weight:800;margin:0 40px 18px 0}.vault-support-dialog p{font-size:14px;line-height:1.8;color:#cbd5e1;margin:12px 0}.vault-support-dialog .vault-support-hint{color:#94a3b8;font-size:12px}.vault-support-close{position:absolute;right:16px;top:16px;padding:8px 12px;border-radius:10px;background:#1e293b;color:#cbd5e1}.vault-support-email{display:block;text-align:center;margin-top:22px;padding:12px 18px;border-radius:12px;background:#22d3ee;color:#082f49;text-decoration:none;font-size:14px;font-weight:800}
 </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 relative overflow-x-hidden">
@@ -379,8 +380,16 @@ header button[onclick="openPublishModal()"] i{display:none}
 
 <div id="vaultHelp" class="vault-help vault-help-direct">
 <button type="button" class="vault-help-toggle" onclick="openFaqGuide()"><i data-lucide="book-open" aria-hidden="true"></i> FAQ &amp; Guide</button>
-<a class="vault-help-toggle" href="mailto:pronneepronneeqs@gmail.com?subject=OH%20Vault%20support"><i data-lucide="mail" aria-hidden="true"></i> Contact support</a>
+<button type="button" class="vault-help-toggle" onclick="document.getElementById('supportDialog').showModal()"><i data-lucide="mail" aria-hidden="true"></i> Need help?</button>
 </div>
+<dialog id="supportDialog" aria-labelledby="supportTitle" class="vault-support-dialog">
+<button type="button" class="vault-support-close" onclick="document.getElementById('supportDialog').close()" aria-label="Close help">✕</button>
+<h2 id="supportTitle">Need help?</h2>
+<p>OH Vault is a private project built and maintained by one person in their spare time.</p>
+<p>You’re welcome to reach out, but replies may take a while. <strong>Please expect long delays in receiving an answer.</strong></p>
+<p class="vault-support-hint">Include what went wrong and a screenshot if possible so I can help you more easily.</p>
+<a class="vault-support-email" href="mailto:pronneepronneeqs@gmail.com?subject=OH%20Vault%20help">Send an email</a>
+</dialog>
 <dialog id="faqDialog" aria-labelledby="faqTitle">
 <div class="faq-shell">
 <div class="faq-top">
@@ -1404,6 +1413,7 @@ if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)clos
 
 document.addEventListener('keydown',e=>{
 if(e.key==='Escape'){
+document.getElementById('supportDialog').close();
 closeFaqGuide();
 closeReport();
 closeEditModal();
@@ -1413,6 +1423,8 @@ closeDetailModal();
 closePublishModal();
 }
 });
+
+document.getElementById('supportDialog').addEventListener('click',e=>{const d=e.currentTarget;if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close();}});
 
 document.addEventListener('DOMContentLoaded',()=>{
 safeCreateIcons();
