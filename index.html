@@ -350,6 +350,7 @@ header button[onclick="openPublishModal()"] i{display:none}
 <textarea id="pubDesc" rows="2" maxlength="500" placeholder="Details about sliders, skin tone, makeup..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"></textarea>
 </div>
 <label class="flex gap-3 items-start rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-3 text-sm"><input type="checkbox" id="enterCompetition" class="mt-1"><span>Enter this preset in the competition<small class="block text-slate-400 mt-1">It will also appear in All presets.</small></span></label>
+<p class="text-xs leading-relaxed text-slate-400 rounded-xl border border-slate-700 bg-slate-950/50 p-3"><strong class="text-slate-200">Game screenshots only.</strong> Explicit nudity and sexual content are not allowed. Images are automatically checked before publishing. <button type="button" onclick="openFaqGuide()" class="text-cyan-400 underline underline-offset-2">Learn more in the FAQ</button>.</p>
 <div id="publishSecurity" class="min-h-[65px]"></div>
 <p class="text-[11px] text-slate-400">JPEG, PNG or WebP · Up to 5 MB per image</p>
 <button type="submit" id="submitBtn" class="w-full py-3 bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 font-extrabold text-xs uppercase tracking-wider rounded-xl hover:brightness-110 transition shadow-lg shadow-cyan-500/20">Publish Design</button>
@@ -482,6 +483,16 @@ header button[onclick="openPublishModal()"] i{display:none}
 <p>Tags and a description are optional. If you want to enter an open competition, tick the competition box. Let the security check finish, then click Publish Design once and wait for the success message.</p>
 </li>
 </ol>
+</details>
+
+<details class="faq-topic">
+<summary>Image rules and automatic safety checks<span aria-hidden="true">＋</span></summary>
+<div class="faq-steps">
+<p>Upload screenshots from Once Human. Explicit nudity and sexual content are not allowed.</p>
+<p>Before a new preset is published, both the showcase image and any QR/share image are sent to OpenAI’s Moderation API for an automated sexual-content check. Images that are flagged are rejected before they are stored publicly or published.</p>
+<p>Revealing game outfits may pass, but the filter cannot reliably distinguish game imagery from real photos. It can occasionally reject a legitimate screenshot or miss inappropriate content. If your image is rejected, try a less suggestive screenshot. Please report inappropriate presets that appear in the gallery.</p>
+<p>If the safety-check service is unavailable, the upload is paused and you will be asked to retry later.</p>
+</div>
 </details>
 
 <details class="faq-topic">
