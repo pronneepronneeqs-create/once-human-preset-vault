@@ -160,6 +160,19 @@ button[class*="from-cyan"]{background-image:none;background-color:#22d3ee;box-sh
 .preset-card{box-shadow:none}
 @media(max-width:540px){.vault-help{right:auto;bottom:auto;padding:16px}body{padding-bottom:0}.vault-feature-shade{background:linear-gradient(90deg,rgba(8,18,31,.97),rgba(8,18,31,.8) 50%,rgba(8,18,31,.3))}}
 </style>
+<style id="vault-simplified-detail-style">
+#detailModal>div{background:#142233;border-color:#2b3c50;box-shadow:0 16px 50px rgba(0,0,0,.3)}
+#detailModal .vault-import-panel{background:#0c1827;border:1px solid #2b3c50;box-shadow:none}
+#detailModal #modalAuthor{color:#b0becd}
+#detailModal #modalAppearanceCode{font-size:13px;background:#08121f;border-color:#2b3c50;padding:12px}
+#detailModal #modalImportGuide{background:#0c1827;border-color:#2b3c50;font-size:13px;line-height:1.6}
+#detailModal #modalDownloadBtn{font-size:13px;text-transform:none;letter-spacing:0;box-shadow:none;padding:12px}
+#detailModal #modalAppearanceCodeContainer>div:first-child{flex-wrap:wrap}
+#detailModal #modalAppearanceCodeContainer button{min-height:40px;font-size:13px}
+#detailModal #modalTags:empty{display:none}
+@media(max-width:640px){#detailModal>.max-w-4xl{max-height:92dvh}#detailModal .custom-scrollbar{padding:18px}}
+@media(prefers-reduced-motion:reduce){#detailModal{scroll-behavior:auto}}
+</style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 relative overflow-x-hidden">
 <div class="fixed inset-0 pointer-events-none z-0">
@@ -268,7 +281,7 @@ button[class*="from-cyan"]{background-image:none;background-color:#22d3ee;box-sh
 </div>
 
 <div id="detailModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
-<div class="bg-slate-900 border border-cyan-500/30 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl relative">
+<div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl relative">
 <button onclick="closeDetailModal()" class="absolute top-4 right-4 z-10 p-2 rounded-full bg-slate-950/80 text-slate-400 hover:text-white border border-slate-800 transition"><i data-lucide="x" class="w-5 h-5"></i></button>
 <div class="overflow-y-auto custom-scrollbar p-6 space-y-6">
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -278,9 +291,9 @@ button[class*="from-cyan"]{background-image:none;background-color:#22d3ee;box-sh
 <div class="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-semibold gap-1.5 transition"><i data-lucide="maximize-2" class="w-4 h-4"></i>Click to Zoom</div>
 <span id="modalBodyType" class="absolute top-3 left-3 text-[10px] font-bold px-2.5 py-1 rounded bg-slate-950/80 text-cyan-400 border border-cyan-500/30 uppercase tracking-widest backdrop-blur-md"></span>
 </div>
-<button id="modalDownloadBtn" onclick="downloadGameImage()" class="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:brightness-110 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl transition shadow-lg shadow-cyan-500/20"><i data-lucide="download" class="w-4 h-4"></i><span>Download QR Image</span></button>
+
 </div>
-<div class="flex flex-col justify-between space-y-4">
+<div class="flex flex-col space-y-4">
 <div>
 <h2 id="modalTitle" class="text-2xl font-black text-white leading-tight"></h2>
 <p id="modalAuthor" class="text-xs text-cyan-400 font-semibold mt-1"></p>
@@ -288,13 +301,13 @@ button[class*="from-cyan"]{background-image:none;background-color:#22d3ee;box-sh
 <div class="mt-4 p-3 rounded-xl bg-slate-950/70 border border-slate-800"><p id="modalDescription" class="text-xs text-slate-400 leading-relaxed"></p></div>
 <div id="modalTags" class="flex flex-wrap gap-1.5 mt-3"></div>
 </div>
-<div id="modalAppearanceCodeContainer" class="p-4 rounded-xl bg-cyan-950/20 border border-cyan-500/40 shadow-inner">
+<div id="modalAppearanceCodeContainer" class="vault-import-panel p-4 rounded-xl">
 <div class="flex items-start justify-between gap-3">
 <div class="min-w-0">
 <span class="text-[10px] font-bold text-cyan-400 uppercase tracking-widest block">Appearance Code</span>
-<p class="text-[10px] text-slate-500 mt-1">Text cipher for appearance sharing/import.</p>
+<p class="text-sm text-slate-300 mt-2">Copy the code, then paste it into the game’s text import.</p>
 </div>
-<button onclick="copyModalAppearanceCode()" class="shrink-0 px-3 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"><i data-lucide="copy" class="w-3.5 h-3.5"></i>Copy</button>
+<button onclick="copyModalAppearanceCode()" class="shrink-0 px-3 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"><i data-lucide="copy" class="w-3.5 h-3.5"></i>Copy code</button>
 </div>
 <div id="modalAppearanceCode" class="code-display mt-3 font-mono text-sm font-bold text-white bg-slate-950 px-3 py-2.5 rounded-lg border border-slate-800 select-all"></div>
 <button onclick="openCodeModal()" class="mt-2 text-[11px] text-slate-400 hover:text-cyan-400 font-semibold transition flex items-center gap-1"><i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>Show full code</button>
@@ -306,13 +319,11 @@ button[class*="from-cyan"]{background-image:none;background-color:#22d3ee;box-sh
 </div>
 <button onclick="copyModalFaceCode()" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"><i data-lucide="copy" class="w-3.5 h-3.5"></i>Copy</button>
 </div>
-<div id="modalQRContainer" class="p-4 rounded-xl bg-slate-950/90 border border-cyan-500/30 flex items-center gap-4 shadow-inner">
-<div class="w-24 h-24 bg-white p-1.5 rounded-lg shrink-0 border border-slate-700"><img id="modalQR" class="w-full h-full object-contain" alt="QR Code"></div>
-<div class="space-y-1.5 min-w-0">
-<span class="text-[10px] font-bold text-cyan-400 uppercase tracking-widest block">QR Appearance Share</span>
-<p class="text-[10px] text-slate-500">Use the QR image where the game supports QR appearance sharing.</p>
-
-</div>
+<div id="modalQRContainer" class="vault-import-panel p-4 rounded-xl">
+<span class="text-xs font-bold text-cyan-300 uppercase tracking-widest">QR image</span>
+<p class="text-sm text-slate-300 mt-2">Download the share image, then select it in the game's QR/image import.</p>
+<img id="modalQR" class="hidden" alt="QR share image">
+<div class="mt-3"><button id="modalDownloadBtn" onclick="downloadGameImage()" class="w-full flex items-center justify-center gap-2 py-2.5 bg-cyan-400 hover:brightness-110 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl transition "><i data-lucide="download" class="w-4 h-4"></i><span>Download QR image</span></button></div>
 </div>
 <div id="modalImportGuide" class="p-4 rounded-xl bg-slate-950/90 border border-slate-800 text-xs text-slate-300"></div>
 <button id="modalEditBtn" type="button" onclick="openEditModal()" class="hidden w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold">Edit preset</button>
@@ -1004,7 +1015,7 @@ const steps=[];
 if(p.appearanceCode)steps.push('<li>Copy the Appearance Code above. In Once Human’s appearance sharing/import screen, choose text cipher import and paste it.</li>');
 if(p.qr)steps.push('<li>Download the QR/share image. In Once Human’s appearance sharing/import screen, choose the QR/image import method and use that image.</li>');
 guide.innerHTML='<h3 class="font-bold text-cyan-400 mb-2">How to import this preset</h3><ol class="list-decimal pl-4 space-y-2">'+steps.join('')+'</ol>';
-guide.classList.toggle('hidden',steps.length===0);
+guide.classList.add('hidden');
 }
 
 window.addEventListener('popstate',syncPresetFromUrl);
@@ -1035,6 +1046,12 @@ a.remove();
 URL.revokeObjectURL(url);
 }catch(e){
 window.open(p.qr,'_blank','noopener,noreferrer');
+}finally{
+const guide=document.getElementById('modalImportGuide');
+guide.innerHTML='<h3 class="font-bold text-cyan-300 mb-3">Use your downloaded QR image</h3><ol class="list-decimal pl-5 space-y-2"><li>Find the saved image in your browser’s Downloads folder. If it opened in a new tab, save that image first.</li><li>Open Once Human’s appearance sharing/import screen and choose the QR/image import option.</li><li>Select the saved image, check the preview, then confirm in the game.</li></ol><p class="mt-3 text-slate-300">If your version of the game has no QR/image import, use the Appearance Code when available.</p>';
+guide.classList.remove('hidden');
+guide.setAttribute('role','status');
+guide.scrollIntoView({block:'nearest',behavior:'smooth'});
 }
 }
 
