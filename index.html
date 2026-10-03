@@ -119,6 +119,14 @@ header button[onclick="openPublishModal()"] i{display:none}
 .vault-support-email{display:block;text-align:center;margin-top:22px;padding:12px 18px;border-radius:12px;background:#22d3ee;color:#082f49;text-decoration:none;font-size:14px;font-weight:800}
 
 #vaultAdminButton[hidden],#vaultAdminLoginForm[hidden],#vaultAdminSessionInfo[hidden]{display:none!important}
+
+.vault-form-message{padding:14px 16px;border:1px solid #0e7490;border-radius:12px;background:#082f49;color:#cffafe;font-size:13px;line-height:1.55;overflow-wrap:anywhere}
+.vault-form-message[hidden]{display:none!important}
+.vault-form-message[data-kind="error"]{border-color:#be465c;background:#381724;color:#ffe4e6}
+.vault-form-message-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:5px}
+.vault-form-message-row button{flex-shrink:0;padding:4px 8px;border-radius:6px;background:transparent;color:inherit;font-size:16px;line-height:1;cursor:pointer}
+.vault-form-message-row button:hover{background:#ffffff12}
+.vault-form-message-row button[hidden]{display:none!important}
 </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 relative overflow-x-hidden">
@@ -330,6 +338,10 @@ header button[onclick="openPublishModal()"] i{display:none}
 <label class="flex gap-3 items-start rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-3 text-sm"><input type="checkbox" id="editCompetition" class="mt-1"><span>Enter this preset in the competition<small class="block text-slate-400 mt-1">Entries with votes cannot be withdrawn.</small></span></label>
 <p class="text-xs text-slate-400">Replacement images are sent to OpenAI for the same safety check used on new uploads. Explicit nudity and sexual content are not allowed.</p>
 <div id="editSecurity" class="min-h-[65px]"></div>
+<div id="editFormMessage" class="vault-form-message" hidden tabindex="-1" role="status" aria-live="polite" aria-atomic="true">
+<div class="vault-form-message-row"><strong id="editFormMessageTitle"></strong><button id="editFormMessageDismiss" type="button" onclick="clearFormMessage('edit')" aria-label="Dismiss message">✕</button></div>
+<p id="editFormMessageText"></p>
+</div>
 <button id="editSaveBtn" type="submit" class="w-full py-2.5 bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 font-bold rounded-xl">Save changes</button>
 <button id="editDeleteBtn" type="button" onclick="deleteOwnPreset()" class="w-full py-2.5 border border-red-500/50 text-red-300 hover:bg-red-500/10 font-bold rounded-xl">Delete preset</button>
 </form>
@@ -397,6 +409,10 @@ header button[onclick="openPublishModal()"] i{display:none}
 <p class="text-xs leading-relaxed text-slate-400 rounded-xl border border-slate-700 bg-slate-950/50 p-3"><strong class="text-slate-200">Game screenshots only.</strong> Explicit nudity and sexual content are not allowed. Images are automatically checked before publishing. <button type="button" onclick="openFaqGuide()" class="text-cyan-400 underline underline-offset-2">Learn more in the FAQ</button>.</p>
 <div id="publishSecurity" class="min-h-[65px]"></div>
 <p class="text-[11px] text-slate-400">JPEG, PNG or WebP · Up to 5 MB per image</p>
+<div id="publishFormMessage" class="vault-form-message" hidden tabindex="-1" role="status" aria-live="polite" aria-atomic="true">
+<div class="vault-form-message-row"><strong id="publishFormMessageTitle"></strong><button id="publishFormMessageDismiss" type="button" onclick="clearFormMessage('publish')" aria-label="Dismiss message">✕</button></div>
+<p id="publishFormMessageText"></p>
+</div>
 <button type="submit" id="submitBtn" class="w-full py-3 bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 font-extrabold text-xs uppercase tracking-wider rounded-xl hover:brightness-110 transition shadow-lg shadow-cyan-500/20">Publish Design</button>
 </form>
 </div>
@@ -1112,10 +1128,45 @@ try{return localStorage.getItem(editStorageKey(id));}
 catch(_){return null;}
 }
 
+
+function clearFormMessage(scope){
+ const box=document.getElementById(scope+'FormMessage');
+ if(!box)return;
+ box.hidden=true;
+ document.getElementById(scope+'FormMessageTitle').textContent='';
+ document.getElementById(scope+'FormMessageText').textContent='';
+}
+function setFormMessage(scope,title,message,kind='progress'){
+ const box=document.getElementById(scope+'FormMessage');
+ if(!box)return;
+ box.dataset.kind=kind;
+ box.setAttribute('role',kind==='error'?'alert':'status');
+ document.getElementById(scope+'FormMessageTitle').textContent=title;
+ document.getElementById(scope+'FormMessageText').textContent=message;
+ document.getElementById(scope+'FormMessageDismiss').hidden=kind!=='error';
+ box.hidden=false;
+ if(kind==='error'){
+  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+  box.focus({preventScroll:true});
+ }
+}
+function showFormError(scope,error){
+ let message=error?.message||(scope==='edit'?'Edit failed. Please retry.':'Upload failed. Please retry.');
+ if(error?.name==='TimeoutError'||error?.name==='AbortError'){
+  message='The request timed out. Check your preset after refreshing before trying again; the server may have completed the save.';
+ }else if(error instanceof TypeError&&/fetch|network|load failed/i.test(message)){
+  message='The connection failed. Check your preset after refreshing before trying again; the server may have completed the save.';
+ }else if(/Submission limit reached|Too many submissions/.test(message)){
+  message+=' Uploads and edits currently share submission limits. Please wait before trying again.';
+ }
+ setFormMessage(scope,scope==='edit'?'Edit not confirmed':'Upload not confirmed',message,'error');
+}
+
 function openEditModal(){
 const p=presets.find(item=>String(item.id)===String(activePresetId));
 if(!p||!getEditToken(p.id))return;
 document.getElementById('editForm').reset();
+clearFormMessage('edit');
 for(const [id,value] of Object.entries({
 editTitle:p.title,
 editAuthor:p.author,
@@ -1168,12 +1219,13 @@ const btn=document.getElementById('editSaveBtn');
 if(btn.disabled)return;
 const id=activePresetId,token=getEditToken(id);
 if(!token){
-showToast('Use the browser that published this preset.');
+showFormError('edit',new Error('Use the browser that published this preset.'));
 return;
 }
 btn.disabled=true;
 document.getElementById('editDeleteBtn').disabled=true;
 btn.textContent='Saving…';
+setFormMessage('edit','Saving your changes','Please keep this form open. New images are checked before saving. The CAPTCHA Success message only confirms the security check.');
 try{
 const p=presets.find(item=>String(item.id)===String(id));
 if(!p)throw new Error('Preset no longer exists.');
@@ -1206,12 +1258,13 @@ if(image)form.set('image',image);
 if(qr)form.set('qr',qr);
 const saved=await secureSubmit('edit',form);
 if(saved.success!==true)throw new Error('Edit was not confirmed.');
+clearFormMessage('edit');
 closeEditModal();
 closeDetailModal();
 await fetchPresetsFromDatabase();
 showToast('Preset updated!');
 }catch(err){
-showToast(err?.message||'Edit failed. Please retry.');
+showFormError('edit',err);
 }finally{
 btn.disabled=false;
 document.getElementById('editDeleteBtn').disabled=false;
@@ -1220,6 +1273,7 @@ btn.textContent='Save changes';
 }
 
 function openPublishModal(){
+clearFormMessage('publish');
 document.getElementById('enterCompetition').checked=competitionMode&&!competitionClosed();
 document.getElementById('enterCompetition').disabled=!competition||competitionClosed();
 document.getElementById('publishModal').classList.remove('hidden');
@@ -1255,7 +1309,7 @@ callback:token=>{securityTokens[action]=token;},
 'expired-callback':()=>{securityTokens[action]='';},
 'error-callback':()=>{
 securityTokens[action]='';
-showToast('Security check could not load. Reopen the form to retry.');
+if(action==='publish'||action==='edit'){showFormError(action,new Error('Security check could not load. Reopen the form to retry.'));}else{showToast('Security check could not load. Reopen the form to retry.');}
 }
 });
 }
@@ -1412,6 +1466,7 @@ const btn=document.getElementById('submitBtn');
 publishInFlight=true;
 btn.disabled=true;
 btn.textContent='Publishing…';
+setFormMessage('publish','Publishing your preset','Please keep this form open. Images are checked before publishing. The CAPTCHA Success message only confirms the security check.');
 try{
 if(!securityTokens.publish)throw new Error('Please complete the security check before publishing.');
 if(!crypto?.subtle||!crypto?.getRandomValues)throw new Error('Publishing needs a secure browser connection.');
@@ -1456,12 +1511,13 @@ const saved=await secureSubmit('publish',form);
 if(saved.id==null)throw new Error('Publication was not confirmed. Retry the same preset.');
 localStorage.setItem(editStorageKey(saved.id),pending.edit_token);
 localStorage.removeItem('ohvault_pending_publish_v1');
+clearFormMessage('publish');
 closePublishModal();
 document.getElementById('publishForm').reset();
 showToast('Preset successfully published!');
 await fetchPresetsFromDatabase();
 }catch(err){
-showToast(err?.message||'Upload failed. Please retry.');
+showFormError('publish',err);
 }finally{
 publishInFlight=false;
 btn.disabled=false;
