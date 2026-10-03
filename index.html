@@ -117,6 +117,8 @@ header button[onclick="openPublishModal()"] i{display:none}
 .vault-support-dialog .vault-support-hint{color:#94a3b8;font-size:12px}
 .vault-support-close{position:absolute;right:16px;top:16px;padding:8px 12px;border-radius:10px;background:#1e293b;color:#cbd5e1}
 .vault-support-email{display:block;text-align:center;margin-top:22px;padding:12px 18px;border-radius:12px;background:#22d3ee;color:#082f49;text-decoration:none;font-size:14px;font-weight:800}
+
+#vaultAdminButton[hidden],#vaultAdminLoginForm[hidden],#vaultAdminSessionInfo[hidden]{display:none!important}
 </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 relative overflow-x-hidden">
@@ -421,9 +423,29 @@ header button[onclick="openPublishModal()"] i{display:none}
 </div>
 
 <div id="vaultHelp" class="vault-help vault-help-direct">
+<button id="vaultAdminButton" type="button" hidden class="vault-help-toggle" onclick="openVaultAdmin()">Admin login</button>
+
 <button type="button" class="vault-help-toggle" onclick="openFaqGuide()"><i data-lucide="book-open" aria-hidden="true"></i> FAQ &amp; Guide</button>
 <button type="button" class="vault-help-toggle" onclick="document.getElementById('supportDialog').showModal()"><i data-lucide="mail" aria-hidden="true"></i> Need help?</button>
 </div>
+<dialog id="vaultAdminDialog" class="vault-support-dialog" aria-labelledby="vaultAdminTitle">
+<button type="button" class="vault-support-close" onclick="document.getElementById('vaultAdminDialog').close()" aria-label="Close admin login">✕</button>
+<h2 id="vaultAdminTitle" style="font-size:22px;font-weight:800;margin-bottom:12px">Owner admin login</h2>
+<p style="color:#94a3b8;font-size:13px;margin-bottom:18px">Private access for the site owner. Visitors do not need an account.</p>
+<form id="vaultAdminLoginForm" onsubmit="signInVaultAdmin(event)">
+<label for="vaultAdminEmail" style="display:block;margin-bottom:6px">Email</label>
+<input id="vaultAdminEmail" type="email" required autocomplete="username" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-4">
+<label for="vaultAdminPassword" style="display:block;margin-bottom:6px">Password</label>
+<input id="vaultAdminPassword" type="password" required autocomplete="current-password" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-4">
+<button id="vaultAdminLoginSubmit" type="submit" class="w-full bg-cyan-400 text-slate-950 rounded-xl p-3 font-bold">Sign in</button>
+</form>
+<div id="vaultAdminSessionInfo" hidden>
+<p style="color:#67e8f9;margin-bottom:12px">Admin mode is active. Upload and edit submission quotas are bypassed for your verified account.</p>
+<p style="color:#94a3b8;font-size:13px;margin-bottom:18px">Image safety checks, preset ownership, competition rules and emergency pauses remain active.</p>
+<button id="vaultAdminLogout" type="button" onclick="signOutVaultAdmin()" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 font-bold">Sign out</button>
+</div>
+<p id="vaultAdminMessage" role="status" aria-live="polite" style="margin-top:14px;font-size:13px;overflow-wrap:anywhere"></p>
+</dialog>
 <dialog id="supportDialog" aria-labelledby="supportTitle" class="vault-support-dialog">
 <button type="button" class="vault-support-close" onclick="document.getElementById('supportDialog').close()" aria-label="Close help">✕</button>
 <h2 id="supportTitle">Need help?</h2>
@@ -1249,6 +1271,85 @@ if(!document.getElementById('reportModal').classList.contains('hidden'))mountSec
 if(!document.getElementById('editModal').classList.contains('hidden'))mountSecurity('edit');
 });
 
+
+const vaultAdminClient=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{
+ auth:{storageKey:'ohvault-owner-admin-v1',storage:window.sessionStorage,persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}
+});
+let vaultAdminVerified=false;
+function updateVaultAdminUI(){
+ const button=document.getElementById('vaultAdminButton');
+ button.hidden=!(vaultAdminVerified||new URLSearchParams(location.search).get('admin')==='1');
+ button.textContent=vaultAdminVerified?'Admin mode':'Admin login';
+ document.getElementById('vaultAdminLoginForm').hidden=vaultAdminVerified;
+ document.getElementById('vaultAdminSessionInfo').hidden=!vaultAdminVerified;
+}
+function openVaultAdmin(){
+ updateVaultAdminUI();
+ document.getElementById('vaultAdminMessage').textContent='';
+ const d=document.getElementById('vaultAdminDialog');
+ if(!d.open)d.showModal();
+ if(!vaultAdminVerified)document.getElementById('vaultAdminEmail').focus();
+}
+async function verifyVaultAdminAccess(accessToken){
+ const response=await fetch(SUPABASE_URL+'/functions/v1/ohvault-submit',{
+  method:'POST',headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY,'x-submit-action':'admin-status','x-vault-admin-token':accessToken},
+  signal:AbortSignal.timeout(15000)
+ });
+ let result;try{result=await response.json();}catch{throw new Error('Admin verification could not respond. Please retry.');}
+ if(!response.ok||result.admin!==true)throw new Error(result.error||'Admin access could not be verified.');
+ return true;
+}
+async function initializeVaultAdmin(){
+ updateVaultAdminUI();
+ try{
+  const {data,error}=await vaultAdminClient.auth.getSession();
+  if(error)throw error;
+  if(data.session){vaultAdminVerified=await verifyVaultAdminAccess(data.session.access_token);}
+ }catch{
+  vaultAdminVerified=false;
+  const button=document.getElementById('vaultAdminButton');
+  button.hidden=false;
+  document.getElementById('vaultAdminMessage').textContent='Please sign in again to enable admin mode.';
+ }
+ updateVaultAdminUI();
+}
+async function signInVaultAdmin(e){
+ e.preventDefault();
+ const button=document.getElementById('vaultAdminLoginSubmit');
+ const message=document.getElementById('vaultAdminMessage');
+ const passwordInput=document.getElementById('vaultAdminPassword');
+ button.disabled=true;button.textContent='Signing in…';message.textContent='';
+ vaultAdminVerified=false;
+ try{
+  const {data,error}=await vaultAdminClient.auth.signInWithPassword({email:document.getElementById('vaultAdminEmail').value.trim(),password:passwordInput.value});
+  passwordInput.value='';
+  if(error||!data.session)throw new Error(error?.message||'Sign in failed.');
+  vaultAdminVerified=await verifyVaultAdminAccess(data.session.access_token);
+  message.textContent='Your account has been verified. Admin mode is ready.';
+ }catch(error){
+  passwordInput.value='';vaultAdminVerified=false;
+  await vaultAdminClient.auth.signOut({scope:'local'}).catch(()=>{});
+  message.textContent=error?.message||'Sign in failed. Please retry.';
+ }finally{
+  button.disabled=false;button.textContent='Sign in';updateVaultAdminUI();
+ }
+}
+async function signOutVaultAdmin(){
+ vaultAdminVerified=false;updateVaultAdminUI();
+ document.getElementById('vaultAdminPassword').value='';
+ const {error}=await vaultAdminClient.auth.signOut({scope:'local'});
+ document.getElementById('vaultAdminMessage').textContent=error?'Admin mode is off. Sign out could not finish; please retry.':'Signed out. Normal submission limits apply.';
+}
+async function vaultAdminSubmissionToken(){
+ if(!vaultAdminVerified)return null;
+ const {data,error}=await vaultAdminClient.auth.getSession();
+ if(error||!data.session){vaultAdminVerified=false;updateVaultAdminUI();throw new Error('Admin login expired. Sign in again.');}
+ return data.session.access_token;
+}
+vaultAdminClient.auth.onAuthStateChange((event,session)=>{
+ if(event==='SIGNED_OUT'||!session){vaultAdminVerified=false;updateVaultAdminUI();}
+});
+
 async function secureSubmit(action,body){
 const submitAction=action==='edit'?'publish':action;
 const token=securityTokens[action];
@@ -1261,6 +1362,8 @@ Authorization:'Bearer '+SUPABASE_ANON_KEY,
 'x-submit-action':submitAction,
 'x-browser-token':browserToken
 };
+const ownerSessionToken=await vaultAdminSubmissionToken();
+if(ownerSessionToken)headers['x-vault-admin-token']=ownerSessionToken;
 if(!(body instanceof FormData))headers['Content-Type']='application/json';
 let response;
 try{
@@ -1524,6 +1627,7 @@ if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.cl
 
 document.addEventListener('DOMContentLoaded',()=>{
 safeCreateIcons();
+initializeVaultAdmin();
 switchTab(false);
 fetchPresetsFromDatabase();
 setInterval(updateCompetitionUI,10000);
