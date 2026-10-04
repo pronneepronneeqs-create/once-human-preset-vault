@@ -189,6 +189,18 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <style id="vault-usability-styles">
 .vault-quick-link{color:#8de1ec;font-size:13px;font-weight:700;text-align:left;padding:8px 0}.vault-banner-control{position:absolute;right:14px;top:14px;z-index:20;background:#0b1626e8;border:1px solid #375063;color:#c9e8ed;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:700}.vault-upload-section{border:1px solid #2b4355;border-radius:14px;padding:14px;display:grid;gap:12px;min-width:0}.vault-upload-section legend{color:#8de1ec;font-size:14px;font-weight:800;padding:0 6px}.vault-upload-section>p{font-size:12px;color:#b0becd;line-height:1.6}.vault-upload-example{display:flex;gap:12px;align-items:center;background:#0b1626;border-radius:10px;padding:10px}.vault-upload-example svg{width:120px;max-width:38%;flex-shrink:0}.vault-upload-example figcaption{font-size:11px;line-height:1.6;color:#b0becd}.vault-upload-chosen{color:#8de1ec!important;overflow-wrap:anywhere}.vault-quick-steps{list-style:none;display:grid;gap:18px;margin:24px 0}.vault-quick-steps li{display:flex;align-items:flex-start;gap:12px}.vault-quick-steps li>span{background:#16495a;color:#a5f3fc;border-radius:10px;padding:5px 12px;font-weight:800}.vault-quick-steps strong{color:#e8f1f6}.vault-quick-steps p{margin:4px 0!important;font-size:13px}.vault-guide-more,.vault-gallery-message button{border:1px solid #397080;background:#10303e;color:#a5f3fc;padding:10px 14px;border-radius:10px;font-weight:700}.vault-gallery-message{border:1px solid #375063;border-radius:12px;padding:18px;font-size:14px;color:#cbd5e1}.vault-gallery-message p{margin-bottom:12px}.vault-intro{flex-wrap:wrap}.vault-quick-link{margin-left:auto}.vault-upload-section input[type=file]{max-width:100%}@media(max-width:640px){.vault-intro{align-items:flex-start}.vault-quick-link{margin-left:0}.vault-banner-control{right:10px;top:10px}.vault-upload-example{gap:8px}}
 </style>
+<style id="vault-floating-help-style">
+/* Keep help within reach while browsing, below open preset windows. */
+.vault-help.vault-help-direct{position:fixed;right:24px;bottom:max(24px,env(safe-area-inset-bottom));z-index:45;width:auto;max-width:calc(100vw - 32px);margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+body{padding-bottom:88px}
+@media(max-width:540px){
+ .vault-help.vault-help-direct{right:12px;bottom:max(12px,env(safe-area-inset-bottom));max-width:calc(100vw - 24px)}
+ .vault-help-toggle{padding:10px 12px;font-size:12px;min-height:44px;gap:6px}
+ .vault-help-toggle svg{width:16px;height:16px}
+ body{padding-bottom:88px}
+ body:has(#vaultAdminButton:not([hidden])){padding-bottom:144px}
+}
+</style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 relative overflow-x-hidden">
 <div class="fixed inset-0 pointer-events-none z-0">
@@ -887,8 +899,9 @@ function paintGallery(){
  const empty=document.getElementById('emptyState'),more=document.getElementById('loadMoreWrap'),button=document.getElementById('loadMoreBtn');
  updateCompetitionUI();
  const items=galleryIds.map(id=>presets.find(p=>String(p.id)===id)).filter(Boolean);
- grid.setAttribute('aria-busy',String(galleryBusy));
- loading.hidden=!(galleryBusy&&!items.length);
+ const waiting=galleryBusy||vaultInitialLoading;
+ grid.setAttribute('aria-busy',String(waiting));
+ loading.hidden=!(waiting&&!items.length);
  document.getElementById('galleryHeading').classList.toggle('hidden',!items.length);
  document.getElementById('presetCounter').textContent=vaultInitialLoading?'…':String(vaultAllTotal);
  document.getElementById('visibleCount').textContent=`${items.length} of ${galleryTotal} design${galleryTotal===1?'':'s'}`;
@@ -897,8 +910,8 @@ function paintGallery(){
  more.classList.toggle('hidden',!items.length||(!galleryBusy&&galleryOffset>=galleryTotal));
  button.disabled=galleryBusy;button.textContent=galleryBusy?'Loading…':'Load more presets';
  grid.innerHTML='';items.forEach(p=>grid.appendChild(createPresetCard(p)));
- empty.classList.toggle('hidden',galleryBusy||!!items.length||!!galleryFailure);
- if(!galleryBusy&&!items.length&&!galleryFailure){
+ empty.classList.toggle('hidden',waiting||!!items.length||!!galleryFailure);
+ if(!waiting&&!items.length&&!galleryFailure){
   const filtered=document.getElementById('searchInput').value.trim()||document.getElementById('genderFilter').value!=='all'||showFavoritesOnly;
   if(filtered){empty.querySelector('h3').textContent=showFavoritesOnly?'No saved presets match':'No matching presets';empty.querySelector('p').textContent='Try a different search or clear your filters.';empty.querySelector('button').textContent='Clear filters';empty.querySelector('button').onclick=resetFilters;}
   else{empty.querySelector('button').textContent='Publish First Preset';empty.querySelector('button').onclick=openPublishModal;}
