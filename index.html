@@ -186,6 +186,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 @media(max-width:540px){header .h-16{height:auto;min-height:64px;gap:10px;padding-top:10px;padding-bottom:10px;flex-wrap:wrap}#detailModal,#editModal,#publishModal,#reportModal{padding:10px}#detailModal .grid,#editModal .grid{grid-template-columns:minmax(0,1fr)}#featuredBanner .max-w-xl{max-width:100%}#featuredTitle{max-width:100%;overflow-wrap:anywhere}#modalAppearanceCode{overflow-wrap:anywhere}#modalTitle{padding-right:28px}#genderFilter,#sortBy{flex:1;min-width:0}.vault-help-direct{max-width:100%}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;scroll-behavior:auto!important;transition:none!important}}
 </style>
+<style id="vault-usability-styles">
+.vault-quick-link{color:#8de1ec;font-size:13px;font-weight:700;text-align:left;padding:8px 0}.vault-banner-control{position:absolute;right:14px;top:14px;z-index:20;background:#0b1626e8;border:1px solid #375063;color:#c9e8ed;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:700}.vault-upload-section{border:1px solid #2b4355;border-radius:14px;padding:14px;display:grid;gap:12px;min-width:0}.vault-upload-section legend{color:#8de1ec;font-size:14px;font-weight:800;padding:0 6px}.vault-upload-section>p{font-size:12px;color:#b0becd;line-height:1.6}.vault-upload-example{display:flex;gap:12px;align-items:center;background:#0b1626;border-radius:10px;padding:10px}.vault-upload-example svg{width:120px;max-width:38%;flex-shrink:0}.vault-upload-example figcaption{font-size:11px;line-height:1.6;color:#b0becd}.vault-upload-chosen{color:#8de1ec!important;overflow-wrap:anywhere}.vault-quick-steps{list-style:none;display:grid;gap:18px;margin:24px 0}.vault-quick-steps li{display:flex;align-items:flex-start;gap:12px}.vault-quick-steps li>span{background:#16495a;color:#a5f3fc;border-radius:10px;padding:5px 12px;font-weight:800}.vault-quick-steps strong{color:#e8f1f6}.vault-quick-steps p{margin:4px 0!important;font-size:13px}.vault-guide-more,.vault-gallery-message button{border:1px solid #397080;background:#10303e;color:#a5f3fc;padding:10px 14px;border-radius:10px;font-weight:700}.vault-gallery-message{border:1px solid #375063;border-radius:12px;padding:18px;font-size:14px;color:#cbd5e1}.vault-gallery-message p{margin-bottom:12px}.vault-intro{flex-wrap:wrap}.vault-quick-link{margin-left:auto}.vault-upload-section input[type=file]{max-width:100%}@media(max-width:640px){.vault-intro{align-items:flex-start}.vault-quick-link{margin-left:0}.vault-banner-control{right:10px;top:10px}.vault-upload-example{gap:8px}}
+</style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 relative overflow-x-hidden">
 <div class="fixed inset-0 pointer-events-none z-0">
@@ -218,6 +221,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <main class="space-y-6">
 <div class="vault-intro">
 <div><h2>Your next character starts here.</h2><p>Discover community presets. Download a QR image or copy a game code.</p></div>
+<button type="button" class="vault-quick-link" onclick="openQuickGuide()">New here? How it works →</button>
 <span class="vault-total"><span id="presetCounter">…</span> presets</span>
 </div>
 <div role="tablist" aria-label="Preset galleries" class="flex gap-2">
@@ -239,7 +243,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <p class="text-xs text-slate-400 mt-4">Entries are shuffled for fair discovery · One vote per entry per browser</p>
 </section>
 
-<section id="featuredBanner" class="hidden relative min-h-[205px] rounded-3xl border border-cyan-500/25 overflow-hidden shadow-2xl shadow-cyan-950/30 bg-slate-900">
+<section aria-label="Featured presets" id="featuredBanner" class="hidden relative min-h-[205px] rounded-3xl border border-cyan-500/25 overflow-hidden shadow-2xl shadow-cyan-950/30 bg-slate-900">
+<button id="featuredPauseBtn" type="button" class="vault-banner-control" onclick="toggleFeaturedPause()" aria-label="Pause featured preset rotation" aria-pressed="false">Ⅱ Pause</button>
 <div class="absolute inset-y-0 right-0 w-full sm:w-1/2">
 <img id="featuredImage" decoding="async" fetchpriority="high" alt="" class="w-full h-full object-cover object-top opacity-100" onerror="this.style.display='none'">
 </div>
@@ -258,13 +263,13 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <div class="vault-toolbar flex flex-col md:flex-row gap-3 items-center justify-between">
 <div class="relative w-full md:w-auto md:flex-1">
 <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-cyan-400"></i>
-<input id="searchInput" type="text" placeholder="Search title, author, tag..." oninput="renderPresets(true)" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition">
+<input id="searchInput" aria-label="Search presets by title, creator or tag" maxlength="200" type="text" placeholder="Search title, author, tag..." oninput="queueGallerySearch()" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition">
 </div>
 <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-between md:justify-end">
-<select id="genderFilter" onchange="renderPresets(true)" class="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-slate-300 focus:outline-none focus:border-cyan-500 transition">
+<select id="genderFilter" aria-label="Filter by body type" onchange="renderPresets(true)" class="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-slate-300 focus:outline-none focus:border-cyan-500 transition">
 <option value="all">All Body Types</option><option value="female">Female</option><option value="male">Male</option>
 </select>
-<select id="sortBy" onchange="renderPresets(true)" class="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-slate-300 focus:outline-none focus:border-cyan-500 transition">
+<select id="sortBy" aria-label="Sort presets" onchange="renderPresets(true)" class="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-slate-300 focus:outline-none focus:border-cyan-500 transition">
 <option value="newest">Newest First</option><option value="random">Random order</option><option value="top">Most Upvoted</option>
 </select>
 <button id="favToggleBtn" onclick="toggleFavoritesOnly()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-950/80 border border-slate-800 text-xs font-semibold text-slate-400 hover:text-amber-400 transition">
@@ -282,8 +287,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <div id="vaultGalleryLoading" role="status" aria-live="polite"><p class="text-sm text-slate-300 mb-4">Loading presets…</p><div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6" aria-hidden="true"><div class="vault-loading-card"></div><div class="vault-loading-card"></div><div class="vault-loading-card"></div></div></div>
 <div id="presetGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
 <div id="loadMoreWrap" class="hidden text-center pt-3">
-<button type="button" onclick="loadMorePresets()" class="px-6 py-3 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-cyan-500/30 text-cyan-200 text-sm font-extrabold shadow-lg">Load more presets</button>
+<button id="loadMoreBtn" type="button" onclick="loadMorePresets()" class="px-6 py-3 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-cyan-500/30 text-cyan-200 text-sm font-extrabold shadow-lg">Load more presets</button>
 </div>
+<div id="galleryRequestMessage" class="vault-gallery-message" role="status" hidden><p id="galleryRequestMessageText"></p><button type="button" onclick="refreshGallery(galleryIds.length>0)">Try again</button></div>
 <div id="emptyState" class="hidden text-center py-20 glass-panel rounded-2xl border border-slate-800">
 <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/30 text-cyan-400 shadow-inner"><i data-lucide="sparkles" class="w-8 h-8"></i></div>
 <h3 class="text-lg font-bold text-slate-200 mb-1">No Presets Found</h3>
@@ -434,40 +440,42 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <p class="text-xs text-slate-400 mb-6">Upload an in-game QR/share screenshot or enter a real Appearance Code. You can provide both.</p>
 <form id="publishForm" onsubmit="handlePublish(event)" class="space-y-4">
 <div>
-<label class="block text-xs font-semibold text-slate-400 mb-1">Preset Title</label>
+<label for="pubTitle" class="block text-xs font-semibold text-slate-400 mb-1">Preset Title</label>
 <input id="pubTitle" type="text" required maxlength="80" placeholder="e.g. Stardust Operative" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
 </div>
 <div class="grid grid-cols-2 gap-3">
 <div>
-<label class="block text-xs font-semibold text-slate-400 mb-1">Creator Name / @Handle</label>
+<label for="pubAuthor" class="block text-xs font-semibold text-slate-400 mb-1">Creator Name / @Handle</label>
 <input id="pubAuthor" type="text" required maxlength="40" placeholder="e.g. MetaHunter" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
 </div>
 <div>
-<label class="block text-xs font-semibold text-slate-400 mb-1">Body Type</label>
-<select id="pubBodyType" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"><option value="female">Female</option><option value="male">Male</option></select>
+<label for="pubBodyType" class="block text-xs font-semibold text-slate-400 mb-1">Body Type</label>
+<select id="pubBodyType" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"><option value="" disabled selected>Choose Male or Female</option><option value="female">Female</option><option value="male">Male</option></select>
 </div>
 </div>
-<div>
-<label class="block text-xs font-semibold text-slate-400 mb-1">Appearance Code (optional)</label>
-<textarea id="pubAppearanceCode" rows="3" maxlength="12000" placeholder="Paste the text cipher generated by Once Human here..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-cyan-300 focus:outline-none focus:border-cyan-500 font-mono resize-y"></textarea>
-<span class="text-[10px] text-slate-500 mt-1 block">Only paste a real code from Once Human if you have one. A QR/share screenshot alone is enough.</span>
-</div>
-<div>
-<label class="block text-xs font-semibold text-slate-400 mb-1">In-game QR/share screenshot (optional)</label>
+<fieldset class="vault-upload-section"><legend>1 · Preset to import</legend><p>Give visitors a way to get your character in their game.</p><figure class="vault-upload-example"><svg viewBox="0 0 160 90" aria-hidden="true"><rect x="3" y="3" width="154" height="84" rx="8" fill="#0b1626" stroke="#35516a"/><circle cx="50" cy="30" r="12" fill="#236579"/><path d="M24 75Q24 46 50 46Q76 46 76 75" fill="#236579"/><rect x="99" y="18" width="43" height="43" rx="3" fill="#1e3548"/><path d="M106 25h10v10h-10zm18 0h10v10h-10zm-18 18h10v10h-10z" fill="none" stroke="#67e8f9" stroke-width="2"/><path d="M124 44h10m-10 6h6" stroke="#67e8f9"/></svg><figcaption>Example: a share image with your character and QR code. Upload the real image from Once Human.</figcaption></figure><div>
+<label for="pubQRFile" class="block text-xs font-semibold text-slate-400 mb-1">QR / share screenshot from the game</label>
 <input id="pubQRFile" type="file" accept="image/jpeg,image/png,image/webp" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer">
 <span class="text-[10px] text-slate-500 mt-1 block">Upload the screenshot from Once Human. Provide this or an Appearance Code (or both).</span>
 </div>
 <div>
-<label class="block text-xs font-semibold text-slate-400 mb-1">Custom Showcase Image (Optional)</label>
-<input id="pubImageFile" type="file" accept="image/jpeg,image/png,image/webp" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer">
-<span class="text-[10px] text-slate-500 mt-1 block">Required for code-only presets. Otherwise the QR/share screenshot is used as the showcase image.</span>
+<label for="pubAppearanceCode" class="block text-xs font-semibold text-slate-400 mb-1">Appearance Code — another way to import</label>
+<textarea id="pubAppearanceCode" rows="3" maxlength="12000" placeholder="Paste the text cipher generated by Once Human here..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-cyan-300 focus:outline-none focus:border-cyan-500 font-mono resize-y"></textarea>
+<span class="text-[10px] text-slate-500 mt-1 block">Only paste a real code from Once Human if you have one. A QR/share screenshot alone is enough.</span>
 </div>
+<p id="pubQRChosen" class="vault-upload-chosen" hidden></p></fieldset>
+<fieldset class="vault-upload-section"><legend>2 · Preview picture</legend><p>Show people what your character looks like.</p><figure class="vault-upload-example"><svg viewBox="0 0 160 90" aria-hidden="true"><rect x="3" y="3" width="154" height="84" rx="8" fill="#0b1626" stroke="#35516a"/><circle cx="80" cy="29" r="16" fill="#236579"/><path d="M43 84Q43 49 80 49Q117 49 117 84" fill="#236579"/><path d="M10 73L35 48L45 64M119 68L140 42L151 59" fill="none" stroke="#184458" stroke-width="3"/></svg><figcaption>Example: a clear in-game character screenshot.</figcaption></figure><div>
+<label for="pubImageFile" class="block text-xs font-semibold text-slate-400 mb-1">Preview picture</label>
+<input id="pubImageFile" type="file" accept="image/jpeg,image/png,image/webp" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer">
+<span class="text-[10px] text-slate-500 mt-1 block">This is the picture visitors see. Add a character screenshot, or leave this empty to use your QR/share image. A picture is required if you only provide a code.</span>
+</div>
+<p id="pubImageChosen" class="vault-upload-chosen" hidden></p></fieldset>
 <div>
-<label class="block text-xs font-semibold text-slate-400 mb-1">Tags (Comma separated)</label>
+<label for="pubTags" class="block text-xs font-semibold text-slate-400 mb-1">Tags (Comma separated)</label>
 <input id="pubTags" type="text" maxlength="250" placeholder="Cyberpunk, Anime, Gothic" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
 </div>
 <div>
-<label class="block text-xs font-semibold text-slate-400 mb-1">Description (Optional)</label>
+<label for="pubDesc" class="block text-xs font-semibold text-slate-400 mb-1">Description (Optional)</label>
 <textarea id="pubDesc" rows="2" maxlength="500" placeholder="Details about sliders, skin tone, makeup..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"></textarea>
 </div>
 <label class="flex gap-3 items-start rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-3 text-sm"><input type="checkbox" id="enterCompetition" class="mt-1"><span>Enter this preset in the competition<small class="block text-slate-400 mt-1">It will also appear in All presets.</small></span></label>
@@ -527,6 +535,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 </div>
 <p id="vaultAdminMessage" role="status" aria-live="polite" style="margin-top:14px;font-size:13px;overflow-wrap:anywhere"></p>
 </dialog>
+<dialog id="quickGuideDialog" class="vault-support-dialog" aria-labelledby="quickGuideTitle">
+<button type="button" class="vault-support-close" onclick="document.getElementById('quickGuideDialog').close()" aria-label="Close quick guide">✕</button>
+<h2 id="quickGuideTitle">Your new look in 3 steps</h2>
+<ol class="vault-quick-steps"><li><span>1</span><div><strong>Pick a character</strong><p>Click its picture or title to open the preset.</p></div></li><li><span>2</span><div><strong>Download or copy</strong><p>Download the QR/share image, or copy the Appearance Code.</p></div></li><li><span>3</span><div><strong>Import in Once Human</strong><p>Open the game's appearance import screen and select the matching QR/image or text-code option. Preview the result before confirming.</p></div></li></ol>
+<p class="vault-support-hint">Import options can vary by game version. No account is needed to browse or download.</p>
+<button type="button" class="vault-guide-more" onclick="openFullGuide()">Show the illustrated guide →</button>
+</dialog>
+
 <dialog id="supportDialog" aria-labelledby="supportTitle" class="vault-support-dialog">
 <button type="button" class="vault-support-close" onclick="document.getElementById('supportDialog').close()" aria-label="Close help">✕</button>
 <h2 id="supportTitle">Need help?</h2>
@@ -597,7 +613,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 </div>
 <label>④ Appearance Code<span>Paste your real game code here, if you have one</span></label>
 <label>⑤ In-game QR/share screenshot<span>Choose file · Your game screenshot</span></label>
-<label>⑥ Custom Showcase Image<span>Choose file · Your character picture</span></label>
+<label>⑥ Preview picture<span>Choose file · Your character picture</span></label>
 <p>☐ Enter this preset in the competition</p>
 <div class="faq-demo-submit">⑦ Publish Design</div>
 </figure>
@@ -619,8 +635,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 </li>
 <li>
 <div class="faq-step-heading"><span class="faq-number">4</span><h4>Choose a cover picture</h4></div>
-<div class="faq-picture"><span class="faq-picture-icon" aria-hidden="true">▧</span><div><strong>Custom Showcase Image</strong><small>JPEG, PNG or WebP · Up to 5 MB per image</small></div></div>
-<p>You can upload a separate character picture as the Custom Showcase Image. For a code-only upload, this picture is required. Otherwise, the QR/share image can be used as the cover.</p>
+<div class="faq-picture"><span class="faq-picture-icon" aria-hidden="true">▧</span><div><strong>Preview picture</strong><small>JPEG, PNG or WebP · Up to 5 MB per image</small></div></div>
+<p>You can upload a separate character picture as the Preview picture. For a code-only upload, this picture is required. Otherwise, the QR/share image can be used as the cover.</p>
 </li>
 <li>
 <div class="faq-step-heading"><span class="faq-number">5</span><h4>Publish</h4></div>
@@ -741,6 +757,7 @@ if(!token)return;
 const {data,error}=await _supabase.rpc('get_my_preset_votes_v1',{p_token:token});
 if(error)throw error;
 const votedIds=new Set((data||[]).map(row=>String(row.preset_id)));
+vaultVotedIds=votedIds;
 presets.forEach(p=>{
 p.allVoted=votedIds.has(String(p.id));
 p.voted=competitionMode?!!p.compVoted:p.allVoted;
@@ -770,99 +787,148 @@ return /^OH-[A-Z0-9]{5}$/i.test(code)||code==='OH-PRESET'?'':code;
 
 let vaultInitialLoading=true;
 let vaultLoadFailed=false;
+let galleryIds=[];
+let galleryTotal=0;
+let vaultAllTotal=0;
+let galleryOffset=0;
+let galleryBusy=false;
+let galleryRequest=0;
+let gallerySearchTimer=null;
+let galleryFailure='';
+const gallerySeed=crypto.randomUUID();
+let vaultVotedIds=new Set();
+let vaultEntries=new Map();
+let vaultFavoriteIds=new Set();
+try{const saved=JSON.parse(localStorage.getItem('ohvault_saved_presets_v1')||'[]');if(Array.isArray(saved))vaultFavoriteIds=new Set(saved.filter(x=>typeof x==='string'));}catch(_){}
+
+function mapVaultPreset(item){
+ const old=presets.find(p=>String(p.id)===String(item.id));
+ const entry=vaultEntries.get(String(item.id));
+ return {...old,id:item.id,title:item.title||'Untitled Preset',author:item.author||'Unknown',
+ bodyType:item.body_type||'female',tags:Array.isArray(item.tags)?item.tags:[],
+ image:item.image_url||item.qr_url||'',qr:item.qr_url||'',
+ appearanceCode:item.summary_only?old?.appearanceCode||'':realAppearanceCode(item.appearance_code||item.preset_code),
+ faceCode:item.summary_only?old?.faceCode||'':normalizeCode(item.face_code||''),
+ hasCode:!!item.has_code,summaryOnly:!!item.summary_only&&!old?.detailsLoaded,detailsLoaded:!item.summary_only||!!old?.detailsLoaded,
+ votes:Number(item.votes_count??0),favorite:vaultFavoriteIds.has(String(item.id)),date:item.created_at,
+ description:item.summary_only?old?.description||'':item.description||'',
+ allVoted:vaultVotedIds.has(String(item.id)),compVoted:!!entry?.voted,entry:!!entry,
+ competitionVotes:Number(entry?.votes_count||0),order:entryOrder.get(String(item.id))??0,
+ voted:competitionMode?!!entry?.voted:vaultVotedIds.has(String(item.id))};
+}
+function mergeVaultRows(rows){
+ return (rows||[]).map(row=>{const p=mapVaultPreset(row);const index=presets.findIndex(x=>String(x.id)===String(p.id));if(index<0)presets.push(p);else presets[index]=p;return p;});
+}
+function galleryOptions(offset=0,featured=false){
+ let ids=competitionMode?[...vaultEntries.keys()]:null;
+ if(!featured&&showFavoritesOnly)ids=ids?ids.filter(id=>vaultFavoriteIds.has(id)):[...vaultFavoriteIds];
+ return {p_search:featured?'':(document.getElementById('searchInput').value||'').trim().slice(0,200),
+ p_body:featured?'all':document.getElementById('genderFilter').value,
+ p_sort:featured?(competitionMode?'random':'top'):document.getElementById('sortBy').value,
+ p_offset:offset,p_limit:featured?3:18,p_ids:ids,
+ p_scores:competitionMode?Object.fromEntries([...vaultEntries].map(([id,e])=>[id,Number(e.votes_count)||0])):{},p_seed:gallerySeed};
+}
+async function requestGallery(options){
+ const {data,error}=await _supabase.rpc('vault_browse_presets_v1',options);
+ if(error)throw error;
+ if(!data||!Array.isArray(data.rows)||!Number.isFinite(Number(data.total)))throw new Error('Invalid gallery response.');
+ return data;
+}
+async function refreshGallery(append=false){
+ const request=++galleryRequest;
+ galleryBusy=true;galleryFailure='';
+ if(!append){galleryIds=[];galleryOffset=0;}
+ paintGallery();
+ try{
+  const result=await requestGallery(galleryOptions(append?galleryOffset:0));
+  if(request!==galleryRequest)return;
+  const rows=mergeVaultRows(result.rows);
+  galleryIds=[...new Set([...(append?galleryIds:[]),...rows.map(p=>String(p.id))])];
+  galleryOffset=(append?galleryOffset:0)+result.rows.length;
+  galleryTotal=Number(result.total);vaultAllTotal=Number(result.all_total);
+  vaultLoadFailed=false;
+ }catch(error){
+  if(request!==galleryRequest)return;
+  console.error('Gallery could not load:',error);vaultLoadFailed=true;
+  galleryFailure=append?'Could not load more presets. Your current results are still here.':'Could not load presets. Please try again.';
+ }finally{
+  if(request===galleryRequest){galleryBusy=false;vaultInitialLoading=false;paintGallery();}
+ }
+}
+async function refreshFeatured(){
+ const mode=competitionMode;
+ const request=++featuredRequest;
+ const options=galleryOptions(0,true);
+ try{
+  const result=await requestGallery(options);
+  if(request!==featuredRequest||mode!==competitionMode)return;
+  const old=featuredPresetId;
+  featuredPresets=mergeVaultRows(result.rows).filter(p=>p.image).slice(0,3);
+  const index=featuredPresets.findIndex(p=>String(p.id)===String(old));featuredIndex=index<0?0:index;
+  paintFeatured();
+ }catch(error){if(request===featuredRequest){featuredPresets=[];paintFeatured();}}
+}
 async function fetchPresetsFromDatabase(){
-try{
-vaultLoadFailed=false;
-const {data,error}=await _supabase.from('presets').select('*').order('created_at',{ascending:false});
-if(error)throw error;
-presets=(data||[]).map(item=>({
-id:item.id,
-title:item.title||'Untitled Preset',
-author:item.author||'Unknown',
-bodyType:item.body_type||'female',
-tags:Array.isArray(item.tags)?item.tags:[],
-image:item.image_url||item.qr_url||'',
-qr:item.qr_url||'',
-appearanceCode:realAppearanceCode(item.appearance_code||item.preset_code),
-faceCode:normalizeCode(item.face_code||''),
-votes:Number(item.votes_count??0),
-voted:false,
-favorite:false,
-date:item.created_at,
-description:item.description||''
-}));
-await Promise.all([restoreMyVotes(),loadCompetition()]);
-presets.forEach(p=>{p.voted=competitionMode?!!p.compVoted:!!p.allVoted;});
-}catch(err){
-vaultLoadFailed=true;
-console.error('Error loading presets:',err);
-}finally{
-vaultInitialLoading=false;
-renderPresets();
-syncPresetFromUrl();
+ // Refresh private voting state and public competition state before browsing.
+ await Promise.all([restoreMyVotes(),loadCompetition()]);
+ presets=[];
+ await Promise.all([refreshGallery(),refreshFeatured()]);
+ syncPresetFromUrl();
 }
-}
-
-function loadMorePresets(){
-visiblePresetLimit+=PRESET_BATCH_SIZE;
-renderPresets();
-}
-
+function queueGallerySearch(){clearTimeout(gallerySearchTimer);gallerySearchTimer=setTimeout(()=>renderPresets(true),250);}
+function loadMorePresets(){if(!galleryBusy)refreshGallery(true);}
 function renderPresets(resetLimit=false){
-const loading=document.getElementById("vaultGalleryLoading");
-if(loading)loading.hidden=!vaultInitialLoading;
-if(vaultInitialLoading){document.getElementById("emptyState").classList.add("hidden");return;}
-if(vaultLoadFailed&&!presets.length){document.getElementById("emptyState").classList.add("hidden");loading.hidden=false;loading.textContent="Could not load presets. Please refresh to try again.";return;}
-
-if(resetLimit)visiblePresetLimit=PRESET_BATCH_SIZE;
-updateCompetitionUI();
-const grid=document.getElementById('presetGrid');
-const emptyState=document.getElementById('emptyState');
-const searchQuery=(document.getElementById('searchInput')?.value||'').toLowerCase().trim();
-const gender=document.getElementById('genderFilter')?.value||'all';
-const sortBy=document.getElementById('sortBy')?.value||'newest';
-
-let filtered=presets.filter(p=>{
-const haystack=[p.title,p.author,...p.tags].join(' ').toLowerCase();
-return (!competitionMode||p.entry)&&haystack.includes(searchQuery)&&
-(gender==='all'||p.bodyType===gender)&&(!showFavoritesOnly||p.favorite);
-});
-
-if(competitionMode&&sortBy==='random')filtered.sort((a,b)=>a.order-b.order);
-else if(sortBy==='top')filtered.sort((a,b)=>score(b)-score(a));
-else filtered.sort((a,b)=>new Date(b.date)-new Date(a.date));
-
-document.getElementById('presetCounter').innerText=presets.length;
-const defaultView=!searchQuery&&gender==='all'&&!showFavoritesOnly&&(sortBy==='newest'||sortBy==='random');
-const previousFeaturedId=featuredPresetId;
-featuredPresets=defaultView
-?(competitionMode
-?presets.filter(p=>p.entry&&p.image).sort((a,b)=>a.order-b.order)
-:presets.filter(p=>p.image).sort((a,b)=>b.votes-a.votes||new Date(b.date)-new Date(a.date)).slice(0,3))
-:[];
-const previousIndex=featuredPresets.findIndex(p=>String(p.id)===String(previousFeaturedId));
-featuredIndex=previousIndex>=0?previousIndex:0;
-renderFeaturedPreset(featuredPresets[featuredIndex]);
-clearInterval(featuredTimer);
-featuredTimer=featuredPresets.length>1?setInterval(()=>{
-if(document.hidden)return;
-featuredIndex=(featuredIndex+1)%featuredPresets.length;
-renderFeaturedPreset(featuredPresets[featuredIndex]);
-},6000):null;
-
-const galleryItems=filtered;
-document.getElementById('galleryHeading').classList.toggle('hidden',galleryItems.length===0);
-const shownCount=Math.min(visiblePresetLimit,galleryItems.length);
-document.getElementById('visibleCount').innerText=`${shownCount} of ${galleryItems.length} design${galleryItems.length===1?'':'s'}`;
-document.getElementById('loadMoreWrap').classList.toggle('hidden',shownCount>=galleryItems.length);
-grid.innerHTML='';
-if(filtered.length===0)emptyState.classList.remove('hidden');
-else{
-emptyState.classList.add('hidden');
-galleryItems.slice(0,visiblePresetLimit).forEach(p=>grid.appendChild(createPresetCard(p)));
+ if(vaultInitialLoading){paintGallery();return;}
+ if(resetLimit){clearTimeout(gallerySearchTimer);refreshGallery();refreshFeatured();return;}
+ paintGallery();paintFeatured();
 }
-safeCreateIcons();
+function paintGallery(){
+ const grid=document.getElementById('presetGrid'),loading=document.getElementById('vaultGalleryLoading');
+ const empty=document.getElementById('emptyState'),more=document.getElementById('loadMoreWrap'),button=document.getElementById('loadMoreBtn');
+ updateCompetitionUI();
+ const items=galleryIds.map(id=>presets.find(p=>String(p.id)===id)).filter(Boolean);
+ grid.setAttribute('aria-busy',String(galleryBusy));
+ loading.hidden=!(galleryBusy&&!items.length);
+ document.getElementById('galleryHeading').classList.toggle('hidden',!items.length);
+ document.getElementById('presetCounter').textContent=vaultInitialLoading?'…':String(vaultAllTotal);
+ document.getElementById('visibleCount').textContent=`${items.length} of ${galleryTotal} design${galleryTotal===1?'':'s'}`;
+ document.getElementById('galleryRequestMessage').hidden=!galleryFailure;
+ document.getElementById('galleryRequestMessageText').textContent=galleryFailure;
+ more.classList.toggle('hidden',!items.length||(!galleryBusy&&galleryOffset>=galleryTotal));
+ button.disabled=galleryBusy;button.textContent=galleryBusy?'Loading…':'Load more presets';
+ grid.innerHTML='';items.forEach(p=>grid.appendChild(createPresetCard(p)));
+ empty.classList.toggle('hidden',galleryBusy||!!items.length||!!galleryFailure);
+ if(!galleryBusy&&!items.length&&!galleryFailure){
+  const filtered=document.getElementById('searchInput').value.trim()||document.getElementById('genderFilter').value!=='all'||showFavoritesOnly;
+  if(filtered){empty.querySelector('h3').textContent=showFavoritesOnly?'No saved presets match':'No matching presets';empty.querySelector('p').textContent='Try a different search or clear your filters.';empty.querySelector('button').textContent='Clear filters';empty.querySelector('button').onclick=resetFilters;}
+  else{empty.querySelector('button').textContent='Publish First Preset';empty.querySelector('button').onclick=openPublishModal;}
+ }
+ safeCreateIcons();
 }
+function vaultImageVersion(url){let hash=2166136261;for(let i=0;i<url.length;i++){hash^=url.charCodeAt(i);hash=Math.imul(hash,16777619);}return (hash>>>0).toString(16).padStart(8,'0');}
+function galleryThumbnail(p){return /^https:\/\/bwdsqiwaoqrnnxwmruar\.supabase\.co\/storage\/v1\/object\/public\/presets\//.test(p.image)?'/api/vault-thumbnail?id='+encodeURIComponent(p.id)+'&v='+vaultImageVersion(p.image):p.image;}
+function thumbnailFailed(image){const original=image.dataset.original;if(original&&image.getAttribute('src')!==original){image.src=original;}else image.style.display='none';}
+
+let featuredRequest=0;
+let featuredPaused=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let featuredHovered=false;
+let featuredFocused=false;
+function updateFeaturedPause(){const button=document.getElementById('featuredPauseBtn');button.textContent=featuredPaused?'▶ Play':'Ⅱ Pause';button.setAttribute('aria-label',featuredPaused?'Play featured preset rotation':'Pause featured preset rotation');button.setAttribute('aria-pressed',String(featuredPaused));}
+function toggleFeaturedPause(){featuredPaused=!featuredPaused;updateFeaturedPause();}
+function paintFeatured(){
+ const search=document.getElementById('searchInput').value.trim();
+ const defaultView=!search&&document.getElementById('genderFilter').value==='all'&&!showFavoritesOnly&&['newest','random'].includes(document.getElementById('sortBy').value);
+ renderFeaturedPreset(defaultView?(presets.find(p=>String(p.id)===String(featuredPresets[featuredIndex]?.id))||featuredPresets[featuredIndex]):null);
+ clearInterval(featuredTimer);featuredTimer=null;
+ updateFeaturedPause();
+ document.getElementById('featuredPauseBtn').hidden=featuredPresets.length<2;
+ if(defaultView&&featuredPresets.length>1)featuredTimer=setInterval(()=>{
+  if(document.hidden||featuredPaused||featuredHovered||featuredFocused||document.querySelector('dialog[open],[role="dialog"][aria-modal="true"]'))return;
+  featuredIndex=(featuredIndex+1)%featuredPresets.length;renderFeaturedPreset(featuredPresets[featuredIndex]);
+ },6000);
+}
+function openQuickGuide(){const d=document.getElementById('quickGuideDialog');if(!d.open)d.showModal();}
+function openFullGuide(){document.getElementById('quickGuideDialog').close();openFaqGuide();}
 
 function renderFeaturedPreset(p){
 const banner=document.getElementById('featuredBanner');
@@ -877,7 +943,7 @@ document.getElementById('featuredAuthor').textContent=`By @${p.author}`;
 document.getElementById('featuredPosition').textContent=`${featuredIndex+1} / ${featuredPresets.length} · ${score(p)} upvote${score(p)===1?'':'s'}`;
 const methods=[];
 if(p.qr)methods.push('<span class="px-2.5 py-1 rounded-lg bg-slate-950/80 border border-cyan-500/40 text-xs text-cyan-200 font-bold">QR image</span>');
-if(p.appearanceCode)methods.push('<span class="px-2.5 py-1 rounded-lg bg-slate-950/80 border border-blue-500/40 text-xs text-blue-200 font-bold">Appearance Code</span>');
+if(p.appearanceCode||p.hasCode)methods.push('<span class="px-2.5 py-1 rounded-lg bg-slate-950/80 border border-blue-500/40 text-xs text-blue-200 font-bold">Appearance Code</span>');
 document.getElementById('featuredMethods').innerHTML=methods.join('');
 }
 
@@ -885,14 +951,14 @@ function openFeaturedPreset(){
 if(featuredPresetId)openDetailModal(featuredPresetId);
 }
 
-function openRandomPreset(){
-if(!presets.length){showToast('No presets yet.');return;}
-const eligible=presets.filter(p=>!competitionMode||p.entry);
-if(!eligible.length){showToast('No entries yet.');return;}
-const choices=eligible.length>1?eligible.filter(p=>String(p.id)!==String(lastRandomPresetId)):eligible;
-const choice=choices[Math.floor(Math.random()*choices.length)];
-lastRandomPresetId=choice.id;
-openDetailModal(choice.id);
+async function openRandomPreset(){
+try{
+const result=await requestGallery({...galleryOptions(),p_sort:'random',p_seed:crypto.randomUUID(),p_offset:0,p_limit:2});
+const candidates=mergeVaultRows(result.rows);
+const p=candidates.find(p=>String(p.id)!==String(lastRandomPresetId))||candidates[0];
+if(!p){showToast('No matching presets yet.');return;}
+lastRandomPresetId=p.id;openDetailModal(p.id);
+}catch(error){showToast('Could not pick a preset. Please try again.');}
 }
 
 function isNewPreset(p){
@@ -908,10 +974,11 @@ const safeId=escapeHtml(p.id);
 const safeTitle=escapeHtml(p.title);
 const safeAuthor=escapeHtml(p.author);
 const safeBody=escapeHtml(p.bodyType);
-const safeImage=escapeHtml(p.image);
+const safeImage=escapeHtml(galleryThumbnail(p));
+const originalImage=escapeHtml(p.image);
 card.innerHTML=`
 <div class="relative aspect-[4/5] bg-slate-900 overflow-hidden"><button type="button" class="vault-portrait-open" aria-label="View ${safeTitle}" onclick="openDetailModal('${safeId}')">
-<img src="${safeImage}" loading="lazy" decoding="async" width="400" height="500" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="${safeTitle}" onerror="this.style.display='none'"></button>
+<img src="${safeImage}" data-original="${originalImage}" loading="lazy" decoding="async" width="400" height="500" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="${safeTitle}" onerror="thumbnailFailed(this)"></button>
 
 <button aria-label="Save ${safeTitle}" aria-pressed="${p.favorite?'true':'false'}" onclick="event.stopPropagation();toggleFavorite('${safeId}')" class="absolute top-3 right-3 p-2 rounded-xl bg-slate-950/80 text-slate-400 hover:text-amber-400 border border-slate-800 transition backdrop-blur-md ${p.favorite?'text-amber-400':''}">
 <i data-lucide="bookmark" class="w-4 h-4"></i>
@@ -923,7 +990,7 @@ card.innerHTML=`
 <div class="mt-3"><div class="flex flex-wrap gap-2">
 <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-lg bg-slate-950/80 text-cyan-400 border border-cyan-500/30 uppercase tracking-widest backdrop-blur-md shadow-lg">${safeBody}</span>
 ${p.qr?'<span class="text-[10px] font-bold px-2 py-1 rounded-lg bg-slate-950/80 text-slate-100 border border-slate-600/70 backdrop-blur-md">QR</span>':''}
-${p.appearanceCode?'<span class="text-[10px] font-bold px-2 py-1 rounded-lg bg-slate-950/80 text-slate-100 border border-slate-600/70 backdrop-blur-md">Code</span>':''}
+${(p.appearanceCode||p.hasCode)?'<span class="text-[10px] font-bold px-2 py-1 rounded-lg bg-slate-950/80 text-slate-100 border border-slate-600/70 backdrop-blur-md">Code</span>':''}
 </div>
 ${isNewPreset(p)?'<span class="px-2 py-1 rounded-lg bg-cyan-500/10 text-cyan-300 text-[10px] font-black uppercase tracking-wide ">New</span>':''}
 </div>
@@ -947,9 +1014,18 @@ card.appendChild(report);
 return card;
 }
 
-function openDetailModal(id,updateUrl=true){
-const p=presets.find(item=>String(item.id)===String(id));
-if(!p)return;
+let detailOpenRequest=0;
+async function openDetailModal(id,updateUrl=true){
+const request=++detailOpenRequest;
+let p=presets.find(item=>String(item.id)===String(id));
+if(!p||!p.detailsLoaded){
+ try{
+  const {data,error}=await _supabase.from('presets').select('*').eq('id',id).single();
+  if(error||!data)throw error||new Error('Preset unavailable');
+  p=mergeVaultRows([data])[0];
+ }catch(error){if(request===detailOpenRequest)showToast('Could not open this preset. It may have been removed.');return;}
+}
+if(request!==detailOpenRequest)return;
 activePresetId=id;
 if(updateUrl){
 const url=new URL(location.href);
@@ -998,6 +1074,7 @@ safeCreateIcons();
 }
 
 function closeDetailModal(updateUrl=true){
+++detailOpenRequest;
 document.getElementById('detailModal').classList.add('hidden');
 activePresetId=null;
 if(updateUrl&&new URL(location.href).searchParams.has('preset')){
@@ -1010,8 +1087,7 @@ history.replaceState({},'',url);
 function syncPresetFromUrl(){
 const id=new URL(location.href).searchParams.get('preset');
 if(id){
-if(presets.some(p=>String(p.id)===id))openDetailModal(id,false);
-else closeDetailModal(false);
+openDetailModal(id,false);
 }else closeDetailModal(false);
 }
 
@@ -1107,12 +1183,16 @@ if(!current)return;
 if(votingCompetition){
 current.compVoted=data.voted;
 current.competitionVotes=count;
+vaultEntries.set(key,{...(vaultEntries.get(key)||{}),votes_count:count,voted:data.voted});
 }else{
 current.allVoted=data.voted;
 current.votes=count;
+if(data.voted)vaultVotedIds.add(key);else vaultVotedIds.delete(key);
 }
 current.voted=competitionMode?!!current.compVoted:!!current.allVoted;
 renderPresets();
+if(document.getElementById('sortBy').value==='top')refreshGallery();
+if(!votingCompetition)refreshFeatured();
 if(activePresetId&&String(activePresetId)===key){
 document.getElementById('modalVoteCount').innerText=score(current);
 updateModalButtonStates(current);
@@ -1130,8 +1210,12 @@ function toggleModalVote(){if(activePresetId)toggleVote(activePresetId);}
 function toggleFavorite(id){
 const p=presets.find(item=>String(item.id)===String(id));
 if(!p)return;
-p.favorite=!p.favorite;
-renderPresets();
+const next=new Set(vaultFavoriteIds);const key=String(p.id);
+if(next.has(key))next.delete(key);else next.add(key);
+try{localStorage.setItem('ohvault_saved_presets_v1',JSON.stringify([...next]));}
+catch(error){showToast('Enable browser storage to save favourites.');return;}
+vaultFavoriteIds=next;p.favorite=next.has(key);
+renderPresets(showFavoritesOnly);
 }
 
 function toggleModalFavorite(){
@@ -1289,7 +1373,7 @@ localStorage.removeItem(editStorageKey(id));
 closeEditModal();
 closeDetailModal();
 presets=presets.filter(item=>String(item.id)!==String(id));
-renderPresets();
+await fetchPresetsFromDatabase();
 showToast('Preset deleted.');
 }catch(err){
 alert('Delete failed: '+(err?.message||err));
@@ -1358,11 +1442,18 @@ btn.textContent='Save changes';
 }
 }
 
+function updatePublishExamples(){
+for(const [inputId,target] of [['pubQRFile','pubQRChosen'],['pubImageFile','pubImageChosen']]){
+const file=document.getElementById(inputId).files[0],el=document.getElementById(target);
+el.hidden=!file;el.textContent=file?'Selected: '+file.name:'';
+}
+}
 function openPublishModal(){
 clearFormMessage('publish');
 document.getElementById('enterCompetition').checked=competitionMode&&!competitionClosed();
 document.getElementById('enterCompetition').disabled=!competition||competitionClosed();
 document.getElementById('publishModal').classList.remove('hidden');
+updatePublishExamples();
 mountSecurity('publish');
 }
 
@@ -1626,6 +1717,7 @@ preset_code:normalizeCode(document.getElementById('pubAppearanceCode').value),
 description:document.getElementById('pubDesc').value.trim(),
 competition_id:document.getElementById('enterCompetition').checked&&competition?competition.id:null
 };
+if(!['male','female'].includes(fields.body_type))throw new Error('Choose Male or Female to match your character.');
 if(!qr&&!fields.preset_code)throw new Error('Upload a QR/share screenshot or enter an Appearance Code.');
 if(!qr&&!image)throw new Error('Add a showcase image.');
 if(fields.tags.length>10||fields.tags.some(t=>t.length>30))throw new Error('Use up to 10 tags, each no longer than 30 characters.');
@@ -1715,7 +1807,8 @@ try{token=getVoteToken();}catch(_){}
 const snapshot=await _supabase.rpc('vault_competition_snapshot',{p_competition:competition.id,p_token:token});
 if(snapshot.error)throw snapshot.error;
 const entries=new Map((snapshot.data||[]).map(e=>[String(e.preset_id),e]));
-const fresh=presets.filter(p=>!entryOrder.has(String(p.id)));
+vaultEntries=entries;
+const fresh=[...entries.keys()].filter(id=>!entryOrder.has(id)).map(id=>({id}));
 for(let i=fresh.length-1;i>0;i--){
 const j=Math.floor(Math.random()*(i+1));
 [fresh[i],fresh[j]]=[fresh[j],fresh[i]];
@@ -1731,7 +1824,7 @@ p.voted=competitionMode?p.compVoted:!!p.allVoted;
 });
 }catch(err){
 console.error('Competition unavailable',err);
-competition=null;
+competition=null;vaultEntries=new Map();
 showToast('Competition could not be loaded. Try refreshing.');
 }
 }
@@ -1828,6 +1921,14 @@ if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.cl
 document.addEventListener('DOMContentLoaded',()=>{
 safeCreateIcons();
 initializeVaultAdmin();
+const feature=document.getElementById('featuredBanner');
+feature.addEventListener('mouseenter',()=>featuredHovered=true);
+feature.addEventListener('mouseleave',()=>featuredHovered=false);
+feature.addEventListener('focusin',()=>featuredFocused=true);
+feature.addEventListener('focusout',event=>featuredFocused=feature.contains(event.relatedTarget));
+document.getElementById('pubQRFile').addEventListener('change',updatePublishExamples);
+document.getElementById('pubImageFile').addEventListener('change',updatePublishExamples);
+document.getElementById('publishForm').addEventListener('reset',()=>queueMicrotask(updatePublishExamples));
 switchTab(false);
 fetchPresetsFromDatabase();
 setInterval(updateCompetitionUI,10000);
