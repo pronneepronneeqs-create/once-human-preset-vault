@@ -415,7 +415,6 @@ body{padding-bottom:88px}
 <input id="editQRFile" type="file" accept="image/jpeg,image/png,image/webp" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white">
 </div>
 <label class="flex gap-2 items-center text-xs text-slate-400"><input id="editRemoveQR" type="checkbox">Remove the existing QR/share image</label>
-<p class="text-xs text-slate-500">Edits have a separate allowance: up to 10 per hour and 30 per day per browser.</p>
 <p class="text-xs text-slate-400">Leave file fields empty to keep your images. Keep at least a QR/share image or an Appearance Code. JPEG, PNG or WebP · Up to 5 MB per image.</p>
 </fieldset>
 <label class="flex gap-3 items-start rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-3 text-sm"><input type="checkbox" id="editCompetition" class="mt-1"><span>Enter this preset in the competition<small class="block text-slate-400 mt-1">Entries with votes cannot be withdrawn.</small></span></label>
@@ -679,7 +678,7 @@ body{padding-bottom:88px}
 <li>
 <div class="faq-step-heading"><span class="faq-number">2</span><h4>Click Edit preset</h4></div>
 <div class="faq-picture"><span class="faq-picture-icon" aria-hidden="true">✎</span><div><strong>Edit preset</strong><small>Correct your preset details, or delete your preset</small></div></div>
-<p>You can edit the title, creator name, body type, tags, description, Appearance Code and both images. Leave replacement file fields empty to keep your images. Replacement images are sent to OpenAI for safety checking. Complete the security check and click Save changes. Edits have their own allowance: up to 10 per hour and 30 per day in this browser. Editing does not use your upload allowance. Shared connection and site-wide limits also apply.</p>
+<p>You can edit the title, creator name, body type, tags, description, Appearance Code and both images. Leave replacement file fields empty to keep your images. Replacement images are sent to OpenAI for safety checking. Complete the security check and click Save changes. If you reach an editing limit, wait before trying again.</p>
 <p>While a competition entry has votes, its images and Appearance Code are locked and it cannot be withdrawn. You can still correct its title, creator name, body type, tags and description. Ordinary gallery votes do not lock editing.</p>
 <p>The edit controls also let you permanently delete your preset. Changing browsers or clearing browser data removes access to those controls.</p>
 </li>
@@ -1338,9 +1337,9 @@ function showFormError(scope,error){
  }else if(error instanceof TypeError&&/fetch|network|load failed/i.test(message)){
   message='The connection failed. Check your preset after refreshing before trying again; the server may have completed the save.';
  }else if(/Edit limit reached|Upload limit reached|Submission limit reached|Too many submissions/i.test(message)){
-  message+=scope==='edit'
-   ?' Editing has a separate allowance of up to 10 edits per hour and 30 per day in this browser. Shared connection and site-wide limits can also apply. Please wait before trying again.'
-   :' Uploads have a separate allowance from edits. Please wait before trying again.';
+  message=scope==='edit'
+   ?'Too many edit requests. Please wait before trying again.'
+   :'Too many upload requests. Please wait before trying again.';
  }
  setFormMessage(scope,scope==='edit'?'Edit not confirmed':'Upload not confirmed',message,'error');
 }
