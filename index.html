@@ -232,7 +232,7 @@ body{padding-bottom:88px}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full relative z-10">
 <main class="space-y-6">
 <div class="vault-intro">
-<div><h2>Your next character starts here.</h2><p>Discover community presets. Download a QR image or copy a game code.</p></div>
+<div><h2>Your next character starts here.</h2><p>Discover community presets. Copy an Appearance Code and make it your own.</p></div>
 <button type="button" class="vault-quick-link" onclick="openQuickGuide()">New here? How it works →</button>
 <span class="vault-total"><span id="presetCounter">…</span> presets</span>
 </div>
@@ -336,7 +336,7 @@ body{padding-bottom:88px}
 <div class="flex items-start justify-between gap-3">
 <div class="min-w-0">
 <span class="text-[10px] font-bold text-cyan-400 uppercase tracking-widest block">Appearance Code</span>
-<p class="text-sm text-slate-300 mt-2">Copy the code, then paste it into the game’s text import.</p>
+<p class="text-sm text-slate-300 mt-2">Copy the code, then paste it into the game’s Enter Face Code field.</p>
 </div>
 <button onclick="copyModalAppearanceCode()" class="shrink-0 px-3 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"><i data-lucide="copy" class="w-3.5 h-3.5"></i>Copy code</button>
 </div>
@@ -351,10 +351,10 @@ body{padding-bottom:88px}
 <button onclick="copyModalFaceCode()" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"><i data-lucide="copy" class="w-3.5 h-3.5"></i>Copy</button>
 </div>
 <div id="modalQRContainer" class="vault-import-panel p-4 rounded-xl">
-<span class="text-xs font-bold text-cyan-300 uppercase tracking-widest">QR image</span>
-<p class="text-sm text-slate-300 mt-2">Download the share image, then select it in the game's QR/image import.</p>
-<img id="modalQR" class="hidden" alt="QR share image">
-<div class="mt-3"><button id="modalDownloadBtn" onclick="downloadGameImage()" class="w-full flex items-center justify-center gap-2 py-2.5 bg-cyan-400 hover:brightness-110 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl transition "><i data-lucide="download" class="w-4 h-4"></i><span>Download QR image</span></button></div>
+<span class="text-xs font-bold text-cyan-300 uppercase tracking-widest">Share / legacy QR image</span>
+<p class="text-sm text-slate-300 mt-2">Read the printed code from the share picture and enter it in the game. Only use QR import if this older picture contains an actual QR square.</p>
+<button type="button" onclick="openShareImage()" class="mt-3 w-full text-cyan-300 text-sm font-semibold">Open full share picture to read its code</button><img id="modalQR" class="hidden" alt="Game share picture or older QR image">
+<div class="mt-3"><button id="modalDownloadBtn" onclick="downloadGameImage()" class="w-full flex items-center justify-center gap-2 py-2.5 bg-cyan-400 hover:brightness-110 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl transition "><i data-lucide="download" class="w-4 h-4"></i><span>Download share image</span></button></div>
 </div>
 <div id="modalImportGuide" class="p-4 rounded-xl bg-slate-950/90 border border-slate-800 text-xs text-slate-300"></div>
 <button id="modalEditBtn" type="button" onclick="openEditModal()" class="hidden w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold">Edit preset</button>
@@ -411,11 +411,11 @@ body{padding-bottom:88px}
 <input id="editImageFile" type="file" accept="image/jpeg,image/png,image/webp" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white">
 </div>
 <div>
-<label for="editQRFile" class="block text-xs font-semibold text-slate-400 mb-1">Replace QR/share image (optional)</label>
+<label for="editQRFile" class="block text-xs font-semibold text-slate-400 mb-1">Replace share screenshot / older QR image (optional)</label>
 <input id="editQRFile" type="file" accept="image/jpeg,image/png,image/webp" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white">
 </div>
-<label class="flex gap-2 items-center text-xs text-slate-400"><input id="editRemoveQR" type="checkbox">Remove the existing QR/share image</label>
-<p class="text-xs text-slate-400">Leave file fields empty to keep your images. Keep at least a QR/share image or an Appearance Code. JPEG, PNG or WebP · Up to 5 MB per image.</p>
+<label class="flex gap-2 items-center text-xs text-slate-400"><input id="editRemoveQR" type="checkbox">Remove the existing share / older QR image</label>
+<p class="text-xs text-slate-400">Leave file fields empty to keep your images. An Appearance Code is required when updating import information. Existing competition entries with locked images and codes can still have their other details corrected. JPEG, PNG or WebP · Up to 5 MB per image.</p>
 </fieldset>
 <label class="flex gap-3 items-start rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-3 text-sm"><input type="checkbox" id="editCompetition" class="mt-1"><span>Enter this preset in the competition<small class="block text-slate-400 mt-1">Entries with votes cannot be withdrawn.</small></span></label>
 <p class="text-xs text-slate-400">Replacement images are sent to OpenAI for the same safety check used on new uploads. Explicit nudity and sexual content are not allowed.</p>
@@ -448,7 +448,7 @@ body{padding-bottom:88px}
 <div class="bg-slate-900 border border-cyan-500/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
 <button aria-label="Close publish preset" onclick="closePublishModal()" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
 <h3 class="text-xl font-black text-white mb-1">Publish Preset</h3>
-<p class="text-xs text-slate-400 mb-6">Upload an in-game QR/share screenshot or enter a real Appearance Code. You can provide both.</p>
+<p class="text-xs text-slate-400 mb-6">Paste your real Appearance Code and add a character picture. Older QR images are optional.</p>
 <form id="publishForm" onsubmit="handlePublish(event)" class="space-y-4">
 <div>
 <label for="pubTitle" class="block text-xs font-semibold text-slate-400 mb-1">Preset Title</label>
@@ -464,21 +464,21 @@ body{padding-bottom:88px}
 <select id="pubBodyType" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"><option value="" disabled selected>Choose Male or Female</option><option value="female">Female</option><option value="male">Male</option></select>
 </div>
 </div>
-<fieldset class="vault-upload-section"><legend>1 · Preset to import</legend><p>Give visitors a way to get your character in their game.</p><figure class="vault-upload-example"><svg viewBox="0 0 160 90" aria-hidden="true"><rect x="3" y="3" width="154" height="84" rx="8" fill="#0b1626" stroke="#35516a"/><circle cx="50" cy="30" r="12" fill="#236579"/><path d="M24 75Q24 46 50 46Q76 46 76 75" fill="#236579"/><rect x="99" y="18" width="43" height="43" rx="3" fill="#1e3548"/><path d="M106 25h10v10h-10zm18 0h10v10h-10zm-18 18h10v10h-10z" fill="none" stroke="#67e8f9" stroke-width="2"/><path d="M124 44h10m-10 6h6" stroke="#67e8f9"/></svg><figcaption>Example: a share image with your character and QR code. Upload the real image from Once Human.</figcaption></figure><div>
-<label for="pubQRFile" class="block text-xs font-semibold text-slate-400 mb-1">QR / share screenshot from the game</label>
-<input id="pubQRFile" type="file" accept="image/jpeg,image/png,image/webp" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer">
-<span class="text-[10px] text-slate-500 mt-1 block">Upload the screenshot from Once Human. Provide this or an Appearance Code (or both).</span>
+<fieldset class="vault-upload-section"><legend>1 · Preset to import</legend><p>Give visitors a way to get your character in their game.</p><figure class="vault-upload-example"><svg viewBox="0 0 160 90" aria-hidden="true"><rect x="3" y="3" width="154" height="84" rx="8" fill="#0b1626" stroke="#35516a"/><circle cx="50" cy="30" r="12" fill="#236579"/><path d="M24 75Q24 46 50 46Q76 46 76 75" fill="#236579"/><rect x="90" y="27" width="58" height="25" rx="3" fill="#1e3548"/><text x="94" y="43" font-size="8" fill="#67e8f9">Your code</text></svg><figcaption>Example: your character with a printed Appearance Code. Copy or type that code into the field below.</figcaption></figure><div>
+<label for="pubAppearanceCode" class="block text-xs font-semibold text-slate-400 mb-1">Appearance Code — required</label>
+<textarea required id="pubAppearanceCode" rows="3" maxlength="12000" placeholder="Paste the text cipher generated by Once Human here..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-cyan-300 focus:outline-none focus:border-cyan-500 font-mono resize-y"></textarea>
+<span class="text-[10px] text-slate-500 mt-1 block">Paste the exact code from Once Human. If it is printed on your share picture, type it carefully, keeping capital and lowercase letters. A picture alone is not enough.</span>
 </div>
 <div>
-<label for="pubAppearanceCode" class="block text-xs font-semibold text-slate-400 mb-1">Appearance Code — another way to import</label>
-<textarea id="pubAppearanceCode" rows="3" maxlength="12000" placeholder="Paste the text cipher generated by Once Human here..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-cyan-300 focus:outline-none focus:border-cyan-500 font-mono resize-y"></textarea>
-<span class="text-[10px] text-slate-500 mt-1 block">Only paste a real code from Once Human if you have one. A QR/share screenshot alone is enough.</span>
+<label for="pubQRFile" class="block text-xs font-semibold text-slate-400 mb-1">Share screenshot / older QR image (optional)</label>
+<input id="pubQRFile" type="file" accept="image/jpeg,image/png,image/webp" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer">
+<span class="text-[10px] text-slate-500 mt-1 block">Optional: your game share picture, or an older image containing an actual QR square. This does not replace the required code.</span>
 </div>
 <p id="pubQRChosen" class="vault-upload-chosen" hidden></p></fieldset>
 <fieldset class="vault-upload-section"><legend>2 · Preview picture</legend><p>Show people what your character looks like.</p><figure class="vault-upload-example"><svg viewBox="0 0 160 90" aria-hidden="true"><rect x="3" y="3" width="154" height="84" rx="8" fill="#0b1626" stroke="#35516a"/><circle cx="80" cy="29" r="16" fill="#236579"/><path d="M43 84Q43 49 80 49Q117 49 117 84" fill="#236579"/><path d="M10 73L35 48L45 64M119 68L140 42L151 59" fill="none" stroke="#184458" stroke-width="3"/></svg><figcaption>Example: a clear in-game character screenshot.</figcaption></figure><div>
 <label for="pubImageFile" class="block text-xs font-semibold text-slate-400 mb-1">Preview picture</label>
 <input id="pubImageFile" type="file" accept="image/jpeg,image/png,image/webp" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer">
-<span class="text-[10px] text-slate-500 mt-1 block">This is the picture visitors see. Add a character screenshot, or leave this empty to use your QR/share image. A picture is required if you only provide a code.</span>
+<span class="text-[10px] text-slate-500 mt-1 block">Add a character screenshot. If you supplied a share picture above, you may use that as the cover instead. Every preset needs a picture.</span>
 </div>
 <p id="pubImageChosen" class="vault-upload-chosen" hidden></p></fieldset>
 <div>
@@ -549,7 +549,7 @@ body{padding-bottom:88px}
 <dialog id="quickGuideDialog" class="vault-support-dialog" aria-labelledby="quickGuideTitle">
 <button type="button" class="vault-support-close" onclick="document.getElementById('quickGuideDialog').close()" aria-label="Close quick guide">✕</button>
 <h2 id="quickGuideTitle">Your new look in 3 steps</h2>
-<ol class="vault-quick-steps"><li><span>1</span><div><strong>Pick a character</strong><p>Click its picture or title to open the preset.</p></div></li><li><span>2</span><div><strong>Download or copy</strong><p>Download the QR/share image, or copy the Appearance Code.</p></div></li><li><span>3</span><div><strong>Import in Once Human</strong><p>Open the game's appearance import screen and select the matching QR/image or text-code option. Preview the result before confirming.</p></div></li></ol>
+<ol class="vault-quick-steps"><li><span>1</span><div><strong>Pick a character</strong><p>Click its picture or title to open the preset.</p></div></li><li><span>2</span><div><strong>Download or copy</strong><p>Copy the Appearance Code. For older entries without one saved, open the share picture and read its printed code.</p></div></li><li><span>3</span><div><strong>Import in Once Human</strong><p>Open the game's appearance import screen, paste the code into Enter Face Code. Check the character preview before confirming.</p></div></li></ol>
 <p class="vault-support-hint">Import options can vary by game version. No account is needed to browse or download.</p>
 <button type="button" class="vault-guide-more" onclick="openFullGuide()">Show the illustrated guide →</button>
 </dialog>
@@ -580,7 +580,7 @@ body{padding-bottom:88px}
 <summary>Use a preset you like<span aria-hidden="true">＋</span></summary>
 <figure class="faq-card-demo" aria-label="Illustration of a preset card">
 <div class="faq-demo-photo">
-<span>FEMALE · QR · Code</span>
+<span>FEMALE · Appearance Code</span>
 <span class="faq-demo-bookmark">☆<small>Save</small></span>
 <svg viewBox="0 0 180 150" aria-hidden="true">
 <circle cx="90" cy="45" r="25" fill="#155e75"/>
@@ -601,13 +601,13 @@ body{padding-bottom:88px}
 </li>
 <li>
 <div class="faq-step-heading"><span class="faq-number">2</span><h4>Save its import information</h4></div>
-<div class="faq-picture"><span class="faq-picture-icon" aria-hidden="true">↓</span><div><strong>Download QR / share image</strong><small>Or copy the Appearance Code</small></div></div>
-<p>If it has a QR/share image, click the download button. If it has an Appearance Code, use the copy button. Some presets have both.</p>
+<div class="faq-picture"><span class="faq-picture-icon" aria-hidden="true">↓</span><div><strong>Copy Appearance Code</strong><small>Use the copy button in the preset</small></div></div>
+<p>Click Copy code. If an older preset has no saved code, open its share picture and carefully type the printed code. Capital and lowercase letters matter. A share screenshot is not automatically a QR code.</p>
 </li>
 <li>
 <div class="faq-step-heading"><span class="faq-number">3</span><h4>Import it in Once Human</h4></div>
-<div class="faq-picture"><span class="faq-picture-icon" aria-hidden="true">↗</span><div><strong>Saved image → Once Human</strong><small>Or copied code → Once Human</small></div></div>
-<p>Open the game’s appearance import/sharing screen. Use the image import option for your saved QR/share image, or text import for the copied code. Available options can differ by platform and game version.</p>
+<div class="faq-picture"><span class="faq-picture-icon" aria-hidden="true">↗</span><div><strong>Copied code → Once Human</strong><small>Paste into appearance code import</small></div></div>
+<p>Open the game’s appearance import/sharing screen, find Enter Face Code and paste your code. Check the character preview before confirming. For an older image containing an actual QR square, you can still try the game’s QR import option if available.</p>
 </li>
 </ol>
 </details>
@@ -622,8 +622,8 @@ body{padding-bottom:88px}
 <label>② Creator Name<span>Your name</span></label>
 <label>③ Body Type<span>Female ▾</span></label>
 </div>
-<label>④ Appearance Code<span>Paste your real game code here, if you have one</span></label>
-<label>⑤ In-game QR/share screenshot<span>Choose file · Your game screenshot</span></label>
+<label>④ Appearance Code<span>Required · Paste or type your real game code</span></label>
+<label>⑤ Optional share / older QR image<span>Choose file · Your game screenshot</span></label>
 <label>⑥ Preview picture<span>Choose file · Your character picture</span></label>
 <p>☐ Enter this preset in the competition</p>
 <div class="faq-demo-submit">⑦ Publish Design</div>
@@ -641,13 +641,13 @@ body{padding-bottom:88px}
 </li>
 <li>
 <div class="faq-step-heading"><span class="faq-number">3</span><h4>Add a way to import your character</h4></div>
-<div class="faq-picture"><span class="faq-picture-icon" aria-hidden="true">▧</span><div><strong>QR/share screenshot OR Appearance Code</strong><small>At least one is needed</small></div></div>
-<p>Upload a real QR/share screenshot from Once Human, or paste a real Appearance Code from the game. You can add both. The site does not generate game codes.</p>
+<div class="faq-picture"><span class="faq-picture-icon" aria-hidden="true">▧</span><div><strong>Appearance Code — required</strong><small>A picture alone is not enough</small></div></div>
+<p>Paste your real Appearance Code from Once Human. If it only appears on your share picture, read it and type it exactly, keeping capital and lowercase letters. You may also attach the share picture or an older QR image. The site does not generate codes or automatically read them from pictures.</p>
 </li>
 <li>
 <div class="faq-step-heading"><span class="faq-number">4</span><h4>Choose a cover picture</h4></div>
 <div class="faq-picture"><span class="faq-picture-icon" aria-hidden="true">▧</span><div><strong>Preview picture</strong><small>JPEG, PNG or WebP · Up to 5 MB per image</small></div></div>
-<p>You can upload a separate character picture as the Preview picture. For a code-only upload, this picture is required. Otherwise, the QR/share image can be used as the cover.</p>
+<p>Add a clear character picture. An optional share screenshot or older QR image can serve as the cover instead. Every new preset needs both a real Appearance Code and a picture.</p>
 </li>
 <li>
 <div class="faq-step-heading"><span class="faq-number">5</span><h4>Publish</h4></div>
@@ -954,7 +954,7 @@ document.getElementById('featuredTitle').textContent=p.title;
 document.getElementById('featuredAuthor').textContent=`By @${p.author}`;
 document.getElementById('featuredPosition').textContent=`${featuredIndex+1} / ${featuredPresets.length} · ${score(p)} upvote${score(p)===1?'':'s'}`;
 const methods=[];
-if(p.qr)methods.push('<span class="px-2.5 py-1 rounded-lg bg-slate-950/80 border border-cyan-500/40 text-xs text-cyan-200 font-bold">QR image</span>');
+if(p.qr)methods.push('<span class="px-2.5 py-1 rounded-lg bg-slate-950/80 border border-cyan-500/40 text-xs text-cyan-200 font-bold">Share / legacy QR image</span>');
 if(p.appearanceCode||p.hasCode)methods.push('<span class="px-2.5 py-1 rounded-lg bg-slate-950/80 border border-blue-500/40 text-xs text-blue-200 font-bold">Appearance Code</span>');
 document.getElementById('featuredMethods').innerHTML=methods.join('');
 }
@@ -1001,7 +1001,7 @@ card.innerHTML=`
 <p class="text-xs text-slate-400 mt-1">By @${safeAuthor}</p>
 <div class="mt-3"><div class="flex flex-wrap gap-2">
 <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-lg bg-slate-950/80 text-cyan-400 border border-cyan-500/30 uppercase tracking-widest backdrop-blur-md shadow-lg">${safeBody}</span>
-${p.qr?'<span class="text-[10px] font-bold px-2 py-1 rounded-lg bg-slate-950/80 text-slate-100 border border-slate-600/70 backdrop-blur-md">QR</span>':''}
+${p.qr?'<span class="text-[10px] font-bold px-2 py-1 rounded-lg bg-slate-950/80 text-slate-100 border border-slate-600/70 backdrop-blur-md">Share image</span>':''}
 ${(p.appearanceCode||p.hasCode)?'<span class="text-[10px] font-bold px-2 py-1 rounded-lg bg-slate-950/80 text-slate-100 border border-slate-600/70 backdrop-blur-md">Code</span>':''}
 </div>
 ${isNewPreset(p)?'<span class="px-2 py-1 rounded-lg bg-cyan-500/10 text-cyan-300 text-[10px] font-black uppercase tracking-wide ">New</span>':''}
@@ -1113,10 +1113,10 @@ copyText(url.toString(),'Preset link copied!');
 function renderImportGuide(p){
 const guide=document.getElementById('modalImportGuide');
 const steps=[];
-if(p.appearanceCode)steps.push('<li>Copy the Appearance Code above. In Once Human’s appearance sharing/import screen, choose text cipher import and paste it.</li>');
-if(p.qr)steps.push('<li>Download the QR/share image. In Once Human’s appearance sharing/import screen, choose the QR/image import method and use that image.</li>');
+if(p.appearanceCode)steps.push('<li>Copy the Appearance Code above. In Once Human’s appearance sharing/import screen, paste it into Enter Face Code.</li>');
+if(!p.appearanceCode&&p.qr)steps.push('<li>No text code was saved for this older preset. Open the full share picture and carefully type its printed Appearance Code into the game. If it contains an actual QR square, legacy QR import may also be available.</li>');
 guide.innerHTML='<h3 class="font-bold text-cyan-400 mb-2">How to import this preset</h3><ol class="list-decimal pl-4 space-y-2">'+steps.join('')+'</ol>';
-guide.classList.add('hidden');
+guide.classList.toggle('hidden',!!p.appearanceCode);
 }
 
 window.addEventListener('popstate',syncPresetFromUrl);
@@ -1128,6 +1128,13 @@ document.getElementById('zoomedImg').src=p.image||p.qr;
 document.getElementById('zoomModal').classList.remove('hidden');
 }
 
+function openShareImage(){
+const p=presets.find(item=>String(item.id)===String(activePresetId));
+if(!p?.qr)return;
+document.getElementById('zoomedImg').src=p.qr;
+document.getElementById('zoomModal').classList.remove('hidden');
+}
+
 function closeZoomModal(){document.getElementById('zoomModal').classList.add('hidden');}
 
 async function downloadGameImage(){
@@ -1135,12 +1142,12 @@ const p=presets.find(item=>String(item.id)===String(activePresetId));
 if(!p?.qr)return;
 try{
 const response=await fetch(p.qr);
-if(!response.ok)throw new Error('QR image could not be downloaded.');
+if(!response.ok)throw new Error('Share image could not be downloaded.');
 const blob=await response.blob();
 const url=URL.createObjectURL(blob);
 const a=document.createElement('a');
 a.href=url;
-a.download=`${(p.title||'once-human-preset').replace(/[^a-z0-9]/gi,'_').toLowerCase()}_qr.png`;
+a.download=`${(p.title||'once-human-preset').replace(/[^a-z0-9]/gi,'_').toLowerCase()}_share.png`;
 document.body.appendChild(a);
 a.click();
 a.remove();
@@ -1149,7 +1156,7 @@ URL.revokeObjectURL(url);
 window.open(p.qr,'_blank','noopener,noreferrer');
 }finally{
 const guide=document.getElementById('modalImportGuide');
-guide.innerHTML='<h3 class="font-bold text-cyan-300 mb-3">Use your downloaded QR image</h3><ol class="list-decimal pl-5 space-y-2"><li>Find the saved image in your browser’s Downloads folder. If it opened in a new tab, save that image first.</li><li>Open Once Human’s appearance sharing/import screen and choose the QR/image import option.</li><li>Select the saved image, check the preview, then confirm in the game.</li></ol><p class="mt-3 text-slate-300">If your version of the game has no QR/image import, use the Appearance Code when available.</p>';
+guide.innerHTML='<h3 class="font-bold text-cyan-300 mb-3">Use the code from your share picture</h3><ol class="list-decimal pl-5 space-y-2"><li>Open the downloaded picture at full size and find the printed Appearance Code.</li><li>Copy the saved code above, or type the printed code carefully into the game’s Enter Face Code field.</li><li>Check the character preview before confirming.</li></ol><p class="mt-3 text-slate-300">Only older pictures with an actual QR square can be used with a supported QR import option.</p>';
 guide.classList.remove('hidden');
 guide.setAttribute('role','status');
 guide.scrollIntoView({block:'nearest',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
@@ -1284,7 +1291,7 @@ setTimeout(()=>toast.remove(),1800);
 
 function copyModalAppearanceCode(){
 const p=presets.find(item=>String(item.id)===String(activePresetId));
-if(p)copyText(p.appearanceCode,'Appearance Code copied!');
+if(p?.appearanceCode){copyText(p.appearanceCode,'Appearance Code copied!');renderImportGuide(p);document.getElementById('modalImportGuide').classList.remove('hidden');}
 }
 
 function copyModalFaceCode(){
@@ -1433,7 +1440,7 @@ remove_qr:removeQR,
 enter_competition:document.getElementById('editCompetition').disabled?null:document.getElementById('editCompetition').checked
 };
 if(fields.tags.length>10||fields.tags.some(t=>t.length>30))throw new Error('Use up to 10 tags, each no longer than 30 characters.');
-if(!qr&&(!p.qr||removeQR)&&!fields.preset_code)throw new Error('Keep a QR/share image or an Appearance Code.');
+if(!locked&&!realAppearanceCode(fields.preset_code))throw new Error('Add the real Appearance Code before saving. Read it from your share picture if needed.');
 const form=new FormData();
 form.set('metadata',JSON.stringify(fields));
 if(image)form.set('image',image);
@@ -1730,7 +1737,7 @@ description:document.getElementById('pubDesc').value.trim(),
 competition_id:document.getElementById('enterCompetition').checked&&competition?competition.id:null
 };
 if(!['male','female'].includes(fields.body_type))throw new Error('Choose Male or Female to match your character.');
-if(!qr&&!fields.preset_code)throw new Error('Upload a QR/share screenshot or enter an Appearance Code.');
+if(!realAppearanceCode(fields.preset_code))throw new Error('Paste the real Appearance Code from Once Human. A share picture or QR image alone is not enough.');
 if(!qr&&!image)throw new Error('Add a showcase image.');
 if(fields.tags.length>10||fields.tags.some(t=>t.length>30))throw new Error('Use up to 10 tags, each no longer than 30 characters.');
 const signature=await clientHash(
