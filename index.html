@@ -1946,6 +1946,13 @@ b.disabled=competitionMode&&!!competitionClosed();
 }
 
 function switchTab(comp,updateUrl=true){
+// Discard the previous gallery's banner and any response still in flight.
+++featuredRequest;
+featuredPresets=[];
+featuredIndex=0;
+clearInterval(featuredTimer);
+featuredTimer=null;
+renderFeaturedPreset(null);
 competitionMode=comp;
 closeDetailModal(updateUrl);
 for(const [id,on] of [['allTab',!comp],['compTab',comp]]){
