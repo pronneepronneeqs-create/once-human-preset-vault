@@ -896,11 +896,20 @@ async function refreshFeatured(){
  }catch(error){if(request===featuredRequest){featuredPresets=[];paintFeatured();}}
 }
 async function fetchPresetsFromDatabase(){
- // Refresh private voting state and public competition state before browsing.
- await Promise.all([restoreMyVotes(),loadCompetition()]);
+ const initialMode=competitionMode;
  presets=[];
- await Promise.all([refreshGallery(),refreshFeatured()]);
+ const stateReady=Promise.all([restoreMyVotes(),loadCompetition()]);
+ // The main gallery can render without waiting for competition membership.
+ // Competition browsing still needs its membership and scores first.
+ if(competitionMode)await stateReady;
+ const galleryReady=Promise.all([refreshGallery(),refreshFeatured()]);
+ await galleryReady;
  syncPresetFromUrl();
+ await stateReady;
+ if(competitionMode!==initialMode)await Promise.all([refreshGallery(),refreshFeatured()]);
+ updateCompetitionUI();
+ paintGallery();
+ paintFeatured();
 }
 function queueGallerySearch(){clearTimeout(gallerySearchTimer);gallerySearchTimer=setTimeout(()=>renderPresets(true),250);}
 function loadMorePresets(){if(!galleryBusy)refreshGallery(true);}
@@ -965,7 +974,9 @@ banner.classList.toggle('hidden',!p);
 if(!p)return;
 const image=document.getElementById('featuredImage');
 image.style.display='block';
-image.src=p.image;
+image.dataset.original=p.image;
+image.onerror=()=>thumbnailFailed(image);
+image.src=galleryThumbnail(p);
 document.getElementById('featuredTitle').textContent=p.title;
 document.getElementById('featuredAuthor').textContent=`By @${p.author}`;
 document.getElementById('featuredPosition').textContent=`${featuredIndex+1} / ${featuredPresets.length} · ${score(p)} upvote${score(p)===1?'':'s'}`;
@@ -1317,21 +1328,24 @@ renderPresets(true);
 
 async function copyText(text,successMessage='Copied!'){
 const value=String(text||'');
-if(!value)return;
+if(!value)return false;
+let copied=false;
 try{
 await navigator.clipboard.writeText(value);
+copied=true;
 }catch(e){
+const previousFocus=document.activeElement;
 const ta=document.createElement('textarea');
 ta.value=value;
 ta.style.position='fixed';
 ta.style.opacity='0';
-document.body.appendChild(ta);
-ta.focus();
-ta.select();
-try{document.execCommand('copy');}catch(_){}
-ta.remove();
+const host=previousFocus?.closest('dialog[open],[role="dialog"][aria-modal="true"]')||document.body;
+host.appendChild(ta);
+try{ta.focus();ta.select();copied=document.execCommand('copy')===true;}catch(_){}
+finally{ta.remove();if(previousFocus?.isConnected)previousFocus.focus();}
 }
-showToast(successMessage);
+showToast(copied?successMessage:'Could not copy automatically. Select the code and copy it manually.');
+return copied;
 }
 
 function showToast(message){
