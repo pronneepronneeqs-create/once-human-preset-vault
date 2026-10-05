@@ -922,16 +922,16 @@ async function refreshFeatured(){
   paintFeatured();
  }catch(error){if(request===featuredRequest){featuredPresets=[];paintFeatured();}}
 }
-async function fetchPresetsFromDatabase(){
+async function fetchPresetsFromDatabase(preserveOpenPreset=false){
  const initialMode=competitionMode;
- presets=[];
+ if(!preserveOpenPreset)presets=[];
  const stateReady=Promise.all([restoreMyVotes(),(competitionLoaded||competitionMode)?ensureCompetition(true):Promise.resolve()]);
  // The main gallery can render without waiting for competition membership.
  // Competition browsing still needs its membership and scores first.
  if(competitionMode)await stateReady;
  const galleryReady=Promise.all([refreshGallery(),refreshFeatured()]);
  await galleryReady;
- syncPresetFromUrl();
+ if(!preserveOpenPreset)syncPresetFromUrl();
  await stateReady;
  if(competitionMode!==initialMode)await Promise.all([refreshGallery(),refreshFeatured()]);
  updateCompetitionUI();
@@ -1470,6 +1470,7 @@ function showFormError(scope,error){
 }
 
 async function openEditModal(){
+if(ownerActionJob){showToast('Please wait for your current save or deletion to finish.');return;}
 const openingId=activePresetId;
 const openingDetailRequest=detailOpenRequest;
 if(!getEditToken(openingId))return;
@@ -1499,44 +1500,62 @@ safeCreateIcons();
 
 function closeEditModal(){document.getElementById('editModal').classList.add('hidden');}
 
+let ownerActionJob=null;
+function beginOwnerAction(kind,id,title){
+if(ownerActionJob)return null;
+const job={kind,id:String(id),title,detailRequest:detailOpenRequest};
+ownerActionJob=job;
+updateOwnerActionButtons();
+return job;
+}
+function updateOwnerActionButtons(){
+const save=document.getElementById('editSaveBtn'),remove=document.getElementById('editDeleteBtn');
+save.disabled=remove.disabled=!!ownerActionJob;
+save.textContent=ownerActionJob?.kind==='save'?'Saving…':'Save changes';
+remove.textContent=ownerActionJob?.kind==='delete'?'Deleting…':'Delete preset';
+}
+function ownerActionViewCurrent(job){
+return ownerActionJob===job&&String(activePresetId)===job.id&&detailOpenRequest===job.detailRequest;
+}
+function finishOwnerAction(job){
+if(ownerActionJob===job){ownerActionJob=null;updateOwnerActionButtons();}
+}
+
 async function deleteOwnPreset(){
+if(ownerActionJob)return;
 const id=activePresetId,token=getEditToken(id);
 const p=presets.find(item=>String(item.id)===String(id));
 if(!p||!token)return;
 if(!confirm(`Permanently delete "${p.title}" from the vault? This cannot be undone.`))return;
-const btn=document.getElementById('editDeleteBtn');
-btn.disabled=true;
-btn.innerText='Deleting...';
+const job=beginOwnerAction('delete',id,p.title);
+if(!job)return;
 try{
 const {data,error}=await _supabase.rpc('delete_preset_with_token',{p_id:String(id),p_token:token});
 if(error)throw error;
 if(!data)throw new Error('Delete access was not verified for this preset.');
 localStorage.removeItem(editStorageKey(id));
-closeEditModal();
-closeDetailModal();
+if(ownerActionViewCurrent(job)){closeEditModal();closeDetailModal();}
 presets=presets.filter(item=>String(item.id)!==String(id));
-await fetchPresetsFromDatabase();
-showToast('Preset deleted.');
+await fetchPresetsFromDatabase(true);
+showToast('Deleted “'+job.title+'”.');
 }catch(err){
-alert('Delete failed: '+(err?.message||err));
+showToast('Could not delete “'+job.title+'”: '+(err?.message||err));
 }finally{
-btn.disabled=false;
-btn.innerText='Delete preset';
+finishOwnerAction(job);
 }
 }
 
 async function savePresetEdit(e){
 e.preventDefault();
 const btn=document.getElementById('editSaveBtn');
-if(btn.disabled)return;
+if(ownerActionJob||btn.disabled)return;
 const id=activePresetId,token=getEditToken(id);
 if(!token){
 showFormError('edit',new Error('Use the browser that published this preset.'));
 return;
 }
-btn.disabled=true;
-document.getElementById('editDeleteBtn').disabled=true;
-btn.textContent='Saving…';
+const job=beginOwnerAction('save',id,presets.find(p=>String(p.id)===String(id))?.title||'preset');
+if(!job)return;
 setFormMessage('edit','Saving your changes','Please keep this form open. New images are checked before saving. The CAPTCHA Success message only confirms the security check.');
 try{
 const p=presets.find(item=>String(item.id)===String(id));
@@ -1570,17 +1589,14 @@ if(image)form.set('image',image);
 if(qr)form.set('qr',qr);
 const saved=await secureSubmit('edit',form);
 if(saved.success!==true)throw new Error('Edit was not confirmed.');
-clearFormMessage('edit');
-closeEditModal();
-closeDetailModal();
-await fetchPresetsFromDatabase();
-showToast('Preset updated!');
+if(ownerActionViewCurrent(job)){clearFormMessage('edit');closeEditModal();closeDetailModal();}
+await fetchPresetsFromDatabase(true);
+showToast('Updated “'+job.title+'”.');
 }catch(err){
-showFormError('edit',err);
+if(ownerActionViewCurrent(job))showFormError('edit',err);
+else showToast('Changes to “'+job.title+'” were not confirmed. Reopen it to check before retrying.');
 }finally{
-btn.disabled=false;
-document.getElementById('editDeleteBtn').disabled=false;
-btn.textContent='Save changes';
+finishOwnerAction(job);
 }
 }
 
