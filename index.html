@@ -1002,14 +1002,20 @@ function openFeaturedPreset(){
 if(featuredPresetId)openDetailModal(featuredPresetId);
 }
 
+let randomPresetRequest=0;
 async function openRandomPreset(){
+const request=++randomPresetRequest;
+const mode=competitionMode;
+const galleryAtStart=galleryRequest;
+const stillCurrent=()=>request===randomPresetRequest&&mode===competitionMode&&galleryAtStart===galleryRequest;
 try{
 const result=await requestGallery({...galleryOptions(),p_sort:'random',p_seed:crypto.randomUUID(),p_offset:0,p_limit:2});
+if(!stillCurrent())return;
 const candidates=mergeVaultRows(result.rows);
 const p=candidates.find(p=>String(p.id)!==String(lastRandomPresetId))||candidates[0];
 if(!p){showToast('No matching presets yet.');return;}
 lastRandomPresetId=p.id;openDetailModal(p.id);
-}catch(error){showToast('Could not pick a preset. Please try again.');}
+}catch(error){if(stillCurrent())showToast('Could not pick a preset. Please try again.');}
 }
 
 function isNewPreset(p){
@@ -1067,6 +1073,9 @@ return card;
 
 let detailOpenRequest=0;
 async function openDetailModal(id,updateUrl=true){
+++randomPresetRequest;
+closeZoomModal();
+closeCodeModal();
 cancelShareDownload();
 const request=++detailOpenRequest;
 let p=presets.find(item=>String(item.id)===String(id));
@@ -1129,6 +1138,9 @@ safeCreateIcons();
 }
 
 function closeDetailModal(updateUrl=true){
+++randomPresetRequest;
+closeZoomModal();
+closeCodeModal();
 cancelShareDownload();
 ++detailOpenRequest;
 document.getElementById('detailModal').classList.add('hidden');
