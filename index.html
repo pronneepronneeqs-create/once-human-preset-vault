@@ -765,6 +765,7 @@ let visiblePresetLimit=PRESET_BATCH_SIZE;
 let lastRandomPresetId=null;
 const VOTE_STORAGE_KEY='ohvault_voter_token_v1';
 const pendingVotes=new Set();
+const voteStateRevisions=new Map();
 
 function getVoteToken(create=false){
 const stored=localStorage.getItem(VOTE_STORAGE_KEY);
@@ -778,12 +779,19 @@ return token;
 }
 
 async function restoreMyVotes(){
+const revisionsAtStart=new Map(voteStateRevisions);
 try{
 const token=getVoteToken();
 if(!token)return;
 const {data,error}=await _supabase.rpc('get_my_preset_votes_v1',{p_token:token});
 if(error)throw error;
 const votedIds=new Set((data||[]).map(row=>String(row.preset_id)));
+// Keep newer local selections when an older history request arrives late.
+for(const [id,revision] of voteStateRevisions){
+if(revision!==(revisionsAtStart.get(id)||0)||pendingVotes.has(id)){
+if(vaultVotedIds.has(id))votedIds.add(id);else votedIds.delete(id);
+}
+}
 vaultVotedIds=votedIds;
 presets.forEach(p=>{
 p.allVoted=votedIds.has(String(p.id));
@@ -937,8 +945,12 @@ function paintGallery(){
  empty.classList.toggle('hidden',waiting||!!items.length||!!galleryFailure);
  if(!waiting&&!items.length&&!galleryFailure){
   const filtered=document.getElementById('searchInput').value.trim()||document.getElementById('genderFilter').value!=='all'||showFavoritesOnly;
-  if(filtered){empty.querySelector('h3').textContent=showFavoritesOnly?'No saved presets match':'No matching presets';empty.querySelector('p').textContent='Try a different search or clear your filters.';empty.querySelector('button').textContent='Clear filters';empty.querySelector('button').onclick=resetFilters;}
-  else{empty.querySelector('button').textContent='Publish First Preset';empty.querySelector('button').onclick=openPublishModal;}
+  if(filtered){const narrowed=document.getElementById('searchInput').value.trim()||document.getElementById('genderFilter').value!=='all';empty.querySelector('h3').textContent=showFavoritesOnly?(narrowed?'No saved presets match':'No saved presets yet'):'No matching presets';empty.querySelector('p').textContent=showFavoritesOnly&&!narrowed?'Tap the bookmark on a preset to save it here.':'Try a different search or clear your filters.';empty.querySelector('button').textContent='Clear filters';empty.querySelector('button').onclick=resetFilters;}
+  else{
+   empty.querySelector('h3').textContent=competitionMode?'No competition entries yet':'No Presets Found';
+   empty.querySelector('p').textContent=competitionMode?'Enter a new preset using the upload checkbox, or enter your existing preset through Edit.':'Be the first player to publish a custom preset design!';
+   empty.querySelector('button').textContent='Publish First Preset';empty.querySelector('button').onclick=openPublishModal;
+  }
  }
  safeCreateIcons();
 }
@@ -1251,6 +1263,7 @@ if(!p||pendingVotes.has(key))return;
 if(competitionMode&&competitionClosed()){showToast('Competition voting is closed.');return;}
 const votingCompetition=competitionMode;
 pendingVotes.add(key);
+if(!votingCompetition)voteStateRevisions.set(key,(voteStateRevisions.get(key)||0)+1);
 try{
 let token;
 try{token=getVoteToken(true);}
@@ -1934,11 +1947,6 @@ document.getElementById('featureLabel').textContent=competitionMode
 ?'Competition spotlight · Random rotation':'Featured Preset';
 document.querySelector('#galleryHeading h2').textContent=competitionMode
 ?'Meet the contestants':'Explore presets';
-document.querySelector('#emptyState h3').textContent=competitionMode
-?'No competition entries yet':'No Presets Found';
-document.querySelector('#emptyState p').textContent=competitionMode
-?'Enter a new preset using the upload checkbox, or enter your existing preset through Edit.'
-:'Be the first player to publish a custom preset design!';
 document.getElementById('modalVoteBtn').disabled=competitionMode&&!!competitionClosed();
 document.querySelectorAll('#presetGrid [data-vote-button]').forEach(b=>{
 b.disabled=competitionMode&&!!competitionClosed();
