@@ -318,7 +318,7 @@ body{padding-bottom:88px}
 <div id="loadMoreWrap" class="hidden text-center pt-3">
 <button id="loadMoreBtn" type="button" onclick="loadMorePresets()" class="px-6 py-3 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-cyan-500/30 text-cyan-200 text-sm font-extrabold shadow-lg">Load more presets</button>
 </div>
-<div id="galleryRequestMessage" class="vault-gallery-message" role="status" hidden><p id="galleryRequestMessageText"></p><button type="button" onclick="refreshGallery(galleryIds.length>0)">Try again</button></div>
+<div id="galleryRequestMessage" class="vault-gallery-message" role="status" hidden><p id="galleryRequestMessageText"></p><button type="button" onclick="retryGallery()">Try again</button></div>
 <div id="emptyState" class="hidden text-center py-20 glass-panel rounded-2xl border border-slate-800">
 <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/30 text-cyan-400 shadow-inner"><i data-lucide="sparkles" class="w-8 h-8"></i></div>
 <h3 class="text-lg font-bold text-slate-200 mb-1">No Presets Found</h3>
@@ -784,7 +784,7 @@ const revisionsAtStart=new Map(voteStateRevisions);
 try{
 const token=getVoteToken();
 if(!token)return;
-const {data,error}=await _supabase.rpc('get_my_preset_votes_v1',{p_token:token});
+const {data,error}=await boundedRead(signal=>_supabase.rpc('get_my_preset_votes_v1',{p_token:token}).abortSignal(signal));
 if(error)throw error;
 const votedIds=new Set((data||[]).map(row=>String(row.preset_id)));
 // Keep newer local selections when an older history request arrives late.
@@ -864,8 +864,25 @@ function galleryOptions(offset=0,featured=false){
  p_offset:offset,p_limit:featured?3:18,p_ids:ids,
  p_scores:competitionMode?Object.fromEntries([...vaultEntries].map(([id,e])=>[id,Number(e.votes_count)||0])):{},p_seed:gallerySeed};
 }
+async function boundedRead(buildRequest,timeoutMs=20000){
+const controller=new AbortController();
+let timer;
+const timeout=new Promise((_,reject)=>{
+ timer=setTimeout(()=>{
+  const error=new Error('The request timed out. Please try again.');
+  error.name='TimeoutError';reject(error);controller.abort();
+ },timeoutMs);
+});
+try{return await Promise.race([Promise.resolve().then(()=>buildRequest(controller.signal)),timeout]);}
+finally{clearTimeout(timer);}
+}
+function retryGallery(){
+if(competitionMode&&!competitionLoaded)return switchTab(true,false);
+return refreshGallery(galleryIds.length>0);
+}
+
 async function requestGallery(options){
- const {data,error}=await _supabase.rpc('vault_browse_presets_v1',options);
+ const {data,error}=await boundedRead(signal=>_supabase.rpc('vault_browse_presets_v1',options).abortSignal(signal));
  if(error)throw error;
  if(!data||!Array.isArray(data.rows)||!Number.isFinite(Number(data.total)))throw new Error('Invalid gallery response.');
  return data;
@@ -886,7 +903,7 @@ async function refreshGallery(append=false){
  }catch(error){
   if(request!==galleryRequest)return;
   console.error('Gallery could not load:',error);vaultLoadFailed=true;
-  galleryFailure=append?'Could not load more presets. Your current results are still here.':'Could not load presets. Please try again.';
+  galleryFailure=error?.name==='TimeoutError'?(append?'Loading more presets timed out. Your current results are still here. Please try again.':'Loading presets timed out. Please try again.'):(append?'Could not load more presets. Your current results are still here.':'Could not load presets. Please try again.');
  }finally{
   if(request===galleryRequest){galleryBusy=false;vaultInitialLoading=false;paintGallery();}
  }
@@ -1082,10 +1099,10 @@ const request=++detailOpenRequest;
 let p=presets.find(item=>String(item.id)===String(id));
 if(!p||!p.detailsLoaded){
  try{
-  const {data,error}=await _supabase.from('presets').select('*').eq('id',id).single();
+  const {data,error}=await boundedRead(signal=>_supabase.from('presets').select('*').eq('id',id).single().abortSignal(signal));
   if(error||!data)throw error||new Error('Preset unavailable');
   p=mergeVaultRows([data])[0];
- }catch(error){if(request===detailOpenRequest)showToast('Could not open this preset. It may have been removed.');return;}
+ }catch(error){if(request===detailOpenRequest)showToast(error?.name==='TimeoutError'?'Opening this preset timed out. Click it again to retry.':'Could not open this preset. It may have been removed.');return;}
 }
 if(request!==detailOpenRequest)return;
 activePresetId=id;
@@ -1948,17 +1965,18 @@ let competitionLoadPromise=null;
 function ensureCompetition(force=false){
 if(competitionLoadPromise)return competitionLoadPromise;
 if(competitionLoaded&&!force)return Promise.resolve(true);
-competitionLoadPromise=loadCompetition().finally(()=>{competitionLoadPromise=null;});
+competitionLoadPromise=loadCompetition().finally(()=>{competitionLoadPromise=null;updateCompetitionUI();});
+updateCompetitionUI();
 return competitionLoadPromise;
 }
 async function loadCompetition(){
 try{
-const config=await _supabase.from('vault_competitions').select('id,name,enabled,closes_at').eq('id',COMPETITION_ID).single();
+const config=await boundedRead(signal=>_supabase.from('vault_competitions').select('id,name,enabled,closes_at').eq('id',COMPETITION_ID).single().abortSignal(signal));
 if(config.error)throw config.error;
 competition=config.data;
 let token=null;
 try{token=getVoteToken();}catch(_){}
-const snapshot=await _supabase.rpc('vault_competition_snapshot',{p_competition:competition.id,p_token:token});
+const snapshot=await boundedRead(signal=>_supabase.rpc('vault_competition_snapshot',{p_competition:competition.id,p_token:token}).abortSignal(signal));
 if(snapshot.error)throw snapshot.error;
 const entries=new Map((snapshot.data||[]).map(e=>[String(e.preset_id),e]));
 vaultEntries=entries;
@@ -1981,7 +1999,7 @@ return true;
 }catch(err){
 console.error('Competition unavailable',err);
 competitionLoaded=false;competition=null;vaultEntries=new Map();
-showToast('Competition could not be loaded. Try refreshing.');
+showToast(err?.name==='TimeoutError'?'Competition loading timed out. Please try again.':'Competition could not be loaded. Please try again.');
 return false;
 }
 }
@@ -1990,7 +2008,8 @@ function updateCompetitionUI(){
 const name=competition?.name||'Competition';
 document.getElementById('competitionTabName').textContent=name;
 document.getElementById('competitionInfo').classList.toggle('hidden',!competitionMode);
-document.getElementById('competitionStatus').textContent=!competition
+document.getElementById('competitionStatus').textContent=competitionLoadPromise
+?'Loading competition…':!competition
 ?'Competition unavailable'
 :competitionClosed()?'Voting closed':'Voting open';
 document.getElementById('competitionDeadline').textContent=competition?.closes_at
