@@ -207,6 +207,16 @@ body{padding-bottom:88px}
   };
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
+<style id="vault-download-polish">
+#modalDownloadBtn:disabled{opacity:.65;cursor:wait}
+.vault-download-fallback{display:inline-flex;align-items:center;min-height:44px;margin:12px 0;padding:10px 14px;border:1px solid #397080;border-radius:10px;color:#a5f3fc;background:#10303e;font-weight:700;overflow-wrap:anywhere}
+@media(max-width:640px){
+ #detailModal>div,#publishModal>div,#editModal>div,#reportModal>div{max-height:calc(100dvh - 20px)}
+ #detailModal .custom-scrollbar,#publishModal .custom-scrollbar,#editModal .custom-scrollbar,#reportModal .custom-scrollbar{overscroll-behavior:contain}
+ #modalTitle,#modalAuthor,#modalDescription{overflow-wrap:anywhere}
+ #modalImportGuide{min-width:0;overflow-wrap:anywhere}
+}
+</style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 relative overflow-x-hidden">
 <div class="fixed inset-0 pointer-events-none z-0">
@@ -1034,6 +1044,7 @@ return card;
 
 let detailOpenRequest=0;
 async function openDetailModal(id,updateUrl=true){
+cancelShareDownload();
 const request=++detailOpenRequest;
 let p=presets.find(item=>String(item.id)===String(id));
 if(!p||!p.detailsLoaded){
@@ -1052,6 +1063,9 @@ url.searchParams.set('preset',String(id));
 history.pushState({preset:String(id)},'',url);
 }
 }
+const downloadGuide=document.getElementById('modalImportGuide');
+downloadGuide.innerHTML='';
+downloadGuide.classList.add('hidden');
 document.getElementById('modalTitle').innerText=p.title;
 document.getElementById('modalAuthor').innerText=`By @${p.author}`;
 document.getElementById('modalBodyType').innerText=p.bodyType;
@@ -1092,6 +1106,7 @@ safeCreateIcons();
 }
 
 function closeDetailModal(updateUrl=true){
+cancelShareDownload();
 ++detailOpenRequest;
 document.getElementById('detailModal').classList.add('hidden');
 activePresetId=null;
@@ -1143,29 +1158,64 @@ document.getElementById('zoomModal').classList.remove('hidden');
 
 function closeZoomModal(){document.getElementById('zoomModal').classList.add('hidden');}
 
-async function downloadGameImage(){
-const p=presets.find(item=>String(item.id)===String(activePresetId));
-if(!p?.qr)return;
-try{
-const response=await fetch(p.qr);
-if(!response.ok)throw new Error('Share image could not be downloaded.');
-const blob=await response.blob();
-const url=URL.createObjectURL(blob);
-const a=document.createElement('a');
-a.href=url;
-a.download=`${(p.title||'once-human-preset').replace(/[^a-z0-9]/gi,'_').toLowerCase()}_share.png`;
-document.body.appendChild(a);
-a.click();
-a.remove();
-URL.revokeObjectURL(url);
-}catch(e){
-window.open(p.qr,'_blank','noopener,noreferrer');
-}finally{
+let shareDownloadJob=null;
+function setShareDownloadBusy(busy){
+const button=document.getElementById('modalDownloadBtn');
+button.disabled=busy;
+button.setAttribute('aria-busy',String(busy));
+button.querySelector('span').textContent=busy?'Preparing image…':'Download share image';
+}
+function cancelShareDownload(){
+const job=shareDownloadJob;
+shareDownloadJob=null;
+if(job)job.controller.abort();
+setShareDownloadBusy(false);
+}
+function showShareDownloadGuide(p,failed=false){
 const guide=document.getElementById('modalImportGuide');
-guide.innerHTML='<h3 class="font-bold text-cyan-300 mb-3">Use the code from your share picture</h3><ol class="list-decimal pl-5 space-y-2"><li>Open the downloaded picture at full size and find the printed Appearance Code.</li><li>Copy the saved code above, or type the printed code carefully into the game’s Enter Face Code field.</li><li>Check the character preview before confirming.</li></ol><p class="mt-3 text-slate-300">Only older pictures with an actual QR square can be used with a supported QR import option.</p>';
+const heading=failed?'Download could not start':'Your share image';
+const message=failed?'Try again, or open the original image and save it from your browser.':'A download was requested. If it does not appear in your downloads, open the original image and save it from your browser.';
+guide.innerHTML='<h3 class="font-bold text-cyan-300 mb-3">'+heading+'</h3><p>'+message+'</p><a class="vault-download-fallback" target="_blank" rel="noopener noreferrer">Open original image ↗</a><ol class="list-decimal pl-5 space-y-2"><li>Find the printed Appearance Code in the picture, or copy the saved code above.</li><li>Paste or type it into the game’s Enter Face Code field. Capital and lowercase letters matter.</li><li>Check the character preview before confirming.</li></ol><p class="mt-3 text-slate-300">Only older pictures with an actual QR square can use a supported QR import option.</p>';
+const link=guide.querySelector('a');
+try{const original=new URL(p.qr,location.href);if(!['https:','http:'].includes(original.protocol))throw new Error('Invalid image link');link.href=original.href;}catch(_){link.remove();}
 guide.classList.remove('hidden');
 guide.setAttribute('role','status');
 guide.scrollIntoView({block:'nearest',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+}
+async function downloadGameImage(){
+const p=presets.find(item=>String(item.id)===String(activePresetId));
+if(!p?.qr||shareDownloadJob)return;
+const job={id:String(p.id),controller:new AbortController()};
+shareDownloadJob=job;
+setShareDownloadBusy(true);
+const timer=setTimeout(()=>job.controller.abort(),20000);
+let objectUrl=null;
+try{
+const response=await fetch(p.qr,{signal:job.controller.signal});
+if(!response.ok)throw new Error('Image unavailable');
+const blob=await response.blob();
+if(!blob.size)throw new Error('Empty image');
+const mime=blob.type.split(';')[0].toLowerCase();
+if(mime&&!mime.startsWith('image/')&&mime!=='application/octet-stream')throw new Error('Invalid image response');
+if(shareDownloadJob!==job||String(activePresetId)!==job.id)return;
+const mimeExtension={'image/png':'png','image/jpeg':'jpg','image/webp':'webp','image/gif':'gif','image/avif':'avif'}[mime];
+const pathExtension=new URL(p.qr,location.href).pathname.match(/\.(png|jpe?g|webp|gif|avif)$/i)?.[1].toLowerCase();
+const extension=mimeExtension||pathExtension||'png';
+objectUrl=URL.createObjectURL(blob);
+const a=document.createElement('a');
+a.href=objectUrl;
+a.download=(p.title||'once-human-preset').replace(/[^a-z0-9]/gi,'_').slice(0,80)+'_share.'+extension;
+document.body.appendChild(a);
+a.click();
+a.remove();
+showShareDownloadGuide(p);
+}catch(error){
+if(shareDownloadJob===job&&String(activePresetId)===job.id)showShareDownloadGuide(p,true);
+}finally{
+clearTimeout(timer);
+// Give browsers time to consume the download before releasing the blob.
+if(objectUrl)setTimeout(()=>URL.revokeObjectURL(objectUrl),60000);
+if(shareDownloadJob===job){shareDownloadJob=null;setShareDownloadBusy(false);}
 }
 }
 
