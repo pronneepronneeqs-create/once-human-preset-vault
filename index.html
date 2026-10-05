@@ -1881,9 +1881,9 @@ b.disabled=competitionMode&&!!competitionClosed();
 });
 }
 
-function switchTab(comp){
+function switchTab(comp,updateUrl=true){
 competitionMode=comp;
-closeDetailModal();
+closeDetailModal(updateUrl);
 for(const [id,on] of [['allTab',!comp],['compTab',comp]]){
 const b=document.getElementById(id);
 b.setAttribute('aria-selected',String(on));
@@ -1954,7 +1954,7 @@ feature.addEventListener('focusout',event=>featuredFocused=feature.contains(even
 document.getElementById('pubQRFile').addEventListener('change',updatePublishExamples);
 document.getElementById('pubImageFile').addEventListener('change',updatePublishExamples);
 document.getElementById('publishForm').addEventListener('reset',()=>queueMicrotask(updatePublishExamples));
-switchTab(false);
+switchTab(false,false);
 fetchPresetsFromDatabase();
 setInterval(updateCompetitionUI,10000);
 });
