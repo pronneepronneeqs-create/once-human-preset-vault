@@ -767,6 +767,7 @@ let lastRandomPresetId=null;
 const VOTE_STORAGE_KEY='ohvault_voter_token_v1';
 const pendingVotes=new Set();
 const voteStateRevisions=new Map();
+const competitionVoteRevisions=new Map();
 
 function getVoteToken(create=false){
 const stored=localStorage.getItem(VOTE_STORAGE_KEY);
@@ -1094,6 +1095,7 @@ async function openDetailModal(id,updateUrl=true){
 ++randomPresetRequest;
 closeZoomModal();
 closeCodeModal();
+closeEditModal();
 cancelShareDownload();
 const request=++detailOpenRequest;
 let p=presets.find(item=>String(item.id)===String(id));
@@ -1159,6 +1161,7 @@ function closeDetailModal(updateUrl=true){
 ++randomPresetRequest;
 closeZoomModal();
 closeCodeModal();
+closeEditModal();
 cancelShareDownload();
 ++detailOpenRequest;
 document.getElementById('detailModal').classList.add('hidden');
@@ -1293,7 +1296,8 @@ if(!p||pendingVotes.has(key))return;
 if(competitionMode&&competitionClosed()){showToast('Competition voting is closed.');return;}
 const votingCompetition=competitionMode;
 pendingVotes.add(key);
-if(!votingCompetition)voteStateRevisions.set(key,(voteStateRevisions.get(key)||0)+1);
+const revisions=votingCompetition?competitionVoteRevisions:voteStateRevisions;
+revisions.set(key,(revisions.get(key)||0)+1);
 try{
 let token;
 try{token=getVoteToken(true);}
@@ -1309,6 +1313,7 @@ const count=Number(data?.votes_count);
 if(!data||typeof data.voted!=='boolean'||!Number.isFinite(count)||count<0)throw new Error('Invalid vote response.');
 const current=presets.find(item=>String(item.id)===key);
 if(!current)return;
+revisions.set(key,(revisions.get(key)||0)+1);
 if(votingCompetition){
 current.compVoted=data.voted;
 current.competitionVotes=count;
@@ -1466,9 +1471,10 @@ function showFormError(scope,error){
 
 async function openEditModal(){
 const openingId=activePresetId;
+const openingDetailRequest=detailOpenRequest;
 if(!getEditToken(openingId))return;
 if(!await ensureCompetition())return;
-if(String(openingId)!==String(activePresetId))return;
+if(openingDetailRequest!==detailOpenRequest||String(openingId)!==String(activePresetId))return;
 const p=presets.find(item=>String(item.id)===String(activePresetId));
 if(!p||!getEditToken(p.id))return;
 document.getElementById('editForm').reset();
@@ -1970,6 +1976,7 @@ updateCompetitionUI();
 return competitionLoadPromise;
 }
 async function loadCompetition(){
+const revisionsAtStart=new Map(competitionVoteRevisions);
 try{
 const config=await boundedRead(signal=>_supabase.from('vault_competitions').select('id,name,enabled,closes_at').eq('id',COMPETITION_ID).single().abortSignal(signal));
 if(config.error)throw config.error;
@@ -1979,6 +1986,13 @@ try{token=getVoteToken();}catch(_){}
 const snapshot=await boundedRead(signal=>_supabase.rpc('vault_competition_snapshot',{p_competition:competition.id,p_token:token}).abortSignal(signal));
 if(snapshot.error)throw snapshot.error;
 const entries=new Map((snapshot.data||[]).map(e=>[String(e.preset_id),e]));
+// Keep current membership from the server, but preserve newer local votes.
+for(const [id,revision] of competitionVoteRevisions){
+ if(revision!==(revisionsAtStart.get(id)||0)||pendingVotes.has(id)){
+  const current=vaultEntries.get(id),entry=entries.get(id);
+  if(current&&entry)entries.set(id,{...entry,voted:!!current.voted,votes_count:Number(current.votes_count)||0});
+ }
+}
 vaultEntries=entries;
 const fresh=[...entries.keys()].filter(id=>!entryOrder.has(id)).map(id=>({id}));
 for(let i=fresh.length-1;i>0;i--){
