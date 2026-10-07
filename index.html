@@ -232,7 +232,7 @@ body{padding-bottom:88px}
 <header class="sticky top-0 z-40 border-b border-cyan-500/20 bg-slate-950/85 backdrop-blur-xl shadow-2xl">
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
 <div class="flex items-center gap-3 cursor-pointer" onclick="resetFilters()">
-<div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-400 via-cyan-500 to-blue-600 flex items-center justify-center font-black text-xl text-slate-950 shadow-lg shadow-cyan-500/30">OH</div>
+<button id="vaultSecretLogo" type="button" aria-label="OH" style="border:0;cursor:pointer" class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-400 via-cyan-500 to-blue-600 flex items-center justify-center font-black text-xl text-slate-950 shadow-lg shadow-cyan-500/30">OH</button>
 <div>
 <h1 class="font-black text-lg tracking-wider bg-gradient-to-r from-white via-cyan-100 to-cyan-400 bg-clip-text text-transparent">PRESET VAULT</h1>
 <p class="text-[10px] text-cyan-400 font-bold tracking-widest uppercase">Once Human Character Vault</p>
@@ -2170,6 +2170,38 @@ document.addEventListener('keydown',event=>{
  if(event.key==='Tab'){const items=controls(top.el);if(!items.length){event.preventDefault();top.el.focus();return;}const first=items[0],last=items[items.length-1];if(event.shiftKey&&(document.activeElement===first||!top.el.contains(document.activeElement))){event.preventDefault();last.focus();}else if(!event.shiftKey&&(document.activeElement===last||!top.el.contains(document.activeElement))){event.preventDefault();first.focus();}}
 },true);
 document.addEventListener('focusin',event=>{const top=stack[stack.length-1];if(top&&!top.el.contains(event.target)&&!event.target.closest('dialog[open]'))(controls(top.el)[0]||top.el).focus();});
+})();
+</script>
+
+<style>
+#vaultPixelSecret{color:#e2e8f0;background:#0f172a;border:1px solid #345063;border-radius:22px;padding:0;width:min(420px,calc(100vw - 40px));max-height:calc(100dvh - 40px);box-shadow:0 0 60px #22d3ee18;overflow:auto;}
+#vaultPixelSecret::backdrop{background:rgba(2,6,23,.82);backdrop-filter:blur(5px);}
+#vaultPixelSecret .pixel-message{position:relative;text-align:center;padding:52px 28px 44px;}
+#vaultPixelSecret .pixel-close{position:absolute;right:10px;top:10px;background:transparent;border:0;color:#94a3b8;width:44px;height:44px;cursor:pointer;}
+#vaultPixelSecret .pixel-dot{display:block;width:12px;height:12px;margin:0 auto 26px;background:#67e8f9;box-shadow:0 0 22px #22d3ee80;}
+#vaultPixelSecret h2{color:#67e8f9;font-size:13px;font-weight:600;letter-spacing:.12em;margin:0 0 20px;}
+#vaultPixelSecret p{font-size:24px;line-height:1.5;margin:0;overflow-wrap:break-word;}
+#vaultPixelSecret [hidden]{display:none!important;}
+#vaultPixelPinForm label{display:block;color:#94a3b8;font-size:14px;margin-bottom:12px;}
+#vaultPixelPin{display:block;box-sizing:border-box;width:100%;max-width:150px;margin:0 auto 18px;padding:12px;text-align:center;font-size:24px;letter-spacing:.2em;color:#e2e8f0;background:#020617;border:1px solid #475569;border-radius:12px;}
+#vaultPixelSecret .pixel-unlock{padding:11px 24px;background:#67e8f9;color:#020617;font-weight:600;border:0;border-radius:10px;cursor:pointer;}
+#vaultPixelHint{min-height:24px;margin-top:18px;color:#a5f3fc;font-size:14px;}
+#vaultPixelSecret button:focus-visible{outline:2px solid #67e8f9;outline-offset:2px;}
+</style>
+<dialog id="vaultPixelSecret" aria-labelledby="vaultPixelTitle" aria-describedby="vaultPixelMessage">
+<div class="pixel-message"><button type="button" class="pixel-close" aria-label="Close secret message">✕</button><span class="pixel-dot" aria-hidden="true"></span><h2 id="vaultPixelTitle">A little secret ✦</h2><form id="vaultPixelPinForm"><label for="vaultPixelPin">Enter the PIN</label><input id="vaultPixelPin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" required aria-describedby="vaultPixelHint"><button type="submit" class="pixel-unlock">Unlock</button><div id="vaultPixelHint" role="status" aria-live="polite"></div></form><p id="vaultPixelMessage" hidden>A little pixel of the internet, just for you.</p></div>
+</dialog>
+<script>
+(()=>{
+const logo=document.getElementById('vaultSecretLogo'),dialog=document.getElementById('vaultPixelSecret');
+const form=document.getElementById('vaultPixelPinForm'),pin=document.getElementById('vaultPixelPin'),hint=document.getElementById('vaultPixelHint'),title=document.getElementById('vaultPixelTitle'),message=document.getElementById('vaultPixelMessage');
+let clicks=0;
+function reset(){form.hidden=false;message.hidden=true;title.textContent='A little secret ✦';pin.value='';hint.textContent='';}
+logo.addEventListener('click',()=>{if(document.querySelector('dialog[open]'))return;if(++clicks===5){clicks=0;reset();dialog.showModal();pin.focus();}});
+form.addEventListener('submit',e=>{e.preventDefault();if(pin.value.trim()==='68'){form.hidden=true;message.hidden=false;title.textContent='For G ✦';dialog.querySelector('button').focus();}else{hint.textContent='You still owe me one 😉';pin.select();}});
+dialog.querySelector('button').addEventListener('click',()=>dialog.close());
+dialog.addEventListener('close',()=>{clicks=0;reset();});
+dialog.addEventListener('click',e=>{if(e.target!==dialog)return;const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();});
 })();
 </script>
 </body>
